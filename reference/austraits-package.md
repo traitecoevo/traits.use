@@ -23,6 +23,9 @@ Useful links:
 
 Authors:
 
+- Fonti Kar <f.kar@unsw.edu.au>
+  ([ORCID](https://orcid.org/0000-0002-2760-3974))
+
 - Daniel Falster <daniel.falster@unsw.edu.au>
   ([ORCID](https://orcid.org/0000-0002-9814-092X))
 

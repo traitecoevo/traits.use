@@ -45,7 +45,7 @@
 <span>  doi <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  version <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  path <span class="op">=</span> <span class="st">"data/austraits"</span>,</span>
-<span>  update <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  update <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -71,7 +71,11 @@
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>a large list containing AusTraits data tables</p>
+    <p>a large list containing AusTraits data tables. Its <code>sources</code> are
+given the class <code><a href="traits_build_sources.html">traits_build_sources</a></code>, also for
+releases built before that class existed, so a reference can be looked
+up by key with <code>$</code> as well as <code>[[</code> and <code>[</code>, e.g.
+<code>austraits$sources$Falster_2005</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

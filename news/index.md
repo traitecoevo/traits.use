@@ -2,6 +2,20 @@
 
 ## austraits (development version)
 
+- `sources` can now be looked up by key with `$` (austraits#185):
+  `database$sources$Falster_2005` returns the reference, as
+  `database$sources[["Falster_2005"]]` does. Before, `$` on a `BibEntry`
+  only did field access, so a key returned a list of `NULL`s.
+  [`bind_databases()`](https://traitecoevo.github.io/austraits/reference/bind_databases.md),
+  [`load_austraits()`](https://traitecoevo.github.io/austraits/reference/load_austraits.md)
+  and
+  [`extract_data()`](https://traitecoevo.github.io/austraits/reference/extract_data.md)
+  give `sources` the class `traits_build_sources` (see
+  [`?traits_build_sources`](https://traitecoevo.github.io/austraits/reference/traits_build_sources.md)),
+  also for older releases; field access such as `sources$title`,
+  printing and
+  [`RefManageR::WriteBib()`](https://docs.ropensci.org/RefManageR/reference/WriteBib.html)
+  output are unchanged.
 - Added new function `load_database` which loads any traits.build
   database from its doi (Zenodo, Figshare or a doi resolving directly to
   an .rds file)

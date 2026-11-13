@@ -9,7 +9,7 @@ load_austraits(
   doi = NULL,
   version = NULL,
   path = "data/austraits",
-  update = FALSE
+  update = TRUE
 )
 ```
 
@@ -33,7 +33,12 @@ load_austraits(
 
 ## Value
 
-a large list containing AusTraits data tables
+a large list containing AusTraits data tables. Its `sources` are given
+the class
+[`traits_build_sources`](https://traitecoevo.github.io/austraits/reference/traits_build_sources.md),
+also for releases built before that class existed, so a reference can be
+looked up by key with `$` as well as `[[` and `[`, e.g.
+`austraits$sources$Falster_2005`.
 
 ## See also
 

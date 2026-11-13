@@ -63,6 +63,18 @@ database object as a large list.</p>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>Compiled database as a single large list</p>
     </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>The combined <code>sources</code> hold the references of every database, with
+duplicate keys removed. They are a <code><a href="https://docs.ropensci.org/RefManageR/reference/BibEntry.html" class="external-link">RefManageR::BibEntry()</a></code> object with the
+class <code><a href="traits_build_sources.html">traits_build_sources</a></code>, so a reference can be
+looked up by key with <code>$</code> as well as <code>[[</code> and <code>[</code>, e.g.
+<code>database$sources$Falster_2005</code>.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
+    <div class="dont-index"><p><a href="traits_build_sources.html">traits_build_sources</a> for looking up <code>sources</code> by key</p></div>
+    </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>

@@ -4,24 +4,40 @@
 
 - [`load_austraits()`](https://traitecoevo.github.io/austraits/reference/load_austraits.md)
   : Load AusTraits database into R console
+
 - [`load_database()`](https://traitecoevo.github.io/austraits/reference/load_database.md)
   : Load any traits.build database into R console
+
 - [`get_compiled_by_traits.build()`](https://traitecoevo.github.io/austraits/reference/get_compiled_by_traits.build.md)
   : Retrieve compiled by information from metadata table
+
 - [`get_traits_table()`](https://traitecoevo.github.io/austraits/reference/get_traits_table.md)
   : Retrieve traits table if user passes traits.build object.
+
 - [`get_version_latest()`](https://traitecoevo.github.io/austraits/reference/get_version_latest.md)
   : Retrieve the latest version of AusTraits
+
 - [`get_versions()`](https://traitecoevo.github.io/austraits/reference/get_versions.md)
   : Print out AusTraits versions
+
 - [`summarise_database()`](https://traitecoevo.github.io/austraits/reference/summarise_database.md)
   : Summarise counts for a particular variable of interest
+
 - [`lookup_context_property()`](https://traitecoevo.github.io/austraits/reference/lookup_context_property.md)
   : Look up context properties
+
 - [`lookup_location_property()`](https://traitecoevo.github.io/austraits/reference/lookup_location_property.md)
   : Look up location properties
+
 - [`lookup_trait()`](https://traitecoevo.github.io/austraits/reference/lookup_trait.md)
   : Look up a particular trait term
+
+- [`` `$`( ``*`<traits_build_sources>`*`)`](https://traitecoevo.github.io/austraits/reference/traits_build_sources.md)
+  [`` `[`( ``*`<traits_build_sources>`*`)`](https://traitecoevo.github.io/austraits/reference/traits_build_sources.md)
+  [`c(`*`<traits_build_sources>`*`)`](https://traitecoevo.github.io/austraits/reference/traits_build_sources.md)
+  :
+
+  Look up references in a database's `sources` by key
 
 ## Filter from the database
 
