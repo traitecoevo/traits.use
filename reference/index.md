@@ -65,6 +65,8 @@
   : Joining location properties to traits table
 - [`join_methods()`](https://traitecoevo.github.io/austraits/reference/join_methods.md)
   : Joining methodological information to traits table
+- [`join_sources()`](https://traitecoevo.github.io/austraits/reference/join_sources.md)
+  : Joining references to traits table
 - [`join_taxa()`](https://traitecoevo.github.io/austraits/reference/join_taxa.md)
   : Joining taxonomy to traits table
 - [`join_taxonomic_updates()`](https://traitecoevo.github.io/austraits/reference/join_taxonomic_updates.md)
@@ -88,6 +90,8 @@
   : Joining location properties to traits table
 - [`join_methods()`](https://traitecoevo.github.io/austraits/reference/join_methods.md)
   : Joining methodological information to traits table
+- [`join_sources()`](https://traitecoevo.github.io/austraits/reference/join_sources.md)
+  : Joining references to traits table
 - [`join_taxa()`](https://traitecoevo.github.io/austraits/reference/join_taxa.md)
   : Joining taxonomy to traits table
 - [`join_taxonomic_updates()`](https://traitecoevo.github.io/austraits/reference/join_taxonomic_updates.md)

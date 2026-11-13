@@ -2,6 +2,34 @@
 
 ## austraits (development version)
 
+- Support databases built with traits.build 2.3, where every observation
+  names the reference it was taken from in `source_id` (the `dataset_id`
+  unless it came from another study) and the methods table’s reference
+  columns are `dataset_id_type`, `dataset_id_citation`, `secondary_id`
+  and `secondary_citation` (traitecoevo/traits.build#296). Older
+  databases still work.
+- New function
+  [`join_sources()`](https://traitecoevo.github.io/austraits/reference/join_sources.md)
+  adds each observation’s references to the traits table:
+  `dataset_id_citation`, `source_id_citation` (formatted from
+  `sources[[source_id]]`), `secondary_id` and `secondary_citation`.
+- [`flatten_database()`](https://traitecoevo.github.io/austraits/reference/flatten_database.md)
+  takes its references from
+  [`join_sources()`](https://traitecoevo.github.io/austraits/reference/join_sources.md),
+  so the flattened table has those columns in place of the methods
+  table’s `source_*` columns.
+- [`as_wide_table()`](https://traitecoevo.github.io/austraits/reference/as_wide_table.md)
+  has `dataset_id_citation`, `source_id_citation` and
+  `secondary_citation` in place of `source_primary_citation` and
+  `source_secondary_citation`.
+- [`extract_data()`](https://traitecoevo.github.io/austraits/reference/extract_data.md)
+  keeps every reference the extracted observations cite, including the
+  studies observations were taken from, which it used to drop; it no
+  longer fails on a database without `source_secondary_key`.
+- [`bind_databases()`](https://traitecoevo.github.io/austraits/reference/bind_databases.md)
+  warns when one citation key names different references in different
+  datasets (titles or years differ), since `sources` keeps only one
+  entry per key and the other is lost.
 - `sources` can now be looked up by key with `$` (austraits#185):
   `database$sources$Falster_2005` returns the reference, as
   `database$sources[["Falster_2005"]]` does. Before, `$` on a `BibEntry`
