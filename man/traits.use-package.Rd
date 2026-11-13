@@ -6,7 +6,7 @@
 \alias{traits.use-package}
 \title{traits.use: Access and Wrangle Data from 'traits.build' Trait Databases}
 \description{
-Load, explore and wrangle data from relational trait databases built with 'traits.build' \url{https://github.com/traitecoevo/traits.build}, such as 'AusTraits', the Australian plant trait database (Falster et al. 2021 \doi{10.1038/s41597-021-01006-6}). Functions load a database from its DOI, join data across its tables, filter it to specific taxa, traits or datasets, combine several databases, look up references, and visualise the distribution of the data.
+Load, explore and wrangle data from relational trait databases built with 'traits.build' \url{https://github.com/traitecoevo/traits.build}, such as AusTraits, the Australian plant trait database (Falster et al. 2021 \doi{10.1038/s41597-021-01006-6}). Functions load a database from its DOI, join data across its tables, filter it to specific taxa, traits or datasets, combine several databases, look up references, and visualise the distribution of the data.
 }
 \seealso{
 Useful links:
