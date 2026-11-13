@@ -99,15 +99,26 @@ NULL
 }
 
 #' @rdname traits_build_sources
-#' @param value For `$<-`, a `BibEntry` of length one to replace the entry
-#'   with key `name` or, when `name` is not a key, the new value of field
-#'   `name`, as for RefManageR's `$<-` method for `BibEntry`.
+#' @param value For `$<-`, a `BibEntry` of length one, with key `name`, to
+#'   replace the entry with key `name` or, when `name` is not a key, the new
+#'   value of field `name`, as for RefManageR's `$<-` method for `BibEntry`.
+#'   Entries can't be removed by assigning `NULL`.
 #' @method $<- traits_build_sources
 #' @export
 `$<-.traits_build_sources` <- function(x, name, value) {
   # Without this, `sources$Key$title <- "New"` would read the entry by key
   # but write it back as a field called "Key" on every entry
   if (is_source_key(x, name)) {
+    # RefManageR's `[[<-` would silently rename the entry (or make the new
+    # key unique with a ":1" suffix), so insist the key is kept
+    new_key <- if (inherits(value, "bibentry") && length(value) == 1) {
+      attr(unclass(value)[[1]], "key")
+    }
+    if (!identical(new_key, name)) {
+      rlang::abort(paste0("`$<-` replaces the entry with key '", name,
+                          "' and needs a BibEntry of length one with the same key; ",
+                          "use `[[<-` to replace it with a different reference."))
+    }
     x[[name]] <- value
     return(as_traits_build_sources(x))
   }
@@ -134,8 +145,11 @@ is_source_key <- function(x, name) {
   if (!name %in% keys) {
     return(FALSE)
   }
-  fields <- c("bibtype", "key", "dateobj", unlist(lapply(entries, names)))
-  !tolower(name) %in% tolower(fields)
+  # RefManageR's attribute names (bibentry_attribute_names), plus the
+  # dot-prefixed names its formatters read (.index, .duplicated)
+  reserved <- c("bibtype", "textVersion", "header", "footer", "key", "dateobj")
+  fields <- c(reserved, unlist(lapply(entries, names)))
+  !startsWith(name, ".") && !tolower(name) %in% tolower(fields)
 }
 
 #' @rdname traits_build_sources

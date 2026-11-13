@@ -62,7 +62,15 @@ test_that("`$<-` with a key replaces that entry, so nested assignment works", {
   # Other entries, and their fields, are untouched
   other <- setdiff(names(sources), key)
   expect_identical(unclass(s[other]), unclass(sources[other]))
-  expect_false(key %in% tolower(unlist(lapply(unclass(s), names))))
+  expect_false(tolower(key) %in% tolower(unlist(lapply(unclass(s), names))))
+})
+
+test_that("`$<-` refuses a replacement with a different key", {
+  s <- sources
+  other <- s[["Crous_2013"]]
+  expect_error(s$Falster_2003 <- other, "needs a BibEntry of length one with the same key")
+  expect_error(s$Falster_2003 <- NULL, "needs a BibEntry of length one with the same key")
+  expect_identical(names(s), names(sources))
 })
 
 test_that("`$<-` with a field name is field assignment and keeps the class", {
@@ -87,6 +95,19 @@ test_that("keys that are also field names are left to field access", {
   # Such entries are still reachable with `[[`; other keys with `$`
   expect_identical(unname(unlist(k[["key"]]$title)), "K")
   expect_identical(unname(unlist(k$Smith_2001$title)), "S")
+})
+
+test_that("keys named like RefManageR attributes don't change formatting", {
+  entry <- function(key) {
+    RefManageR::BibEntry(bibtype = "Article", key = key, title = paste("Title", key),
+                         author = "Ann Author", journal = "J", year = 2001)
+  }
+  plain_k <- c(entry("header"), entry("footer"), entry("textVersion"), entry(".index"),
+               entry(".duplicated"), entry("Smith_2001"))
+  k <- as_traits_build_sources(plain_k)
+  for (style in c("text", "citation", "R", "Bibtex", "Biblatex", "yaml")) {
+    expect_identical(format(k, style = style), format(plain_k, style = style), info = style)
+  }
 })
 
 test_that("`[` and `[[` return the same entries and keep the class", {

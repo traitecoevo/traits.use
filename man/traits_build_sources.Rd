@@ -22,9 +22,10 @@ traits.build database.}
 
 \item{name}{A citation key, or a \code{BibEntry} field name.}
 
-\item{value}{For \verb{$<-}, a \code{BibEntry} of length one to replace the entry
-with key \code{name} or, when \code{name} is not a key, the new value of field
-\code{name}, as for RefManageR's \verb{$<-} method for \code{BibEntry}.}
+\item{value}{For \verb{$<-}, a \code{BibEntry} of length one, with key \code{name}, to
+replace the entry with key \code{name} or, when \code{name} is not a key, the new
+value of field \code{name}, as for RefManageR's \verb{$<-} method for \code{BibEntry}.
+Entries can't be removed by assigning \code{NULL}.}
 
 \item{i, j, ..., drop}{Indices, as for RefManageR's \code{[} method for \code{BibEntry}.}
 

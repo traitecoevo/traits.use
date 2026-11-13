@@ -104,6 +104,28 @@ test_that("Restricted Zenodo records give a clear error", {
   expect_error(resolve_doi_files("10.5281/zenodo.22961387"), "are restricted on Zenodo")
 })
 
+test_that("Figshare ids come from the doi, not the landing url's slug", {
+  requested <- NULL
+  local_mocked_bindings(
+    resolve_doi = function(doi) "https://figshare.com/articles/dataset/2019/12345678/2"
+  )
+  local_mocked_bindings(
+    read_json = function(url, ...) {
+      requested <<- c(requested, url)
+      list(version = 4, files = data.frame(name = "db.rds", download_url = "u", computed_md5 = ""))
+    },
+    .package = "jsonlite"
+  )
+  expect_identical(resolve_doi_files("10.6084/m9.figshare.12345678.v4")$version, "4")
+  resolve_doi_files("10.6084/M9.FIGSHARE.12345678.V4/")
+  resolve_doi_files("10.6084/m9.figshare.12345678")
+  expect_identical(requested, c(
+    "https://api.figshare.com/v2/articles/12345678/versions/4",
+    "https://api.figshare.com/v2/articles/12345678/versions/4",
+    "https://api.figshare.com/v2/articles/12345678"
+  ))
+})
+
 test_that("Right errors are tripped", {
   expect_error(load_database(path = path), "Please supply a doi")
   expect_error(load_database(doi = "10.5281/zenodo.10156222", path = NULL), "File path must be supplied")

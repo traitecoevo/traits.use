@@ -181,7 +181,7 @@ resolve_doi_files <- function(doi){
     # Take the article id and version from the doi itself
     # (10.6084/m9.figshare.<id>[.v<version>]); the landing url's slug can
     # contain numbers too, so it is only a fallback.
-    ids <- stringr::str_match(doi, "figshare\\.([0-9]+)(?:\\.v([0-9]+))?$")
+    ids <- stringr::str_match(doi, stringr::regex("figshare\\.([0-9]+)(?:\\.v([0-9]+))?/?$", ignore_case = TRUE))
     if(is.na(ids[, 2])) {
       ids <- stringr::str_match(landing_url, "/([0-9]+)(?:/([0-9]+))?/?$")
     }
