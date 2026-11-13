@@ -29,11 +29,11 @@ The combined `sources` hold the references of every database, with
 duplicate keys removed. They are a
 [`RefManageR::BibEntry()`](https://docs.ropensci.org/RefManageR/reference/BibEntry.html)
 object with the class
-[`traits_build_sources`](https://traitecoevo.github.io/austraits/reference/traits_build_sources.md),
+[`traits_build_sources`](https://traitecoevo.github.io/traits.use/reference/traits_build_sources.md),
 so a reference can be looked up by key with `$` as well as `[[` and `[`,
 e.g. `database$sources$Falster_2005`.
 
 ## See also
 
-[traits_build_sources](https://traitecoevo.github.io/austraits/reference/traits_build_sources.md)
+[traits_build_sources](https://traitecoevo.github.io/traits.use/reference/traits_build_sources.md)
 for looking up `sources` by key

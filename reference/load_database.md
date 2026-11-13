@@ -1,7 +1,7 @@
 # Load any traits.build database into R console
 
 Works like
-[`load_austraits()`](https://traitecoevo.github.io/austraits/reference/load_austraits.md),
+[`load_austraits()`](https://traitecoevo.github.io/traits.use/reference/load_austraits.md),
 but accepts the doi of any traits.build formatted database. The doi is
 resolved to its repository, the relational database `.rds` file is
 downloaded to `path` (if not already there, or if the copy there does

@@ -1,163 +1,159 @@
-# austraits ![](reference/figures/austraits_hex.png)
+# traits.use
 
-`austraits` allow users to **access, explore and wrangle data** from
-[traits.build](https://github.com/traitecoevo/traits.build) relational
-databases. It is also an R interface to
+`traits.use` helps you **load, explore and wrangle data** from trait
+databases built with
+[traits.build](https://github.com/traitecoevo/traits.build), such as
 [AusTraits](https://austraits.org/), the Australian plant trait
-database. This package contains functions for joining data from various
-tables, filtering to specific records, combining multiple databases and
-visualising the distribution of the data. We expect this package will
-assist users in working with `traits.build` databases.
+database. It works with any traits.build database, whichever group of
+organisms or region it covers.
 
-### Installation
+With `traits.use` you can:
 
-This package is not on CRAN yet and is still under active development.
-For the current stable release of `austraits`, which has full
-capabilities of the functions used in vignettes (e.g. plotting
-functions), use:
+- load a database from its DOI
+  ([`load_database()`](https://traitecoevo.github.io/traits.use/reference/load_database.md)),
+  with local caching;
+- filter it to particular traits, taxa or datasets
+  ([`extract_trait()`](https://traitecoevo.github.io/traits.use/reference/extract_trait.md),
+  [`extract_taxa()`](https://traitecoevo.github.io/traits.use/reference/extract_taxa.md),
+  [`extract_dataset()`](https://traitecoevo.github.io/traits.use/reference/extract_dataset.md),
+  [`extract_data()`](https://traitecoevo.github.io/traits.use/reference/extract_data.md)),
+  keeping every table consistent;
+- join information from the database’s other tables onto the trait
+  values
+  ([`join_location_coordinates()`](https://traitecoevo.github.io/traits.use/reference/join_location_coordinates.md),
+  [`join_taxa()`](https://traitecoevo.github.io/traits.use/reference/join_taxa.md),
+  [`join_methods()`](https://traitecoevo.github.io/traits.use/reference/join_methods.md),
+  [`join_context_properties()`](https://traitecoevo.github.io/traits.use/reference/join_context_properties.md)
+  and more);
+- reshape and flatten it
+  ([`trait_pivot_wider()`](https://traitecoevo.github.io/traits.use/reference/trait_pivot_wider.md),
+  [`as_wide_table()`](https://traitecoevo.github.io/traits.use/reference/as_wide_table.md),
+  [`flatten_database()`](https://traitecoevo.github.io/traits.use/reference/flatten_database.md)),
+  or combine several databases
+  ([`bind_databases()`](https://traitecoevo.github.io/traits.use/reference/bind_databases.md));
+- look up traits, references and properties
+  ([`lookup_trait()`](https://traitecoevo.github.io/traits.use/reference/lookup_trait.md),
+  `database$sources$Falster_2005`), summarise what it contains
+  ([`summarise_database()`](https://traitecoevo.github.io/traits.use/reference/summarise_database.md)),
+  and plot trait distributions and locations.
+
+## Installation
+
+`traits.use` is not yet on CRAN. Install the development version from
+GitHub:
 
 ``` r
 
-#install.packages("remotes")
-remotes::install_github("traitecoevo/austraits", dependencies = TRUE, upgrade = "ask")
-
-library(austraits) 
+# install.packages("remotes")
+remotes::install_github("traitecoevo/traits.use", dependencies = TRUE, upgrade = "ask")
 ```
 
-For a lightweight installation where dependencies for plotting and
-producing the vignettes will not be installed, use:
+Leave out `dependencies = TRUE` for a lighter installation without the
+packages used for plotting and building the vignettes.
+
+## Getting started
 
 ``` r
 
-remotes::install_github("traitecoevo/austraits", upgrade = "ask")
+library(traits.use)
+
+# Load any traits.build database from its DOI; the .rds is cached in `path`
+database <- load_database("10.5281/zenodo.11188867", path = "data/austraits")
+
+# Pick out the traits you want, then add site coordinates to each value
+wood_density <- database |>
+  extract_trait("wood_density") |>
+  join_location_coordinates()
+
+summarise_database(wood_density, "family")
 ```
 
-### Details for AusTraits users
+The [Getting Started
+tutorial](https://traitecoevo.github.io/traits.use/articles/austraits.html)
+walks through these functions using AusTraits. The [traits.build
+book](https://traitecoevo.github.io/traits.build-book/) explains how a
+traits.build database is structured: its tables, identifiers and how
+they link.
 
-#### Retrieve AusTraits data
+## For AusTraits users
 
-- **For R users**, the AusTraits database can be accessed through the
-  `austraits` package using
-  [`load_austraits()`](https://traitecoevo.github.io/austraits/reference/load_austraits.md)
+AusTraits is built with traits.build, so everything in `traits.use`
+works on it.
+[`load_austraits()`](https://traitecoevo.github.io/traits.use/reference/load_austraits.md)
+loads a released AusTraits version by version number, and AusTraits
+releases on [Zenodo](https://doi.org/10.5281/zenodo.3568417) also
+include the data as plain-text `.csv` files for users of Python and
+other tools. You can look up each trait’s definition in the [AusTraits
+Plant Dictionary](https://w3id.org/APD).
 
-- **For Python or other users**, the [Zenodo
-  download](https://zenodo.org/record/5112001#collapseTwo) includes a
-  `.zip` file containing all the data in plain text (`.csv` files) and
-  associated meta-data
-
-#### Backwards compatibility with past AusTraits versions
-
-From September 2024, `austraits` functions were revamped to support all
-[traits.build](https://github.com/traitecoevo/traits.build) compiled
-databases, rather than being linked to
-[austraits.build](https://github.com/traitecoevo/austraits.build).
-
-Versions of `austraits.build` (the AusTraits plant trait database) **\<
-5.0 are no longer supported** by the latest version of the package. If
-you are working with an older version of AusTraits, please install an
-older version of austraits:
-
-For `austraits.build` versions 4.2 and older:
+The current functions support AusTraits 5.0.0 and later. For older
+releases (4.2 and earlier), install an older version of the `austraits`
+package:
 
 ``` r
 
-#install.packages("remotes")
 remotes::install_github("traitecoevo/austraits@v2.2.2", dependencies = TRUE, upgrade = "ask")
-
-library(austraits)
 ```
 
-Note, if you are unsure what version of AusTraits you are working with,
-run:
+To check which version of AusTraits you have loaded, run
+`database$build_info$version`.
+
+## History
+
+`traits.use` began in 2021 as the `austraits` R package, an interface to
+the AusTraits plant trait database ([Falster et
+al. 2021](https://doi.org/10.1038/s41597-021-01006-6)). In 2024
+(`austraits` 3.0) its functions were generalised to work with any
+database compiled with traits.build, not just AusTraits. As other
+traits.build databases appeared, the general-purpose code was split out
+in 2026 into this package, `traits.use`, carrying over the full
+development history and its contributors. The `austraits` package
+continues as a thin AusTraits-specific layer built on `traits.use`
+([austraits#188](https://github.com/traitecoevo/austraits/issues/188)).
+
+## Citation
+
+Please consider citing `traits.use` if you use it in your work:
 
 ``` r
 
-austraits$build_info$version
+citation("traits.use")
+#> To cite traits.use in publications, please use the first reference
+#> below. If you use AusTraits data, please also cite the AusTraits
+#> database (second reference).
+#> 
+#>   Wenk, E., Kar, F., Falster, D. and Indiarto, D. (2026) traits.use:
+#>   Access and Wrangle Data from 'traits.build' Trait Databases. R
+#>   package version 0.1.0. https://github.com/traitecoevo/traits.use
+#> 
+#>   Falster, D., Gallagher, R., Wenk, E.H. et al. (2021) AusTraits, a
+#>   curated plant trait database for the Australian flora. Scientific
+#>   Data 8, 254. https://doi.org/10.1038/s41597-021-01006-6
+#> 
+#> To see these entries in BibTeX format, use 'print(<citation>,
+#> bibtex=TRUE)', 'toBibtex(.)', or set
+#> 'options(citation.bibtex.max=999)'.
 ```
 
-### Getting started 👀
+## Find a bug?
 
-We highly recommend taking a look at our [Getting Started
-tutorial](https://traitecoevo.github.io/austraits/articles/austraits.html)
-on our website before jumping into the `austraits` R package!
-
-If you prefer to view this vignette in R, we recommend installing the
-package with `build_vignettes = TRUE`.
-
-``` r
-
-remotes::install_github("traitecoevo/austraits", 
-                        dependencies = TRUE, upgrade = "ask", 
-                        build_vignettes = TRUE)
-
-vignette("austraits")
-```
-
-### Cheat sheet
-
-[![](reference/figures/austraits-cheatsheet.png)](https://github.com/traitecoevo/austraits/tree/master/inst/cheatsheet/austraits-cheatsheet.pdf)
-
-### Learn more about AusTraits
-
-AusTraits is a relational database, you can learn more about it’s
-structure from the [traits.build
-book](https://traitecoevo.github.io/traits.build-book/content/AusTraits_tutorial.html).
-
-You can also learn about the definitions of each plant trait with the
-[AusTraits Plant Dictionary!](https://w3id.org/APD)
-
-### Show us some support 💚
-
-Please consider citing `austraits`, we would super appreciate it!
-
-``` r
-
-citation("austraits")
-#> To cite austraits in publications use:
-#> 
-#>   Falster, D., Gallagher, R., Wenk, E.H. et al. AusTraits, a curated
-#>   plant trait database for the Australian flora. Sci Data 8, 254
-#>   (2021). https://doi.org/10.1038/s41597-021-01006-6
-#> 
-#> A BibTeX entry for LaTeX users is
-#> 
-#>   @Article{,
-#>     title = {AusTraits, a curated plant trait database for the Australian flora},
-#>     author = {Daniel Falster and Rachael Gallagher and Elizabeth Wenk et al.},
-#>     journal = {Scientific Data},
-#>     year = {2021},
-#>     volume = {8},
-#>     number = {1},
-#>     pages = {254 - 274},
-#>     url = {https://doi.org/10.1038/s41597-021-01006-6},
-#>   }
-```
-
-### Behind the scenes 🛠
-
-Check out
-[austraits.build](https://github.com/traitecoevo/austraits.build?tab=readme-ov-file),
-if you are interested in how AusTraits the database is managed and
-created
-
-### Find a bug? 🐛
-
-Thank you for finding it! Head over to the GitHub Issues tab and let us
-know about it! We will try to get to it as soon as we can!
+Please let us know on the [issue
+tracker](https://github.com/traitecoevo/traits.use/issues).
 
 ## AusTraits family
 
-`austraits` is part of the **AusTraits family** of packages maintained
+`traits.use` is part of the **AusTraits family** of packages maintained
 by the [AusTraits](https://austraits.org) team. See
 **[austraits.org](https://austraits.org)** for the project, the data,
-and the people behind it.
+and the people behind it. To see how AusTraits itself is compiled, look
+at [austraits.build](https://github.com/traitecoevo/austraits.build).
 
 Contributing? Issues across the family are tracked on one board,
 [AusTraits \#9](https://github.com/orgs/traitecoevo/projects/9), and new
 issues are auto-added. Please read the [issue & labelling
 guide](https://github.com/traitecoevo/austraits-meta/blob/master/governance/issue-guide.md)
-in [`austraits-meta`](https://github.com/traitecoevo/austraits-meta) —
-the family’s cross-package knowledge and governance hub — before filing.
+in [`austraits-meta`](https://github.com/traitecoevo/austraits-meta),
+the family’s cross-package knowledge and governance hub, before filing.
 
 ## Acknowledgements
 

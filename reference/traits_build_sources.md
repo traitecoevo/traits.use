@@ -3,7 +3,7 @@
 The `sources` component of a traits.build database holds the
 bibliographic references for every dataset, as a
 [`RefManageR::BibEntry()`](https://docs.ropensci.org/RefManageR/reference/BibEntry.html)
-object keyed by citation key (for example `"Falster_2005"`). austraits
+object keyed by citation key (for example `"Falster_2005"`). traits.use
 gives it the extra class `traits_build_sources`, which makes `$` look an
 entry up by its key. Any of these return the reference for
 `Falster_2005`:
@@ -97,19 +97,19 @@ too. RefManageR's other replacement functions (`[<-`, `[[<-`, `names<-`)
 return a plain `BibEntry`, and so does
 [`merge()`](https://rdrr.io/r/base/merge.html) when it adds entries.
 
-[`bind_databases()`](https://traitecoevo.github.io/austraits/reference/bind_databases.md),
-[`load_austraits()`](https://traitecoevo.github.io/austraits/reference/load_austraits.md)
+[`bind_databases()`](https://traitecoevo.github.io/traits.use/reference/bind_databases.md),
+[`load_austraits()`](https://traitecoevo.github.io/traits.use/reference/load_austraits.md)
 and
-[`extract_data()`](https://traitecoevo.github.io/austraits/reference/extract_data.md)
+[`extract_data()`](https://traitecoevo.github.io/traits.use/reference/extract_data.md)
 (and so the other `extract_*()` functions) add the class to the
 `sources` they return, including for databases built before the class
 existed. An object carrying the class behaves as a plain `BibEntry` in a
-session where austraits is not loaded.
+session where traits.use is not loaded.
 
 ## See also
 
-[`bind_databases()`](https://traitecoevo.github.io/austraits/reference/bind_databases.md),
-[`load_austraits()`](https://traitecoevo.github.io/austraits/reference/load_austraits.md),
+[`bind_databases()`](https://traitecoevo.github.io/traits.use/reference/bind_databases.md),
+[`load_austraits()`](https://traitecoevo.github.io/traits.use/reference/load_austraits.md),
 [`RefManageR::BibEntry()`](https://docs.ropensci.org/RefManageR/reference/BibEntry.html)
 
 ## Examples

@@ -2,7 +2,7 @@
 
 Function to check whether the data object has been compiled by the
 traits.build workflow and therefore has a data structure that is
-appropriate for use with austraits functions.
+appropriate for use with traits.use functions.
 
 ## Usage
 

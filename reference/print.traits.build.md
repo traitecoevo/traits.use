@@ -1,6 +1,6 @@
-# Generic for outputting a nice summary for austraits objects
+# Generic for outputting a nice summary for traits.build databases
 
-Generic for outputting a nice summary for austraits objects
+Generic for outputting a nice summary for traits.build databases
 
 ## Usage
 

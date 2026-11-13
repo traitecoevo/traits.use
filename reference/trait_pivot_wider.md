@@ -10,7 +10,7 @@ data wider, such that each trait is its own column. *Note that if two
 trait measurements have the same observation_id but different value
 types (min, mean, mode, etc.) these will be on separate rows.*
 
-The function austraits::trait_pivot_longer reverts the actions of this
+The function traits.use::trait_pivot_longer reverts the actions of this
 function.
 
 ## Usage

@@ -1,27 +1,27 @@
-# austraits
+# Getting started with traits.use, using AusTraits
 
-`austraits` allow users to **access, explore and wrangle data** from
+`traits.use` lets users **load, explore and wrangle data** from
 [traits.build](https://github.com/traitecoevo/traits.build) relational
-databases. It is also an R interface to
-[AusTraits](https://austraits.org/), the Australian plant trait
-database. This package contains functions for joining data from various
-tables, filtering to specific records, combining multiple databases and
+trait databases, such as [AusTraits](https://austraits.org/), the
+Australian plant trait database. It began as the `austraits` package.
+This package contains functions for joining data from various tables,
+filtering to specific records, combining multiple databases and
 visualising the distribution of the data. Below, we’ve include a
 tutorial using the AusTraits database to illustrate how some these
 functions work together to generate useful outputs.
 
-## Install and load `austraits`
+## Install and load `traits.use`
 
-`austraits` is still under development. To install the current version
-from GitHub:
+`traits.use` is not yet on CRAN. To install the current version from
+GitHub:
 
 ``` r
 
 #install.packages("remotes")
-remotes::install_github("traitecoevo/austraits", dependencies = TRUE, upgrade = "ask")
+remotes::install_github("traitecoevo/traits.use", dependencies = TRUE, upgrade = "ask")
 
-# Load the austraits package
-library(austraits)
+# Load the traits.use package
+library(traits.use)
 ```
 
 ### Retrieve AusTraits database
@@ -29,13 +29,13 @@ library(austraits)
 We will use the latest AusTraits database as an example database.
 
 We can download the AusTraits database by calling
-[`load_austraits()`](https://traitecoevo.github.io/austraits/reference/load_austraits.md).
+[`load_austraits()`](https://traitecoevo.github.io/traits.use/reference/load_austraits.md).
 This function will download AusTraits to a specified path. By default it
 is `data/austraits`. The function will reload the database from this
 location in the future. You can set `update = TRUE` so the database is
 downloaded fresh from [Zenodo](https://zenodo.org/record/3568429). Note
 that
-[`load_austraits()`](https://traitecoevo.github.io/austraits/reference/load_austraits.md)
+[`load_austraits()`](https://traitecoevo.github.io/traits.use/reference/load_austraits.md)
 will happily accept a DOI of a particular version.
 
 ``` r
@@ -65,9 +65,8 @@ AusTraits, like all traits.build databases, is a relational database. In
 R, it is a very *large* list with multiple tables. If you are not
 familiar with working with lists in R, we recommend having a quick look
 at this [tutorial](https://www.tutorialspoint.com/r/r_lists.htm). To
-learn more about the structure of `austraits`, check out the [structure
-of the
-database](https://traitecoevo.github.io/austraits/articles/structure.html).
+learn more about how a traits.build database is structured, see the
+[traits.build book](https://traitecoevo.github.io/traits.build-book/).
 
 ``` r
 
@@ -209,11 +208,11 @@ lookup_location_property(austraits, "temperature") %>% head()
 In most cases, users would like to extract a subset of a database for
 their research purposes.
 
-- [`extract_dataset()`](https://traitecoevo.github.io/austraits/reference/extract_dataset.md)
+- [`extract_dataset()`](https://traitecoevo.github.io/traits.use/reference/extract_dataset.md)
   filters for a particular study
-- [`extract_trait()`](https://traitecoevo.github.io/austraits/reference/extract_trait.md)
+- [`extract_trait()`](https://traitecoevo.github.io/traits.use/reference/extract_trait.md)
   filters for a certain trait
-- [`extract_taxa()`](https://traitecoevo.github.io/austraits/reference/extract_taxa.md)
+- [`extract_taxa()`](https://traitecoevo.github.io/traits.use/reference/extract_taxa.md)
   filters for a specific taxon
 
 Note you can supply a vector to each of these functions to filter for
@@ -454,11 +453,11 @@ object. Their suffixes refer to the type of information that is joined,
 e.g. `join_taxa` appends taxonomic information to the `traits`
 dataframe.
 
-- [`join_taxa()`](https://traitecoevo.github.io/austraits/reference/join_taxa.md)
-- [`join_methods()`](https://traitecoevo.github.io/austraits/reference/join_methods.md)
-- [`join_location_coordinates()`](https://traitecoevo.github.io/austraits/reference/join_location_coordinates.md)
-- [`join_location_properties()`](https://traitecoevo.github.io/austraits/reference/join_location_properties.md)
-- [`join_context_properties()`](https://traitecoevo.github.io/austraits/reference/join_context_properties.md)
+- [`join_taxa()`](https://traitecoevo.github.io/traits.use/reference/join_taxa.md)
+- [`join_methods()`](https://traitecoevo.github.io/traits.use/reference/join_methods.md)
+- [`join_location_coordinates()`](https://traitecoevo.github.io/traits.use/reference/join_location_coordinates.md)
+- [`join_location_properties()`](https://traitecoevo.github.io/traits.use/reference/join_location_properties.md)
+- [`join_context_properties()`](https://traitecoevo.github.io/traits.use/reference/join_context_properties.md)
 
 We recommend pulling up the help file for each one for more details e.g
 `?join_location_coordinates()`
@@ -650,7 +649,7 @@ but offers versatile joining options.
     #> #   temporal_context_properties <chr>, method_context_properties <chr>, location_name <chr>, …
 
 Alternatively,users can join **all** information using
-[`flatten_database()`](https://traitecoevo.github.io/austraits/reference/flatten_database.md):
+[`flatten_database()`](https://traitecoevo.github.io/traits.use/reference/flatten_database.md):
 
 ``` r
 
@@ -680,17 +679,17 @@ data_fire %>% flatten_database()
 
 ## Visualising data by site
 
-[`plot_locations()`](https://traitecoevo.github.io/austraits/reference/plot_locations.md)
+[`plot_locations()`](https://traitecoevo.github.io/traits.use/reference/plot_locations.md)
 graphically summarises where trait data was collected from and how much
 data is available. The legend refers to the number of neighbouring
 points: the warmer the colour, the more data that is available. This
 function only works for studies that are geo-referenced. Users must
 first use
-[`join_location_coordinates()`](https://traitecoevo.github.io/austraits/reference/join_location_coordinates.md)
+[`join_location_coordinates()`](https://traitecoevo.github.io/traits.use/reference/join_location_coordinates.md)
 to append latitude and longitude information from the locations
 dataframe into the traits dataframe before plotting.
 
-[`plot_locations()`](https://traitecoevo.github.io/austraits/reference/plot_locations.md)
+[`plot_locations()`](https://traitecoevo.github.io/traits.use/reference/plot_locations.md)
 defaults to dividing the data by trait_name (feature = “trait_name”),
 but you can select any of the columns within the traits table -
 including columns you add with `join_` functions. However, selecting
@@ -739,7 +738,7 @@ The traits table in AusTraits is in **long** format, where data for all
 trait information are denoted by two columns called `trait_name` and
 `value`. You can convert this to wide format, where each trait is in a
 separate column, using the function
-[`trait_pivot_wider()`](https://traitecoevo.github.io/austraits/reference/trait_pivot_wider.md).
+[`trait_pivot_wider()`](https://traitecoevo.github.io/traits.use/reference/trait_pivot_wider.md).
 
 Note that the following columns are lost when pivoting: unit,
 replicates, measurement_remarks, and basis_of_value to provide a useful
@@ -748,10 +747,11 @@ output.
 ### Pivot wider
 
 **Note** that the latest version of
-[`trait_pivot_wider()`](https://traitecoevo.github.io/austraits/reference/trait_pivot_wider.md)
+[`trait_pivot_wider()`](https://traitecoevo.github.io/traits.use/reference/trait_pivot_wider.md)
 is no longer supporting AusTraits database versions \<=4.0.2. Please
-refer to our [README](https://github.com/traitecoevo/austraits) to
-install an older version of the `austraits` R package to work old
+refer to our
+[README](https://github.com/traitecoevo/traits.use#for-austraits-users)
+to install an older version of the `austraits` R package to work old
 versions of the AusTraits database.
 
 ``` r
@@ -821,7 +821,7 @@ data_trait_bound  %>%
     #> #   measurement_remarks <chr>, method_id <chr>, method_context_id <chr>, original_name <chr>
 
 If you would like to revert the bounded trait values, call
-[`separate_trait_values()`](https://traitecoevo.github.io/austraits/reference/separate_trait_values.md):
+[`separate_trait_values()`](https://traitecoevo.github.io/traits.use/reference/separate_trait_values.md):
 
 ``` r
 

@@ -37,7 +37,7 @@ A tibble in long format
     "measurement_remarks", "basis_of_record", "basis_of_value"
 
 This function reverts the actions of the function
-austraits::trait_pivot_wider.
+traits.use::trait_pivot_wider.
 
 It begins with a derivation of a traits.build traits table, where
 multiple measurements that comprise a single observation are displayed

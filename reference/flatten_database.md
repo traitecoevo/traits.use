@@ -6,7 +6,7 @@ are still output in long format (1 row per trait value), but all
 measurement-related metadata (methods, location properties, context
 properties, contributors, references) are now included as additional
 columns in a single table. References are joined by
-[`join_sources()`](https://traitecoevo.github.io/austraits/reference/join_sources.md),
+[`join_sources()`](https://traitecoevo.github.io/traits.use/reference/join_sources.md),
 so `vars$sources` selects among its columns, and the reference columns
 of the methods table are not repeated.
 

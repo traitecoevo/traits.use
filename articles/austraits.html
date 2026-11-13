@@ -5,12 +5,12 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>austraits • austraits</title>
+<title>Getting started with traits.use, using AusTraits • traits.use</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="austraits">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Getting started with traits.use, using AusTraits">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -18,9 +18,9 @@
 
     <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
 
-    <a class="navbar-brand me-2" href="../index.html">austraits</a>
+    <a class="navbar-brand me-2" href="../index.html">traits.use</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">3.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -38,7 +38,7 @@
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
 </form></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/traitecoevo/austraits/"><span class="fa fab fa-github fa-lg"></span></a></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/traitecoevo/traits.use/"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul>
 </div>
 
@@ -52,37 +52,38 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>austraits</h1>
+      <h1>Getting started with traits.use, using AusTraits</h1>
                         <h4 data-toc-skip class="author">Fonti Kar,
 Elizabeth Wenk, Daniel Falster</h4>
             
             <h4 data-toc-skip class="date">2025-03-28</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/traitecoevo/austraits/blob/master/vignettes/austraits.Rmd" class="external-link"><code>vignettes/austraits.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/traitecoevo/traits.use/blob/master/vignettes/austraits.Rmd" class="external-link"><code>vignettes/austraits.Rmd</code></a></small>
       <div class="d-none name"><code>austraits.Rmd</code></div>
     </div>
 
     
     
-<p><code>austraits</code> allow users to <strong>access, explore and
-wrangle data</strong> from <a href="https://github.com/traitecoevo/traits.build" class="external-link">traits.build</a>
-relational databases. It is also an R interface to <a href="https://austraits.org/" class="external-link">AusTraits</a>, the Australian plant trait
-database. This package contains functions for joining data from various
-tables, filtering to specific records, combining multiple databases and
-visualising the distribution of the data. Below, we’ve include a
-tutorial using the AusTraits database to illustrate how some these
-functions work together to generate useful outputs.</p>
+<p><code>traits.use</code> lets users <strong>load, explore and wrangle
+data</strong> from <a href="https://github.com/traitecoevo/traits.build" class="external-link">traits.build</a>
+relational trait databases, such as <a href="https://austraits.org/" class="external-link">AusTraits</a>, the Australian plant trait
+database. It began as the <code>austraits</code> package. This package
+contains functions for joining data from various tables, filtering to
+specific records, combining multiple databases and visualising the
+distribution of the data. Below, we’ve include a tutorial using the
+AusTraits database to illustrate how some these functions work together
+to generate useful outputs.</p>
 <div class="section level2">
-<h2 id="install-and-load-austraits">Install and load <code>austraits</code><a class="anchor" aria-label="anchor" href="#install-and-load-austraits"></a>
+<h2 id="install-and-load-traits-use">Install and load <code>traits.use</code><a class="anchor" aria-label="anchor" href="#install-and-load-traits-use"></a>
 </h2>
-<p><code>austraits</code> is still under development. To install the
-current version from GitHub:</p>
+<p><code>traits.use</code> is not yet on CRAN. To install the current
+version from GitHub:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#install.packages("remotes")</span></span>
-<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"traitecoevo/austraits"</span>, dependencies <span class="op">=</span> <span class="cn">TRUE</span>, upgrade <span class="op">=</span> <span class="st">"ask"</span><span class="op">)</span></span>
+<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"traitecoevo/traits.use"</span>, dependencies <span class="op">=</span> <span class="cn">TRUE</span>, upgrade <span class="op">=</span> <span class="st">"ask"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Load the austraits package</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://traitecoevo.github.io/austraits/">austraits</a></span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># Load the traits.use package</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://traitecoevo.github.io/traits.use/">traits.use</a></span><span class="op">)</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="retrieve-austraits-database">Retrieve AusTraits database<a class="anchor" aria-label="anchor" href="#retrieve-austraits-database"></a>
 </h3>
@@ -114,9 +115,8 @@ associated DOI by using:</p>
 In R, it is a very <em>large</em> list with multiple tables. If you are
 not familiar with working with lists in R, we recommend having a quick
 look at this <a href="https://www.tutorialspoint.com/r/r_lists.htm" class="external-link">tutorial</a>. To
-learn more about the structure of <code>austraits</code>, check out the
-<a href="https://traitecoevo.github.io/austraits/articles/structure.html">structure
-of the database</a>.</p>
+learn more about how a traits.build database is structured, see the <a href="https://traitecoevo.github.io/traits.build-book/" class="external-link">traits.build
+book</a>.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">austraits</span></span></code></pre></div>
 <pre><code><span><span class="co">#&gt; ── This is 6.0.0 of AusTraits: a curated plant trait database for the Australian flora! ──────────────────────────────</span></span>
@@ -699,9 +699,9 @@ output.</p>
 </h3>
 <p><strong>Note</strong> that the latest version of
 <code><a href="../reference/trait_pivot_wider.html">trait_pivot_wider()</a></code> is no longer supporting AusTraits
-database versions &lt;=4.0.2. Please refer to our <a href="https://github.com/traitecoevo/austraits" class="external-link">README</a> to install an
-older version of the <code>austraits</code> R package to work old
-versions of the AusTraits database.</p>
+database versions &lt;=4.0.2. Please refer to our <a href="https://github.com/traitecoevo/traits.use#for-austraits-users" class="external-link">README</a>
+to install an older version of the <code>austraits</code> R package to
+work old versions of the AusTraits database.</p>
 <div class="sourceCode" id="cb56"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">data_fire</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/trait_pivot_wider.html">trait_pivot_wider</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">#&gt; # A tibble: 1,366 × 49</span></span>
@@ -793,7 +793,7 @@ maximum fruit length for a species. You can use
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Daniel Falster, Fonti Kar, Dony Indiarto.</p>
+  <p>Developed by Elizabeth Wenk, Fonti Kar, Daniel Falster, Dony Indiarto.</p>
 </div>
 
 <div class="pkgdown-footer-right">

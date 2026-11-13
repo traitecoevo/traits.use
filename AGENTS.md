@@ -1,10 +1,11 @@
-# austraits — agent & contributor guide
+# traits.use — agent & contributor guide
 
-`austraits` is an R package of **helpful functions to access, explore
-and wrangle data** from `traits.build` relational databases. It is also
-the R interface to AusTraits, the Australian plant trait database —
-[`load_austraits()`](https://traitecoevo.github.io/austraits/reference/load_austraits.md)
-fetches a released `.rds` build.
+`traits.use` is an R package for **loading, exploring and wrangling
+data** from any `traits.build` relational trait database, such as
+AusTraits. It began as the `austraits` package and was split out in 2026
+(traitecoevo/austraits#188, history carried over). `austraits` is
+becoming a thin AusTraits-specific layer over it. The first CRAN release
+(0.1.0, maintainer Elizabeth Wenk) is tracked in \#13.
 
 ## Repo-local guidance
 
@@ -12,52 +13,56 @@ fetches a released `.rds` build.
   docs), `NAMESPACE`, `vignettes/`. `data/`, `data-raw/`, and `inst/`
   hold packaged/raw assets (incl. the cheatsheet).
 - **Access entry point:**
-  [`load_austraits()`](https://traitecoevo.github.io/austraits/reference/load_austraits.md)
+  [`load_austraits()`](https://traitecoevo.github.io/traits.use/reference/load_austraits.md)
   (`R/load_austraits.R`) downloads/loads a released AusTraits build
   (`.rds`);
-  [`get_versions()`](https://traitecoevo.github.io/austraits/reference/get_versions.md)
+  [`get_versions()`](https://traitecoevo.github.io/traits.use/reference/get_versions.md)
   /
-  [`get_version_latest()`](https://traitecoevo.github.io/austraits/reference/get_version_latest.md)
+  [`get_version_latest()`](https://traitecoevo.github.io/traits.use/reference/get_version_latest.md)
   resolve versions.
-  [`load_database()`](https://traitecoevo.github.io/austraits/reference/load_database.md)
+  [`load_database()`](https://traitecoevo.github.io/traits.use/reference/load_database.md)
   (`R/load_database.R`) loads any traits.build database from its doi
   (Zenodo, Figshare, or a doi resolving directly to an `.rds`).
 - **Wrangle/extract:** `extract_*()` (data/dataset/taxa/trait),
   `join_*()` (taxa, methods, contributors, locations, context/location
   properties), `lookup_*()`, `trait_pivot_longer/wider()`,
-  [`summarise_database()`](https://traitecoevo.github.io/austraits/reference/summarise_database.md),
-  [`bind_databases()`](https://traitecoevo.github.io/austraits/reference/bind_databases.md),
-  [`flatten_database()`](https://traitecoevo.github.io/austraits/reference/flatten_database.md),
-  [`as_wide_table()`](https://traitecoevo.github.io/austraits/reference/as_wide_table.md).
+  [`summarise_database()`](https://traitecoevo.github.io/traits.use/reference/summarise_database.md),
+  [`bind_databases()`](https://traitecoevo.github.io/traits.use/reference/bind_databases.md),
+  [`flatten_database()`](https://traitecoevo.github.io/traits.use/reference/flatten_database.md),
+  [`as_wide_table()`](https://traitecoevo.github.io/traits.use/reference/as_wide_table.md).
 - **Build/test (standard R-package workflow):** `devtools::load_all()`,
   `devtools::test()`, `devtools::check()`. The package targets
   `R >= 4.0.0`; tidyverse-style Imports (dplyr, tidyr, purrr, etc.).
-  Lifecycle badge is **stable**.
+  Lifecycle badge is **experimental** until the first CRAN release.
 - **Default branch:** `master`. Docs/pkgdown site at
-  <https://traitecoevo.github.io/austraits/>.
+  <https://traitecoevo.github.io/traits.use/>.
+- **CRAN-bound:** `traits.use` must never `Import`/`Depend` on
+  traits.build (not on CRAN, and +57 recursive dependencies). Keep
+  network tests behind `skip_on_cran()` / `skip_if_offline()`.
 
-> Heads-up: `austraits` is the *downstream* access/wrangle layer in the
-> data pipeline, but the R-package install graph runs the other way —
-> `traits.build` **Imports `austraits`** and re-exports a few conversion
-> helpers from it (`convert_df_to_list`, `convert_list_to_df1`,
-> `convert_list_to_df2`, `bind_databases`, `flatten_database` — all in
-> `NAMESPACE`). Changing those helpers can break `traits.build`; run its
-> tests after touching them.
+> Heads-up: `traits.use` (like `austraits` before it) is the
+> *downstream* access/wrangle layer in the data pipeline, but the
+> R-package install graph runs the other way — `traits.build` currently
+> **Imports `austraits`** (moving to `traits.use`, see austraits#188)
+> and re-exports a few conversion helpers from it (`convert_df_to_list`,
+> `convert_list_to_df1`, `convert_list_to_df2`, `bind_databases`,
+> `flatten_database` — all in `NAMESPACE`). Changing those helpers can
+> break `traits.build`; run its tests after touching them.
 
-> Heads-up: from Sept 2024 `austraits` works against any `traits.build`
+> Heads-up: from Sept 2024 the code works against any `traits.build`
 > database (not just `austraits.build`). `austraits.build` versions **\<
 > 5.0 are unsupported** by the current package — older builds need an
-> older tagged `austraits` (e.g. `@v2.2.2`).
+> older tagged `austraits` (e.g. `traitecoevo/austraits@v2.2.2`).
 
 ------------------------------------------------------------------------
 
 ## AusTraits family — cross-package context
 
-`austraits` is part of the **AusTraits family** (a subset of the
+`traits.use` is part of the **AusTraits family** (a subset of the
 [`traitecoevo`](https://github.com/traitecoevo) org) — here, the
 user-facing access/wrangle API (R package) for traits.build-format
 databases, including AusTraits; loads the released `.rds` via
-[`load_austraits()`](https://traitecoevo.github.io/austraits/reference/load_austraits.md).
+[`load_austraits()`](https://traitecoevo.github.io/traits.use/reference/load_austraits.md).
 Family-wide concerns are documented centrally in
 **[austraits-meta](https://github.com/traitecoevo/austraits-meta)** —
 don’t restate them here, read them there:

@@ -35,7 +35,7 @@ load_austraits(
 
 a large list containing AusTraits data tables. Its `sources` are given
 the class
-[`traits_build_sources`](https://traitecoevo.github.io/austraits/reference/traits_build_sources.md),
+[`traits_build_sources`](https://traitecoevo.github.io/traits.use/reference/traits_build_sources.md),
 also for releases built before that class existed, so a reference can be
 looked up by key with `$` as well as `[[` and `[`, e.g.
 `austraits$sources$Falster_2005`.

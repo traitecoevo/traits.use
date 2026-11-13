@@ -2,4 +2,5 @@
 
 ### All vignettes
 
-- [austraits](https://traitecoevo.github.io/austraits/articles/austraits.md):
+- [Getting started with traits.use, using
+  AusTraits](https://traitecoevo.github.io/traits.use/articles/austraits.md):
