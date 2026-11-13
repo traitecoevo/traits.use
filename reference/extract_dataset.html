@@ -41,7 +41,7 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">extract_dataset</span><span class="op">(</span><span class="va">database</span>, <span class="va">dataset_id</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">extract_dataset</span><span class="op">(</span><span class="va">database</span>, <span class="va">dataset_id</span>, partial_matches_allowed <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -54,6 +54,10 @@
 
 <dt id="arg-dataset-id">dataset_id<a class="anchor" aria-label="anchor" href="#arg-dataset-id"></a></dt>
 <dd><p>character string that matches a <code>dataset_id</code> in the database</p></dd>
+
+
+<dt id="arg-partial-matches-allowed">partial_matches_allowed<a class="anchor" aria-label="anchor" href="#arg-partial-matches-allowed"></a></dt>
+<dd><p>logical. If <code>TRUE</code> (the default), each value is matched as a case-insensitive regular expression, so <code>"Acacia"</code> also matches <code>"Acacia celsa"</code>; characters with special meaning in regular expressions, such as brackets, then need escaping. If <code>FALSE</code>, only exact matches are kept.</p></dd>
 
 </dl></div>
     <div class="section level2">

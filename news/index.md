@@ -7,6 +7,12 @@
   the `austraits` package (version 3.1.1 and earlier, listed below),
   which becomes a thin AusTraits-specific layer over `traits.use`
   (austraits#188).
+- [`extract_data()`](https://traitecoevo.github.io/traits.use/reference/extract_data.md)
+  on the contexts table now honours `partial_matches_allowed`: matching
+  is case-insensitive by default, exact with `FALSE` (so brackets are
+  read literally), and several values are combined.
+  `partial_matches_allowed` is now documented in all `extract_*()`
+  functions.
 - Support databases built with traits.build 2.3, where every observation
   names the reference it was taken from in `source_id` (the `dataset_id`
   unless it came from another study) and the methods table’s reference

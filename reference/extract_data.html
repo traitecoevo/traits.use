@@ -81,6 +81,10 @@ based on the specified table, column (variable) and column value.</p>
 <dt id="arg-col-value">col_value<a class="anchor" aria-label="anchor" href="#arg-col-value"></a></dt>
 <dd><p>Value (of column, from with a table) that is used to subset database. This can be a single value or a vector. It includes partial string matches.</p></dd>
 
+
+<dt id="arg-partial-matches-allowed">partial_matches_allowed<a class="anchor" aria-label="anchor" href="#arg-partial-matches-allowed"></a></dt>
+<dd><p>logical. If <code>TRUE</code> (the default), each value is matched as a case-insensitive regular expression, so <code>"Acacia"</code> also matches <code>"Acacia celsa"</code>; characters with special meaning in regular expressions, such as brackets, then need escaping. If <code>FALSE</code>, only exact matches are kept.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>

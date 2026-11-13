@@ -6,7 +6,12 @@ traits.build relational database.
 ## Usage
 
 ``` r
-extract_trait(database, trait_names, taxon_names)
+extract_trait(
+  database,
+  trait_names,
+  taxon_names = NULL,
+  partial_matches_allowed = TRUE
+)
 ```
 
 ## Arguments
@@ -22,6 +27,14 @@ extract_trait(database, trait_names, taxon_names)
 - taxon_names:
 
   optional argument, specifying taxa for which data will be extracted
+
+- partial_matches_allowed:
+
+  logical. If `TRUE` (the default), each value is matched as a
+  case-insensitive regular expression, so `"Acacia"` also matches
+  `"Acacia celsa"`; characters with special meaning in regular
+  expressions, such as brackets, then need escaping. If `FALSE`, only
+  exact matches are kept.
 
 ## Value
 

@@ -37,6 +37,8 @@
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.0" id="traitsuse-010">traits.use 0.1.0<a class="anchor" aria-label="anchor" href="#traitsuse-010"></a></h2>
 <ul><li>First release as <code>traits.use</code>, a generic package for loading and wrangling any traits.build database. The code and history come from the <code>austraits</code> package (version 3.1.1 and earlier, listed below), which becomes a thin AusTraits-specific layer over <code>traits.use</code> (austraits#188).</li>
+<li>
+<code><a href="../reference/extract_data.html">extract_data()</a></code> on the contexts table now honours <code>partial_matches_allowed</code>: matching is case-insensitive by default, exact with <code>FALSE</code> (so brackets are read literally), and several values are combined. <code>partial_matches_allowed</code> is now documented in all <code>extract_*()</code> functions.</li>
 <li>Support databases built with traits.build 2.3, where every observation names the reference it was taken from in <code>source_id</code> (the <code>dataset_id</code> unless it came from another study) and the methods table’s reference columns are <code>dataset_id_type</code>, <code>dataset_id_citation</code>, <code>secondary_id</code> and <code>secondary_citation</code> (traitecoevo/traits.build#296). Older databases still work.</li>
 <li>New function <code><a href="../reference/join_sources.html">join_sources()</a></code> adds each observation’s references to the traits table: <code>dataset_id_citation</code>, <code>source_id_citation</code> (formatted from <code>sources[[source_id]]</code>), <code>secondary_id</code> and <code>secondary_citation</code>.</li>
 <li>

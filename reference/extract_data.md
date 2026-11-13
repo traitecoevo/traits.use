@@ -38,6 +38,14 @@ extract_data(
   This can be a single value or a vector. It includes partial string
   matches.
 
+- partial_matches_allowed:
+
+  logical. If `TRUE` (the default), each value is matched as a
+  case-insensitive regular expression, so `"Acacia"` also matches
+  `"Acacia celsa"`; characters with special meaning in regular
+  expressions, such as brackets, then need escaping. If `FALSE`, only
+  exact matches are kept.
+
 ## Value
 
 subset traits.build database
