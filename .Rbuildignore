@@ -18,3 +18,5 @@
 ^CITATION\.cff$
 ^\.claude$
 ^inst/cheatsheet$
+^tests/testthat/_problems$
+testthat-problems\.rds$

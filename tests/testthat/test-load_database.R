@@ -1,6 +1,8 @@
 path = "ignore/data/austraits"
 
 test_that("load_database is working", {
+  skip_on_cran()
+  skip_if_offline()
   database <- load_database(doi = "10.5281/zenodo.10156222", path = path, update = TRUE)
   
   expect_visible(database)
@@ -30,7 +32,8 @@ test_that("A cached file from a different release is not reused", {
   make_release <- function(version, n, md5 = NULL) {
     dir.create(file.path(src, version))
     file <- file.path(src, version, "MYtraits.rds")
-    saveRDS(list(traits = data.frame(value = seq_len(n)), taxa = data.frame(), methods = data.frame()), file)
+    saveRDS(list(traits = data.frame(value = seq_len(n)), taxa = data.frame(), methods = data.frame(),
+                 sources = RefManageR::BibEntry(bibtype = "Misc", key = "Src_2001", title = "T", author = "A B", year = 2001)), file)
     list(doi = paste0("10.5281/zenodo.", version), source = "zenodo", version = version,
          files = data.frame(key = "MYtraits.rds", url = file_url(file),
                             md5 = if (is.null(md5)) unname(tools::md5sum(file)) else md5))
@@ -45,6 +48,9 @@ test_that("A cached file from a different release is not reused", {
 
   expect_message(v1 <- load_database(doi = "10.5281/zenodo.1", path = path_cache), "is version 1")
   v2 <- load_database(doi = "10.5281/zenodo.2", path = path_cache)
+  # sources get the class that lets `$` look references up by key
+  expect_s3_class(v1$sources, "traits_build_sources")
+  expect_identical(unname(unlist(v1$sources$Src_2001$title)), "T")
   expect_equal(nrow(v1$traits), 3)
   expect_equal(nrow(v2$traits), 5)
 
@@ -98,10 +104,48 @@ test_that("Restricted Zenodo records give a clear error", {
   expect_error(resolve_doi_files("10.5281/zenodo.22961387"), "are restricted on Zenodo")
 })
 
+test_that("Figshare ids come from the doi, not the landing url's slug", {
+  requested <- NULL
+  local_mocked_bindings(
+    resolve_doi = function(doi) "https://figshare.com/articles/dataset/2019/12345678/2"
+  )
+  local_mocked_bindings(
+    read_json = function(url, ...) {
+      requested <<- c(requested, url)
+      list(version = 4, files = data.frame(name = "db.rds", download_url = "u", computed_md5 = ""))
+    },
+    .package = "jsonlite"
+  )
+  expect_identical(resolve_doi_files("10.6084/m9.figshare.12345678.v4")$version, "4")
+  resolve_doi_files("10.6084/M9.FIGSHARE.12345678.V4/")
+  resolve_doi_files("10.6084/m9.figshare.12345678")
+  expect_identical(requested, c(
+    "https://api.figshare.com/v2/articles/12345678/versions/4",
+    "https://api.figshare.com/v2/articles/12345678/versions/4",
+    "https://api.figshare.com/v2/articles/12345678"
+  ))
+})
+
 test_that("Right errors are tripped", {
   expect_error(load_database(path = path), "Please supply a doi")
   expect_error(load_database(doi = "10.5281/zenodo.10156222", path = NULL), "File path must be supplied")
+  expect_error(load_database(doi = "10.1000/notarealdoi123", path = path), "Could not resolve doi")
+})
+
+test_that("A record without a relational .rds gives a clear error", {
+  skip_on_cran()
+  skip_if_offline()
   # AusTraits v0.1.0 has no .rds file
   expect_error(load_database(doi = "10.5281/zenodo.3568418", path = path), "No .rds file found")
-  expect_error(load_database(doi = "10.1000/notarealdoi123", path = path), "Could not resolve doi")
+})
+
+test_that("A record whose only .rds is flattened is not downloaded", {
+  path_flat <- tempfile("flat")
+  on.exit(unlink(path_flat, recursive = TRUE), add = TRUE)
+  local_mocked_bindings(
+    resolve_doi_files = function(doi) list(doi = doi, source = "zenodo", version = "1",
+      files = data.frame(key = "db-flattened.rds", url = "file:///nonexistent/db-flattened.rds", md5 = NA))
+  )
+  expect_error(suppressMessages(load_database(doi = "10.5281/zenodo.9", path = path_flat)),
+               "Only flattened .rds files found")
 })

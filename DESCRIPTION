@@ -64,7 +64,7 @@ Suggests:
     lubridate,
     knitr,
     rmarkdown,
-    testthat (>= 3.0.0),
+    testthat (>= 3.1.7),
     markdown,
     withr
 VignetteBuilder: knitr

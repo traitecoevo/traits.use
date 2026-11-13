@@ -22,14 +22,22 @@
 #' one per entry, instead of the reference. With the `traits_build_sources`
 #' class, `$` looks up by key when the name is a key, and otherwise falls back
 #' to field access, so `sources$title` and `sources$author` work as before.
+#' A key that is also a field name (for example a key `"title"` or `"key"`)
+#' is left to field access, so RefManageR's own methods keep working; reach
+#' that entry with `[[` instead.
+#'
+#' `sources$Falster_2005 <- entry` replaces that entry, so nested assignment
+#' such as `sources$Falster_2005$title <- "New title"` changes just that
+#' entry's title.
 #'
 #' The class only adds behaviour; everything else is inherited from
 #' `BibEntry`. Printing, [format()], [RefManageR::WriteBib()] and
 #' [RefManageR::toBiblatex()] give the same output with or without it.
 #' `[`, `[[` and `c()` keep the class (for `c()`, when the first argument has
 #' it), as do the RefManageR methods built on `[`, such as `sort()`,
-#' `unique()` and `head()`. RefManageR's replacement functions (`$<-`, `[<-`,
-#' `[[<-`) and `merge()` return a plain `BibEntry`.
+#' `unique()` and `head()`. `$<-` keeps the class too. RefManageR's other
+#' replacement functions (`[<-`, `[[<-`, `names<-`) return a plain
+#' `BibEntry`, and so does `merge()` when it adds entries.
 #'
 #' [bind_databases()], [load_austraits()] and [extract_data()] (and so the
 #' other `extract_*()` functions) add the class to the `sources` they return,
@@ -45,8 +53,8 @@
 #'
 #' @return For `$`, the entry with key `name` as a `traits_build_sources`
 #'   object of length one or, when `name` is not a key, the value of field
-#'   `name` for every entry. For `[` and `c()`, a `traits_build_sources`
-#'   object.
+#'   `name` for every entry. For `$<-`, `[` and `c()`, a
+#'   `traits_build_sources` object.
 #'
 #' @seealso [bind_databases()], [load_austraits()], [RefManageR::BibEntry()]
 #' @name traits_build_sources
@@ -84,13 +92,64 @@ NULL
 #' @method $ traits_build_sources
 #' @export
 `$.traits_build_sources` <- function(x, name) {
-  # Read the keys directly: `names()` on a BibEntry is itself `x$key`, so
-  # calling it here would recurse
-  keys <- unlist(lapply(unclass(x), attr, "key"))
-  if (name %in% keys) {
+  if (is_source_key(x, name)) {
     return(x[[name]])
   }
   NextMethod()
+}
+
+#' @rdname traits_build_sources
+#' @param value For `$<-`, a `BibEntry` of length one, with key `name`, to
+#'   replace the entry with key `name` or, when `name` is not a key, the new
+#'   value of field `name`, as for RefManageR's `$<-` method for `BibEntry`.
+#'   Entries can't be removed by assigning `NULL`.
+#' @method $<- traits_build_sources
+#' @export
+`$<-.traits_build_sources` <- function(x, name, value) {
+  # Without this, `sources$Key$title <- "New"` would read the entry by key
+  # but write it back as a field called "Key" on every entry
+  if (is_source_key(x, name)) {
+    # RefManageR's `[[<-` would silently rename the entry (or make the new
+    # key unique with a ":1" suffix), so insist the key is kept
+    new_key <- if (inherits(value, "bibentry") && length(value) == 1) {
+      attr(unclass(value)[[1]], "key")
+    }
+    if (!identical(new_key, name)) {
+      rlang::abort(paste0("`$<-` replaces the entry with key '", name,
+                          "' and needs a BibEntry of length one with the same key; ",
+                          "use `[[<-` to replace it with a different reference."))
+    }
+    x[[name]] <- value
+    return(as_traits_build_sources(x))
+  }
+  as_traits_build_sources(NextMethod())
+}
+
+#' Is `name` a citation key that `$` should look up?
+#'
+#' A key that is also a field name (`"title"`, `"key"`, `"year"`, ...) is
+#' left to field access, because RefManageR's own methods call `x$key`,
+#' `x$bibtype` and `x$<field>` on the object and would otherwise break. Such
+#' a key can still be reached with `[[`.
+#'
+#' @param x A `traits_build_sources` object
+#' @param name A name passed to `$`
+#' @return `TRUE` or `FALSE`
+#' @noRd
+#' @keywords internal
+is_source_key <- function(x, name) {
+  # Read the keys directly: `names()` on a BibEntry is itself `x$key`, so
+  # calling it here would recurse
+  entries <- unclass(x)
+  keys <- unlist(lapply(entries, attr, "key"))
+  if (!name %in% keys) {
+    return(FALSE)
+  }
+  # RefManageR's attribute names (bibentry_attribute_names), plus the
+  # dot-prefixed names its formatters read (.index, .duplicated)
+  reserved <- c("bibtype", "textVersion", "header", "footer", "key", "dateobj")
+  fields <- c(reserved, unlist(lapply(entries, names)))
+  !startsWith(name, ".") && !tolower(name) %in% tolower(fields)
 }
 
 #' @rdname traits_build_sources
