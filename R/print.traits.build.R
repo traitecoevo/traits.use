@@ -1,4 +1,4 @@
-#' @title Generic for outputting a nice summary for austraits objects
+#' @title Generic for outputting a nice summary for traits.build databases
 #'
 #' @name print.traits.build
 #' @param x traits.build database

@@ -12,7 +12,7 @@
 #' - For AusTraits version >3.0.2,  `trait_pivot_longer` will return a tibble with fewer columns than that original traits table
 #'    - The excluded columns include: "unit", "replicates", "measurement_remarks", "basis_of_record", "basis_of_value"
 #' 
-#' This function reverts the actions of the function austraits::trait_pivot_wider.
+#' This function reverts the actions of the function traits.use::trait_pivot_wider.
 #' 
 #' It begins with a derivation of a traits.build traits table, where multiple measurements that comprise a single observation are displayed on a single row,with a column for each trait. It then converts the table into long format where measurements of multiple traits that comprise a single observation are on different rows and a column specifying the trait names is added.
 #' 

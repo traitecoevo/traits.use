@@ -22,7 +22,7 @@ knitr::opts_chunk$set(
 library(dplyr)
 library(here)
 library(stringr)
-library(austraits)
+library(traits.use)
 
 path = "ignore/data/austraits/"
 austraits <- load_austraits(version = "6.0.0", path = here(path))
@@ -40,7 +40,7 @@ austraits <- load_austraits(version = "6.0.0", path = here(path))
 remotes::install_github("traitecoevo/austraits", dependencies = TRUE, upgrade = "ask")
 
 # Load the austraits package
-library(austraits)
+library(traits.use)
 ```
 
 ### Retrieve AusTraits database

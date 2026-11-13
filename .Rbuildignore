@@ -13,3 +13,8 @@
 ^austraits$
 ^codecov\.yml$
 ^inst/cheatsheet/.*\.ppt$
+^LICENSE\.md$
+^AGENTS\.md$
+^CITATION\.cff$
+^\.claude$
+^inst/cheatsheet$

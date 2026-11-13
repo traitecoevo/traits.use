@@ -24,7 +24,7 @@ editor_options:
 remotes::install_github("traitecoevo/austraits", dependencies = TRUE, upgrade = "ask")
 
 # Load the austraits package
-library(austraits)
+library(traits.use)
 ```
 
 ### Retrieve AusTraits database

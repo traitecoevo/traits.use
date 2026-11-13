@@ -1,4 +1,6 @@
-# austraits (development version)
+# traits.use 0.1.0
+
+- First release as `traits.use`, a generic package for loading and wrangling any traits.build database. The code and history come from the `austraits` package (version 3.1.1 and earlier, listed below), which becomes a thin AusTraits-specific layer over `traits.use` (austraits#188).
 - `sources` can now be looked up by key with `$` (austraits#185): `database$sources$Falster_2005` returns the reference, as `database$sources[["Falster_2005"]]` does. Before, `$` on a `BibEntry` only did field access, so a key returned a list of `NULL`s. `bind_databases()`, `load_austraits()` and `extract_data()` give `sources` the class `traits_build_sources` (see `?traits_build_sources`), also for older releases; field access such as `sources$title`, printing and `RefManageR::WriteBib()` output are unchanged.
 - Added new function `load_database` which loads any traits.build database from its doi (Zenodo, Figshare or a doi resolving directly to an .rds file)
 - Fix bug in `load_austraits` and `load_database` downloads: when the temporary folder was on a different drive to `path`, the file was saved under its temporary name and could not be loaded. The user's `timeout` option is now also restored after a download.
