@@ -161,8 +161,21 @@ extract_data <- function(database, table = NA, col, col_value, partial_matches_a
     # If the context table is queried need to convert the word "contexts" into a vector that indicates which of the 5 context categories have matches
     if (table == "contexts") {
   
-      table_tmp <- database$contexts %>% 
-        dplyr::filter(stringr::str_detect(database$contexts[[col]], col_value)) %>%
+      # Match the same way as the context tables are searched below, so
+      # partial_matches_allowed applies and several values are OR-ed
+      if (partial_matches_allowed == TRUE) {
+        context_rows <- purrr::map(col_value, ~{
+          stringr::str_which(database$contexts[[col]],
+                             pattern = stringr::regex(.x, ignore_case = TRUE))
+        })
+      } else {
+        context_rows <- purrr::map(col_value, ~{
+          which(database$contexts[[col]] == .x)
+        })
+      }
+
+      table_tmp <- database$contexts %>%
+        dplyr::slice(purrr::reduce(context_rows, union, .init = integer())) %>%
         dplyr::distinct(link_id)
       
       table <- as.vector(table_tmp[[1]])

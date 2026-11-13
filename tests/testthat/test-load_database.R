@@ -129,6 +129,12 @@ test_that("Figshare ids come from the doi, not the landing url's slug", {
 test_that("Right errors are tripped", {
   expect_error(load_database(path = path), "Please supply a doi")
   expect_error(load_database(doi = "10.5281/zenodo.10156222", path = NULL), "File path must be supplied")
+})
+
+test_that("A doi that doesn't resolve gives a clear error", {
+  # Asks doi.org
+  skip_on_cran()
+  skip_if_offline()
   expect_error(load_database(doi = "10.1000/notarealdoi123", path = path), "Could not resolve doi")
 })
 
