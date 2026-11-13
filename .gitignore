@@ -53,3 +53,5 @@ data/austraits/
 #
 *.svg
 
+tests/testthat/_problems/
+testthat-problems.rds

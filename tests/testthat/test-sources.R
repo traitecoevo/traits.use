@@ -52,6 +52,64 @@ test_that("`$` with any other name is still field access", {
   expect_identical(names(sources), names(plain))
 })
 
+test_that("`$<-` with a key replaces that entry, so nested assignment works", {
+  s <- sources
+  s$Falster_2003$title <- "A new title"
+  expect_s3_class(s, "traits_build_sources")
+  expect_identical(length(s), length(sources))
+  expect_identical(names(s), names(sources))
+  expect_identical(unname(unlist(s[[key]]$title)), "A new title")
+  # Other entries, and their fields, are untouched
+  other <- setdiff(names(sources), key)
+  expect_identical(unclass(s[other]), unclass(sources[other]))
+  expect_false(tolower(key) %in% tolower(unlist(lapply(unclass(s), names))))
+})
+
+test_that("`$<-` refuses a replacement with a different key", {
+  s <- sources
+  other <- s[["Crous_2013"]]
+  expect_error(s$Falster_2003 <- other, "needs a BibEntry of length one with the same key")
+  expect_error(s$Falster_2003 <- NULL, "needs a BibEntry of length one with the same key")
+  expect_identical(names(s), names(sources))
+})
+
+test_that("`$<-` with a field name is field assignment and keeps the class", {
+  s <- sources[some_keys]
+  s$note <- c("a", "b", "c")
+  expect_s3_class(s, "traits_build_sources")
+  expect_identical(unname(unlist(s$note)), c("a", "b", "c"))
+})
+
+test_that("keys that are also field names are left to field access", {
+  entry <- function(key, title) {
+    RefManageR::BibEntry(bibtype = "Article", key = key, title = title,
+                         author = "Ann Author", journal = "J", year = 2001)
+  }
+  k <- as_traits_build_sources(c(entry("title", "T"), entry("key", "K"), entry("Smith_2001", "S")))
+  # RefManageR's own methods, which call `x$key`, `x$title` etc., still work
+  expect_identical(unname(names(k)), c("title", "key", "Smith_2001"))
+  expect_no_error(sort(k))
+  expect_no_error(as.data.frame(k))
+  expect_no_error(format(k, style = "citation"))
+  expect_identical(unname(unlist(k$title)), c("T", "K", "S"))
+  # Such entries are still reachable with `[[`; other keys with `$`
+  expect_identical(unname(unlist(k[["key"]]$title)), "K")
+  expect_identical(unname(unlist(k$Smith_2001$title)), "S")
+})
+
+test_that("keys named like RefManageR attributes don't change formatting", {
+  entry <- function(key) {
+    RefManageR::BibEntry(bibtype = "Article", key = key, title = paste("Title", key),
+                         author = "Ann Author", journal = "J", year = 2001)
+  }
+  plain_k <- c(entry("header"), entry("footer"), entry("textVersion"), entry(".index"),
+               entry(".duplicated"), entry("Smith_2001"))
+  k <- as_traits_build_sources(plain_k)
+  for (style in c("text", "citation", "R", "Bibtex", "Biblatex", "yaml")) {
+    expect_identical(format(k, style = style), format(plain_k, style = style), info = style)
+  }
+})
+
 test_that("`[` and `[[` return the same entries and keep the class", {
   indices <- list(some_keys, 2:4, names(plain) %in% some_keys)
   for (i in indices) {

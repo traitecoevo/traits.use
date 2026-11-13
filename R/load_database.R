@@ -60,10 +60,8 @@ load_database <- function(doi = NULL, path = "data/traits.build", update = TRUE)
 
   files <- files[is_rds, ]
 
-  # Ignore flattened database files
-  if(nrow(files) > 1) {
-    files <- files[!stringr::str_detect(files$key, "flattened"), ]
-  }
+  # Ignore flattened database files, even when one is the only .rds
+  files <- files[!stringr::str_detect(files$key, "flattened"), ]
 
   if(nrow(files) == 0) {
     rlang::abort(paste0("Only flattened .rds files found for doi '", doi,
@@ -105,8 +103,9 @@ load_database <- function(doi = NULL, path = "data/traits.build", update = TRUE)
     rlang::abort(paste0("'", file_nm, "' is not a traits.build database!"))
   }
 
-  # Assign class
+  # Assign class, and let `$` look up sources by key (as load_austraits() does)
   attr(data, "class") <- "traits.build"
+  data <- classify_sources(data)
 
   data
 }
@@ -179,7 +178,13 @@ resolve_doi_files <- function(doi){
 
   # Figshare
   if(stringr::str_detect(landing_url, "figshare\\.com/")){
-    ids <- stringr::str_match(landing_url, "/([0-9]+)(?:/([0-9]+))?/?$")
+    # Take the article id and version from the doi itself
+    # (10.6084/m9.figshare.<id>[.v<version>]); the landing url's slug can
+    # contain numbers too, so it is only a fallback.
+    ids <- stringr::str_match(doi, stringr::regex("figshare\\.([0-9]+)(?:\\.v([0-9]+))?/?$", ignore_case = TRUE))
+    if(is.na(ids[, 2])) {
+      ids <- stringr::str_match(landing_url, "/([0-9]+)(?:/([0-9]+))?/?$")
+    }
 
     if(is.na(ids[, 2])){
       rlang::abort(paste0("Could not find Figshare article id for doi '", doi, "'"))
