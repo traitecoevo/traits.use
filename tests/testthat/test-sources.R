@@ -218,7 +218,7 @@ test_that("saveRDS() / readRDS() round-trip keeps the class and lookup", {
   expect_identical(restored$Falster_2003, sources[[key]])
 })
 
-test_that("the class is a plain BibEntry where austraits is not loaded", {
+test_that("the class is a plain BibEntry where traits.use is not loaded", {
   # Consumers of a published .rds (austraits-api, the portal) read it without
   # austraits, so S3 dispatch must fall through to RefManageR's methods,
   # exactly as for an object built before the class existed
@@ -260,7 +260,7 @@ test_that("the class is a plain BibEntry where austraits is not loaded", {
       "  write(with, file.path(dir, 'with.bib')),",
       "  write(without, file.path(dir, 'without.bib')))",
       "saveRDS(list(before = before, after = after,",
-      "  austraits_loaded = isNamespaceLoaded('austraits')),",
+      paste0("  pkg_loaded = isNamespaceLoaded('", utils::packageName(), "')),"),
       "  file.path(dir, 'result.rds'))"
     ),
     file.path(dir, "check.R")
@@ -272,7 +272,7 @@ test_that("the class is a plain BibEntry where austraits is not loaded", {
   expect_identical(status, 0L)
   result <- readRDS(file.path(dir, "result.rds"))
 
-  expect_false(result$austraits_loaded)
+  expect_false(result$pkg_loaded)
   # Without RefManageR loaded, utils' bibentry methods apply to both alike
   failing <- function(x) toString(names(x)[!x])
   expect_true(all(result$before), info = failing(result$before))

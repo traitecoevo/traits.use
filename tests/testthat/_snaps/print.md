@@ -46,7 +46,7 @@
       * build_info: A description of the computing environment used to create this
       version of the dataset, including version number, git commit and R
       session_info.
-      i To access a component, try using the $ e.g. austraits$traits
+      i To access a component, try using the $ e.g. database$traits
 
 ---
 
@@ -89,5 +89,5 @@
       * build_info: A description of the computing environment used to create this
       version of the dataset, including version number, git commit and R
       session_info.
-      i To access a component, try using the $ e.g. austraits$traits
+      i To access a component, try using the $ e.g. database$traits
 

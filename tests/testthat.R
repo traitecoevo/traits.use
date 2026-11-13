@@ -1,4 +1,4 @@
 library(testthat)
-library(austraits)
+library(traits.use)
 
-test_check("austraits")
+test_check("traits.use")

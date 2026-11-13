@@ -40,7 +40,7 @@ object of length one or, when \code{name} is not a key, the value of field
 \description{
 The \code{sources} component of a traits.build database holds the bibliographic
 references for every dataset, as a \code{\link[RefManageR:BibEntry]{RefManageR::BibEntry()}} object keyed by
-citation key (for example \code{"Falster_2005"}). austraits gives it the extra
+citation key (for example \code{"Falster_2005"}). traits.use gives it the extra
 class \code{traits_build_sources}, which makes \code{$} look an entry up by its key.
 Any of these return the reference for \code{Falster_2005}:
 
@@ -78,7 +78,7 @@ replacement functions (\verb{[<-}, \verb{[[<-}, \verb{names<-}) return a plain
 \code{\link[=bind_databases]{bind_databases()}}, \code{\link[=load_austraits]{load_austraits()}} and \code{\link[=extract_data]{extract_data()}} (and so the
 other \verb{extract_*()} functions) add the class to the \code{sources} they return,
 including for databases built before the class existed. An object carrying
-the class behaves as a plain \code{BibEntry} in a session where austraits is not
+the class behaves as a plain \code{BibEntry} in a session where traits.use is not
 loaded.
 }
 \examples{

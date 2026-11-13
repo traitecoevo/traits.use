@@ -30,7 +30,7 @@ In other words, trait_pivot_longer reverts the actions of trait_pivot_wider
 }
 }
 
-This function reverts the actions of the function austraits::trait_pivot_wider.
+This function reverts the actions of the function traits.use::trait_pivot_wider.
 
 It begins with a derivation of a traits.build traits table, where multiple measurements that comprise a single observation are displayed on a single row,with a column for each trait. It then converts the table into long format where measurements of multiple traits that comprise a single observation are on different rows and a column specifying the trait names is added.
 

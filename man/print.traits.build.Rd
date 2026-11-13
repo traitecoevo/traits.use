@@ -2,7 +2,7 @@
 % Please edit documentation in R/print.traits.build.R
 \name{print.traits.build}
 \alias{print.traits.build}
-\title{Generic for outputting a nice summary for austraits objects}
+\title{Generic for outputting a nice summary for traits.build databases}
 \usage{
 \method{print}{traits.build}(x, ...)
 }
@@ -15,5 +15,5 @@
 nicely printed table
 }
 \description{
-Generic for outputting a nice summary for austraits objects
+Generic for outputting a nice summary for traits.build databases
 }

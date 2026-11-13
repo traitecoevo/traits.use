@@ -1,6 +1,6 @@
 #' @title Check compatibility of traits.build object
 #' @description Function to check whether the data object has been compiled by the traits.build workflow and 
-#' therefore has a data structure that is appropriate for use with austraits functions.
+#' therefore has a data structure that is appropriate for use with traits.use functions.
 #' @param database traits.build database (list object)
 #' @param single_table_allowed logical for when the input might be a single table instead of a complete database; defaults to FALSE
 #'

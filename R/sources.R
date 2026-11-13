@@ -3,7 +3,7 @@
 #' @description
 #' The `sources` component of a traits.build database holds the bibliographic
 #' references for every dataset, as a [RefManageR::BibEntry()] object keyed by
-#' citation key (for example `"Falster_2005"`). austraits gives it the extra
+#' citation key (for example `"Falster_2005"`). traits.use gives it the extra
 #' class `traits_build_sources`, which makes `$` look an entry up by its key.
 #' Any of these return the reference for `Falster_2005`:
 #'
@@ -42,7 +42,7 @@
 #' [bind_databases()], [load_austraits()] and [extract_data()] (and so the
 #' other `extract_*()` functions) add the class to the `sources` they return,
 #' including for databases built before the class existed. An object carrying
-#' the class behaves as a plain `BibEntry` in a session where austraits is not
+#' the class behaves as a plain `BibEntry` in a session where traits.use is not
 #' loaded.
 #'
 #' @param x A `traits_build_sources` object: the `sources` component of a
