@@ -39,6 +39,7 @@ Imports:
     stringr,
     stats,
     jsonlite,
+    tools,
     utils,
     magrittr,
     janitor,
