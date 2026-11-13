@@ -1,4 +1,4 @@
-# Importing the package that austraits depends on
+# Importing the package that traits.use depends on
 #' @import RefManageR
 
 # Recommendation by jennybc https://github.com/STAT545-UBC/Discussion/issues/451
@@ -6,7 +6,7 @@
 if(getRversion() >= "2.15.1")  utils::globalVariables(c(".", "dplyr::n()"))
 
 .onAttach <- function(libname, pkgname) {
-    cli::cli_inform("Thanks for showing interest in `austraits`! Please consider citing this package - citation('austraits')", class = "packageStartupMessage")
+    cli::cli_inform("Thanks for using `traits.use`! Please consider citing it: citation('traits.use')", class = "packageStartupMessage")
 }
 
 #' @keywords internal

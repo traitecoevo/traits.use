@@ -1,8 +1,8 @@
-url: https://traitecoevo.github.io/austraits/
+url: https://traitecoevo.github.io/traits.use/
 
 home:
-  title: An R package for accessing the AusTraits database
-  description: Explore and wrangle curated database of plant traits of Australian flora
+  title: Access and wrangle data from traits.build trait databases
+  description: Load, explore and wrangle trait databases built with traits.build, such as AusTraits
 
 development:
   mode: release
@@ -75,4 +75,4 @@ navbar:
       href: news/index.html
     github:
       icon: fab fa-github fa-lg
-      href: https://github.com/traitecoevo/austraits/
+      href: https://github.com/traitecoevo/traits.use/

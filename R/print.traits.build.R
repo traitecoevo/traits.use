@@ -1,4 +1,4 @@
-#' @title Generic for outputting a nice summary for austraits objects
+#' @title Generic for outputting a nice summary for traits.build databases
 #'
 #' @name print.traits.build
 #' @param x traits.build database
@@ -54,7 +54,7 @@ print.traits.build <- function(x, ...){
       cli::cli_li("{.emph build_info}: A description of the computing environment used to create this version of the dataset, including version number, git commit and R session_info.")
       cli::cli_end()
       
-      cli::cli_alert_info("To access a component, try using the $ e.g. austraits$traits")
+      cli::cli_alert_info("To access a component, try using the $ e.g. database$traits")
     }
     
     nice_summary_output()
@@ -81,7 +81,7 @@ print.traits.build <- function(x, ...){
       cli::cli_li("{.emph build_info}:  A description of the computing environment used to create this version of the dataset, including version number, git commit and R session_info.")
       cli::cli_end()
       
-      cli::cli_alert_info("To access a component, try using the $ e.g. austraits$traits")
+      cli::cli_alert_info("To access a component, try using the $ e.g. database$traits")
     }
     
     old_version_nice_output()

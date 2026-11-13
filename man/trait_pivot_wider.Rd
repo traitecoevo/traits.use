@@ -17,7 +17,7 @@ Function to "widen" long format data ("tidy data").
 
 Data in a traits.build databases' traits table are organised in a long format where each trait measurement is on a different row and measurement metadata is recorded in other columns. Multiple traits may be measured as part of a single observation and this function pivots the data wider, such that each trait is its own column. \if{html}{\out{<i>}}Note that if two trait measurements have the same observation_id but different value types (min, mean, mode, etc.) these will be on separate rows.\if{html}{\out{</i>}}
 
-The function austraits::trait_pivot_longer reverts the actions of this function.
+The function traits.use::trait_pivot_longer reverts the actions of this function.
 }
 \details{
 `trait_pivot_wider`` has been developed to pivot the traits table for a database build using the traits.build workflow.

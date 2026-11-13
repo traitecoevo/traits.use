@@ -1,4 +1,24 @@
-citHeader("To cite austraits in publications use:")
+citHeader("To cite traits.use in publications, please use the first reference below. If you use AusTraits data, please also cite the AusTraits database (second reference).")
+
+bibentry(
+  bibtype  = "Manual",
+  title    = "traits.use: Access and Wrangle Data from 'traits.build' Trait Databases",
+  author   = c(
+    person("Elizabeth", "Wenk"),
+    person("Fonti", "Kar"),
+    person("Daniel", "Falster"),
+    person("Dony", "Indiarto")
+  ),
+  year     = "2026",
+  note     = paste("R package version", meta$Version),
+  url      = "https://github.com/traitecoevo/traits.use",
+  textVersion = paste0(
+    "Wenk, E., Kar, F., Falster, D. and Indiarto, D. (2026) ",
+    "traits.use: Access and Wrangle Data from 'traits.build' Trait Databases. ",
+    "R package version ", meta$Version, ". https://github.com/traitecoevo/traits.use"
+  )
+)
+
 
 bibentry(
   bibtype  = "Article",

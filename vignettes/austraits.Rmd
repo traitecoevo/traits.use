@@ -1,10 +1,10 @@
 ---
-title: "austraits"
+title: "Getting started with traits.use, using AusTraits"
 author: "Fonti Kar, Elizabeth Wenk, Daniel Falster"
 date: "2025-03-28"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{austraits}
+  %\VignetteIndexEntry{Getting started with traits.use, using AusTraits}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
 editor_options: 
@@ -13,18 +13,18 @@ editor_options:
 
 
 
-`austraits` allow users to **access, explore and wrangle data** from [traits.build](https://github.com/traitecoevo/traits.build) relational databases. It is also an R interface to [AusTraits](https://austraits.org/), the Australian plant trait database. This package contains functions for joining data from various tables, filtering to specific records, combining multiple databases and visualising the distribution of the data. Below, we've include a tutorial using the AusTraits database to illustrate how some these functions work together to generate useful outputs.
+`traits.use` lets users **load, explore and wrangle data** from [traits.build](https://github.com/traitecoevo/traits.build) relational trait databases, such as [AusTraits](https://austraits.org/), the Australian plant trait database. It began as the `austraits` package. This package contains functions for joining data from various tables, filtering to specific records, combining multiple databases and visualising the distribution of the data. Below, we've include a tutorial using the AusTraits database to illustrate how some these functions work together to generate useful outputs.
 
-## Install and load `austraits`
-`austraits` is still under development. To install the current version from GitHub: 
+## Install and load `traits.use`
+`traits.use` is not yet on CRAN. To install the current version from GitHub: 
 
 
 ``` r
 #install.packages("remotes")
-remotes::install_github("traitecoevo/austraits", dependencies = TRUE, upgrade = "ask")
+remotes::install_github("traitecoevo/traits.use", dependencies = TRUE, upgrade = "ask")
 
-# Load the austraits package
-library(austraits)
+# Load the traits.use package
+library(traits.use)
 ```
 
 ### Retrieve AusTraits database
@@ -58,7 +58,7 @@ get_versions(path = "data/austraits")
 #> 6 2021-07-14       10.5281/zenodo.5112001  3.0.2   5112001
 ```
 
-AusTraits, like all traits.build databases, is a relational database. In R, it is a very *large* list with multiple tables. If you are not familiar with working with lists in R, we recommend having a quick look at this [tutorial](https://www.tutorialspoint.com/r/r_lists.htm). To learn more about the structure of `austraits`, check out the [structure of the database](https://traitecoevo.github.io/austraits/articles/structure.html). 
+AusTraits, like all traits.build databases, is a relational database. In R, it is a very *large* list with multiple tables. If you are not familiar with working with lists in R, we recommend having a quick look at this [tutorial](https://www.tutorialspoint.com/r/r_lists.htm). To learn more about how a traits.build database is structured, see the [traits.build book](https://traitecoevo.github.io/traits.build-book/). 
 
 
 ``` r
@@ -720,7 +720,7 @@ Note that the following columns are lost when pivoting: unit, replicates, measur
 
 ### Pivot wider 
 
-**Note** that the latest version of `trait_pivot_wider()` is no longer supporting AusTraits database versions <=4.0.2. Please refer to our [README](https://github.com/traitecoevo/austraits) to install an older version of the `austraits` R package to work old versions of the AusTraits database. 
+**Note** that the latest version of `trait_pivot_wider()` is no longer supporting AusTraits database versions <=4.0.2. Please refer to our [README](https://github.com/traitecoevo/traits.use#for-austraits-users) to install an older version of the `austraits` R package to work old versions of the AusTraits database. 
 
 
 ``` r
