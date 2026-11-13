@@ -3,11 +3,14 @@
 \name{traits_build_sources}
 \alias{traits_build_sources}
 \alias{$.traits_build_sources}
+\alias{$<-.traits_build_sources}
 \alias{[.traits_build_sources}
 \alias{c.traits_build_sources}
 \title{Look up references in a database's \code{sources} by key}
 \usage{
 \method{$}{traits_build_sources}(x, name)
+
+\method{$}{traits_build_sources}(x, name) <- value
 
 \method{[}{traits_build_sources}(x, i, j, ..., drop = FALSE)
 
@@ -19,6 +22,11 @@ traits.build database.}
 
 \item{name}{A citation key, or a \code{BibEntry} field name.}
 
+\item{value}{For \verb{$<-}, a \code{BibEntry} of length one, with key \code{name}, to
+replace the entry with key \code{name} or, when \code{name} is not a key, the new
+value of field \code{name}, as for RefManageR's \verb{$<-} method for \code{BibEntry}.
+Entries can't be removed by assigning \code{NULL}.}
+
 \item{i, j, ..., drop}{Indices, as for RefManageR's \code{[} method for \code{BibEntry}.}
 
 \item{recursive}{Ignored, as for RefManageR's \code{c()} method for \code{BibEntry}.}
@@ -26,8 +34,8 @@ traits.build database.}
 \value{
 For \code{$}, the entry with key \code{name} as a \code{traits_build_sources}
 object of length one or, when \code{name} is not a key, the value of field
-\code{name} for every entry. For \code{[} and \code{c()}, a \code{traits_build_sources}
-object.
+\code{name} for every entry. For \verb{$<-}, \code{[} and \code{c()}, a
+\code{traits_build_sources} object.
 }
 \description{
 The \code{sources} component of a traits.build database holds the bibliographic
@@ -50,14 +58,22 @@ title of every entry), so \code{sources$Falster_2005} returns a list of \code{NU
 one per entry, instead of the reference. With the \code{traits_build_sources}
 class, \code{$} looks up by key when the name is a key, and otherwise falls back
 to field access, so \code{sources$title} and \code{sources$author} work as before.
+A key that is also a field name (for example a key \code{"title"} or \code{"key"})
+is left to field access, so RefManageR's own methods keep working; reach
+that entry with \code{[[} instead.
+
+\code{sources$Falster_2005 <- entry} replaces that entry, so nested assignment
+such as \code{sources$Falster_2005$title <- "New title"} changes just that
+entry's title.
 
 The class only adds behaviour; everything else is inherited from
 \code{BibEntry}. Printing, \code{\link[=format]{format()}}, \code{\link[RefManageR:WriteBib]{RefManageR::WriteBib()}} and
 \code{\link[RefManageR:toBiblatex]{RefManageR::toBiblatex()}} give the same output with or without it.
 \code{[}, \code{[[} and \code{c()} keep the class (for \code{c()}, when the first argument has
 it), as do the RefManageR methods built on \code{[}, such as \code{sort()},
-\code{unique()} and \code{head()}. RefManageR's replacement functions (\verb{$<-}, \verb{[<-},
-\verb{[[<-}) and \code{merge()} return a plain \code{BibEntry}.
+\code{unique()} and \code{head()}. \verb{$<-} keeps the class too. RefManageR's other
+replacement functions (\verb{[<-}, \verb{[[<-}, \verb{names<-}) return a plain
+\code{BibEntry}, and so does \code{merge()} when it adds entries.
 
 \code{\link[=bind_databases]{bind_databases()}}, \code{\link[=load_austraits]{load_austraits()}} and \code{\link[=extract_data]{extract_data()}} (and so the
 other \verb{extract_*()} functions) add the class to the \code{sources} they return,

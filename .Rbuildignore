@@ -13,3 +13,5 @@
 ^austraits$
 ^codecov\.yml$
 ^inst/cheatsheet/.*\.ppt$
+^tests/testthat/_problems$
+testthat-problems\.rds$
