@@ -32,7 +32,8 @@ test_that("A cached file from a different release is not reused", {
   make_release <- function(version, n, md5 = NULL) {
     dir.create(file.path(src, version))
     file <- file.path(src, version, "MYtraits.rds")
-    saveRDS(list(traits = data.frame(value = seq_len(n)), taxa = data.frame(), methods = data.frame()), file)
+    saveRDS(list(traits = data.frame(value = seq_len(n)), taxa = data.frame(), methods = data.frame(),
+                 sources = RefManageR::BibEntry(bibtype = "Misc", key = "Src_2001", title = "T", author = "A B", year = 2001)), file)
     list(doi = paste0("10.5281/zenodo.", version), source = "zenodo", version = version,
          files = data.frame(key = "MYtraits.rds", url = file_url(file),
                             md5 = if (is.null(md5)) unname(tools::md5sum(file)) else md5))
@@ -47,6 +48,9 @@ test_that("A cached file from a different release is not reused", {
 
   expect_message(v1 <- load_database(doi = "10.5281/zenodo.1", path = path_cache), "is version 1")
   v2 <- load_database(doi = "10.5281/zenodo.2", path = path_cache)
+  # sources get the class that lets `$` look references up by key
+  expect_s3_class(v1$sources, "traits_build_sources")
+  expect_identical(unname(unlist(v1$sources$Src_2001$title)), "T")
   expect_equal(nrow(v1$traits), 3)
   expect_equal(nrow(v2$traits), 5)
 

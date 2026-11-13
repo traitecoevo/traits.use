@@ -103,8 +103,9 @@ load_database <- function(doi = NULL, path = "data/traits.build", update = TRUE)
     rlang::abort(paste0("'", file_nm, "' is not a traits.build database!"))
   }
 
-  # Assign class
+  # Assign class, and let `$` look up sources by key (as load_austraits() does)
   attr(data, "class") <- "traits.build"
+  data <- classify_sources(data)
 
   data
 }
