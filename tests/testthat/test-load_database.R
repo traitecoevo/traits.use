@@ -1,6 +1,8 @@
 path = "ignore/data/austraits"
 
 test_that("load_database is working", {
+  skip_on_cran()
+  skip_if_offline()
   database <- load_database(doi = "10.5281/zenodo.10156222", path = path, update = TRUE)
   
   expect_visible(database)
@@ -101,7 +103,23 @@ test_that("Restricted Zenodo records give a clear error", {
 test_that("Right errors are tripped", {
   expect_error(load_database(path = path), "Please supply a doi")
   expect_error(load_database(doi = "10.5281/zenodo.10156222", path = NULL), "File path must be supplied")
+  expect_error(load_database(doi = "10.1000/notarealdoi123", path = path), "Could not resolve doi")
+})
+
+test_that("A record without a relational .rds gives a clear error", {
+  skip_on_cran()
+  skip_if_offline()
   # AusTraits v0.1.0 has no .rds file
   expect_error(load_database(doi = "10.5281/zenodo.3568418", path = path), "No .rds file found")
-  expect_error(load_database(doi = "10.1000/notarealdoi123", path = path), "Could not resolve doi")
+})
+
+test_that("A record whose only .rds is flattened is not downloaded", {
+  path_flat <- tempfile("flat")
+  on.exit(unlink(path_flat, recursive = TRUE), add = TRUE)
+  local_mocked_bindings(
+    resolve_doi_files = function(doi) list(doi = doi, source = "zenodo", version = "1",
+      files = data.frame(key = "db-flattened.rds", url = "file:///nonexistent/db-flattened.rds", md5 = NA))
+  )
+  expect_error(suppressMessages(load_database(doi = "10.5281/zenodo.9", path = path_flat)),
+               "Only flattened .rds files found")
 })
