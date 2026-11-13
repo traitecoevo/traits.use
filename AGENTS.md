@@ -19,6 +19,9 @@ fetches a released `.rds` build.
   /
   [`get_version_latest()`](https://traitecoevo.github.io/austraits/reference/get_version_latest.md)
   resolve versions.
+  [`load_database()`](https://traitecoevo.github.io/austraits/reference/load_database.md)
+  (`R/load_database.R`) loads any traits.build database from its doi
+  (Zenodo, Figshare, or a doi resolving directly to an `.rds`).
 - **Wrangle/extract:** `extract_*()` (data/dataset/taxa/trait),
   `join_*()` (taxa, methods, contributors, locations, context/location
   properties), `lookup_*()`, `trait_pivot_longer/wider()`,

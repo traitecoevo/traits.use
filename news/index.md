@@ -2,6 +2,13 @@
 
 ## austraits (development version)
 
+- Added new function `load_database` which loads any traits.build
+  database from its doi (Zenodo, Figshare or a doi resolving directly to
+  an .rds file)
+- Fix bug in `load_austraits` and `load_database` downloads: when the
+  temporary folder was on a different drive to `path`, the file was
+  saved under its temporary name and could not be loaded. The user’s
+  `timeout` option is now also restored after a download.
 - Fix bug in `plot_locations` that silently left out locations east of
   153°E (Brisbane, the Gold Coast, Byron Bay) and north of 9.5°S (Torres
   Strait), about 2% of AusTraits 5.0.0 records with coordinates.

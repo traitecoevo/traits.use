@@ -36,7 +36,9 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="austraits-development-version">austraits (development version)<a class="anchor" aria-label="anchor" href="#austraits-development-version"></a></h2>
-<ul><li>Fix bug in <code>plot_locations</code> that silently left out locations east of 153°E (Brisbane, the Gold Coast, Byron Bay) and north of 9.5°S (Torres Strait), about 2% of AusTraits 5.0.0 records with coordinates. Locations beyond the map of Australia are now reported in a message. The new argument <code>basemap = NULL</code> draws every location without the map, for databases from outside Australia. <code>...</code> is now passed on to <code>geom_pointdensity()</code>, and <code>feature = NA</code> works.</li>
+<ul><li>Added new function <code>load_database</code> which loads any traits.build database from its doi (Zenodo, Figshare or a doi resolving directly to an .rds file)</li>
+<li>Fix bug in <code>load_austraits</code> and <code>load_database</code> downloads: when the temporary folder was on a different drive to <code>path</code>, the file was saved under its temporary name and could not be loaded. The user’s <code>timeout</code> option is now also restored after a download.</li>
+<li>Fix bug in <code>plot_locations</code> that silently left out locations east of 153°E (Brisbane, the Gold Coast, Byron Bay) and north of 9.5°S (Torres Strait), about 2% of AusTraits 5.0.0 records with coordinates. Locations beyond the map of Australia are now reported in a message. The new argument <code>basemap = NULL</code> draws every location without the map, for databases from outside Australia. <code>...</code> is now passed on to <code>geom_pointdensity()</code>, and <code>feature = NA</code> works.</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="3.1.1" id="austraits-311">austraits 3.1.1<a class="anchor" aria-label="anchor" href="#austraits-311"></a></h2>

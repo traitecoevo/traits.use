@@ -186,6 +186,8 @@ Infrastructure Strategy](https://www.education.gov.au/ncris) (NCRIS).
 
 - [`load_austraits()`](https://traitecoevo.github.io/austraits/reference/load_austraits.md)
   : Load AusTraits database into R console
+- [`load_database()`](https://traitecoevo.github.io/austraits/reference/load_database.md)
+  : Load any traits.build database into R console
 - [`get_compiled_by_traits.build()`](https://traitecoevo.github.io/austraits/reference/get_compiled_by_traits.build.md)
   : Retrieve compiled by information from metadata table
 - [`get_traits_table()`](https://traitecoevo.github.io/austraits/reference/get_traits_table.md)
