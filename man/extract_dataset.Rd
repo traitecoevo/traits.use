@@ -4,12 +4,14 @@
 \alias{extract_dataset}
 \title{Extract all data for a particular dataset}
 \usage{
-extract_dataset(database, dataset_id)
+extract_dataset(database, dataset_id, partial_matches_allowed = TRUE)
 }
 \arguments{
 \item{database}{traits.build database (list object)}
 
 \item{dataset_id}{character string that matches a \code{dataset_id} in the database}
+
+\item{partial_matches_allowed}{logical. If \code{TRUE} (the default), each value is matched as a case-insensitive regular expression, so \code{"Acacia"} also matches \code{"Acacia celsa"}; characters with special meaning in regular expressions, such as brackets, then need escaping. If \code{FALSE}, only exact matches are kept.}
 }
 \value{
 List of tibbles containing all traits.build data and metadata for the specified dataset(s).

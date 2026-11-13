@@ -1,3 +1,7 @@
+# These tests download AusTraits releases from Zenodo
+skip_on_cran()
+skip_if_offline()
+
 path = "ignore/data/austraits"
 
 test_that("load_austraits is working", {

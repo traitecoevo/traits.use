@@ -10,6 +10,7 @@
 #' @param table Table within a traits.build database
 #' @param col Column name within the specified table.
 #' @param col_value Value (of column, from with a table) that is used to subset database. This can be a single value or a vector. It includes partial string matches. 
+#' @param partial_matches_allowed logical. If `TRUE` (the default), each value is matched as a case-insensitive regular expression, so `"Acacia"` also matches `"Acacia celsa"`; characters with special meaning in regular expressions, such as brackets, then need escaping. If `FALSE`, only exact matches are kept.
 #' @importFrom rlang :=
 #' @return subset traits.build database
 #' @export
@@ -237,7 +238,7 @@ extract_data <- function(database, table = NA, col, col_value, partial_matches_a
         if (nrow(ret_tmp[["excluded_data"]]) == 0) {
             ret[["excluded_data"]] <- database[["traits"]][0,] %>% 
               dplyr::mutate(error = character()) %>%
-              dplyr::select(error, everything())
+              dplyr::select(dplyr::all_of("error"), tidyselect::everything())
         } else {
             ret[["excluded_data"]] <- ret_tmp[["excluded_data"]] 
         }
