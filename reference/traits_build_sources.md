@@ -22,6 +22,9 @@ several. Use `names(database$sources)` to list the keys.
 x$name
 
 # S3 method for class 'traits_build_sources'
+x$name <- value
+
+# S3 method for class 'traits_build_sources'
 x[i, j, ..., drop = FALSE]
 
 # S3 method for class 'traits_build_sources'
@@ -39,6 +42,13 @@ c(..., recursive = FALSE)
 
   A citation key, or a `BibEntry` field name.
 
+- value:
+
+  For `$<-`, a `BibEntry` of length one, with key `name`, to replace the
+  entry with key `name` or, when `name` is not a key, the new value of
+  field `name`, as for RefManageR's `$<-` method for `BibEntry`. Entries
+  can't be removed by assigning `NULL`.
+
 - i, j, ..., drop:
 
   Indices, as for RefManageR's `[` method for `BibEntry`.
@@ -52,8 +62,8 @@ c(..., recursive = FALSE)
 
 For `$`, the entry with key `name` as a `traits_build_sources` object of
 length one or, when `name` is not a key, the value of field `name` for
-every entry. For `[` and [`c()`](https://rdrr.io/r/base/c.html), a
-`traits_build_sources` object.
+every entry. For `$<-`, `[` and [`c()`](https://rdrr.io/r/base/c.html),
+a `traits_build_sources` object.
 
 ## Details
 
@@ -62,7 +72,14 @@ title of every entry), so `sources$Falster_2005` returns a list of
 `NULL`s, one per entry, instead of the reference. With the
 `traits_build_sources` class, `$` looks up by key when the name is a
 key, and otherwise falls back to field access, so `sources$title` and
-`sources$author` work as before.
+`sources$author` work as before. A key that is also a field name (for
+example a key `"title"` or `"key"`) is left to field access, so
+RefManageR's own methods keep working; reach that entry with `[[`
+instead.
+
+`sources$Falster_2005 <- entry` replaces that entry, so nested
+assignment such as `sources$Falster_2005$title <- "New title"` changes
+just that entry's title.
 
 The class only adds behaviour; everything else is inherited from
 `BibEntry`. Printing, [`format()`](https://rdrr.io/r/base/format.html),
@@ -75,10 +92,10 @@ give the same output with or without it. `[`, `[[` and
 as do the RefManageR methods built on `[`, such as
 [`sort()`](https://rdrr.io/r/base/sort.html),
 [`unique()`](https://rdrr.io/r/base/unique.html) and
-[`head()`](https://rdrr.io/r/utils/head.html). RefManageR's replacement
-functions (`$<-`, `[<-`, `[[<-`) and
-[`merge()`](https://rdrr.io/r/base/merge.html) return a plain
-`BibEntry`.
+[`head()`](https://rdrr.io/r/utils/head.html). `$<-` keeps the class
+too. RefManageR's other replacement functions (`[<-`, `[[<-`, `names<-`)
+return a plain `BibEntry`, and so does
+[`merge()`](https://rdrr.io/r/base/merge.html) when it adds entries.
 
 [`bind_databases()`](https://traitecoevo.github.io/austraits/reference/bind_databases.md),
 [`load_austraits()`](https://traitecoevo.github.io/austraits/reference/load_austraits.md)

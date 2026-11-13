@@ -33,6 +33,7 @@
   : Look up a particular trait term
 
 - [`` `$`( ``*`<traits_build_sources>`*`)`](https://traitecoevo.github.io/austraits/reference/traits_build_sources.md)
+  [`` `$<-`( ``*`<traits_build_sources>`*`)`](https://traitecoevo.github.io/austraits/reference/traits_build_sources.md)
   [`` `[`( ``*`<traits_build_sources>`*`)`](https://traitecoevo.github.io/austraits/reference/traits_build_sources.md)
   [`c(`*`<traits_build_sources>`*`)`](https://traitecoevo.github.io/austraits/reference/traits_build_sources.md)
   :

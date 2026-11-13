@@ -74,6 +74,9 @@ Use <code>names(database$sources)</code> to list the keys.</p>
 <span><span class="va">x</span><span class="op">$</span><span class="va">name</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'traits_build_sources'</span></span>
+<span><span class="va">x</span><span class="op">$</span><span class="va">name</span> <span class="op">&lt;-</span> <span class="va">value</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'traits_build_sources'</span></span>
 <span><span class="va">x</span><span class="op">[</span><span class="va">i</span>, <span class="va">j</span>, <span class="va">...</span>, drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'traits_build_sources'</span></span>
@@ -93,6 +96,13 @@ traits.build database.</p></dd>
 <dd><p>A citation key, or a <code>BibEntry</code> field name.</p></dd>
 
 
+<dt id="arg-value">value<a class="anchor" aria-label="anchor" href="#arg-value"></a></dt>
+<dd><p>For <code>$&lt;-</code>, a <code>BibEntry</code> of length one, with key <code>name</code>, to
+replace the entry with key <code>name</code> or, when <code>name</code> is not a key, the new
+value of field <code>name</code>, as for RefManageR's <code>$&lt;-</code> method for <code>BibEntry</code>.
+Entries can't be removed by assigning <code>NULL</code>.</p></dd>
+
+
 <dt id="arg-i-j-drop">i, j, ..., drop<a class="anchor" aria-label="anchor" href="#arg-i-j-drop"></a></dt>
 <dd><p>Indices, as for RefManageR's <code>[</code> method for <code>BibEntry</code>.</p></dd>
 
@@ -105,8 +115,8 @@ traits.build database.</p></dd>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>For <code>$</code>, the entry with key <code>name</code> as a <code>traits_build_sources</code>
 object of length one or, when <code>name</code> is not a key, the value of field
-<code>name</code> for every entry. For <code>[</code> and <code><a href="https://rdrr.io/r/base/c.html" class="external-link">c()</a></code>, a <code>traits_build_sources</code>
-object.</p>
+<code>name</code> for every entry. For <code>$&lt;-</code>, <code>[</code> and <code><a href="https://rdrr.io/r/base/c.html" class="external-link">c()</a></code>, a
+<code>traits_build_sources</code> object.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -114,14 +124,21 @@ object.</p>
 title of every entry), so <code>sources$Falster_2005</code> returns a list of <code>NULL</code>s,
 one per entry, instead of the reference. With the <code>traits_build_sources</code>
 class, <code>$</code> looks up by key when the name is a key, and otherwise falls back
-to field access, so <code>sources$title</code> and <code>sources$author</code> work as before.</p>
+to field access, so <code>sources$title</code> and <code>sources$author</code> work as before.
+A key that is also a field name (for example a key <code>"title"</code> or <code>"key"</code>)
+is left to field access, so RefManageR's own methods keep working; reach
+that entry with <code>[[</code> instead.</p>
+<p><code>sources$Falster_2005 &lt;- entry</code> replaces that entry, so nested assignment
+such as <code>sources$Falster_2005$title &lt;- "New title"</code> changes just that
+entry's title.</p>
 <p>The class only adds behaviour; everything else is inherited from
 <code>BibEntry</code>. Printing, <code><a href="https://rdrr.io/r/base/format.html" class="external-link">format()</a></code>, <code><a href="https://docs.ropensci.org/RefManageR/reference/WriteBib.html" class="external-link">RefManageR::WriteBib()</a></code> and
 <code><a href="https://docs.ropensci.org/RefManageR/reference/toBiblatex.html" class="external-link">RefManageR::toBiblatex()</a></code> give the same output with or without it.
 <code>[</code>, <code>[[</code> and <code><a href="https://rdrr.io/r/base/c.html" class="external-link">c()</a></code> keep the class (for <code><a href="https://rdrr.io/r/base/c.html" class="external-link">c()</a></code>, when the first argument has
 it), as do the RefManageR methods built on <code>[</code>, such as <code><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort()</a></code>,
-<code><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique()</a></code> and <code><a href="https://rdrr.io/r/utils/head.html" class="external-link">head()</a></code>. RefManageR's replacement functions (<code>$&lt;-</code>, <code>[&lt;-</code>,
-<code>[[&lt;-</code>) and <code><a href="https://rdrr.io/r/base/merge.html" class="external-link">merge()</a></code> return a plain <code>BibEntry</code>.</p>
+<code><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique()</a></code> and <code><a href="https://rdrr.io/r/utils/head.html" class="external-link">head()</a></code>. <code>$&lt;-</code> keeps the class too. RefManageR's other
+replacement functions (<code>[&lt;-</code>, <code>[[&lt;-</code>, <code>names&lt;-</code>) return a plain
+<code>BibEntry</code>, and so does <code><a href="https://rdrr.io/r/base/merge.html" class="external-link">merge()</a></code> when it adds entries.</p>
 <p><code><a href="bind_databases.html">bind_databases()</a></code>, <code><a href="load_austraits.html">load_austraits()</a></code> and <code><a href="extract_data.html">extract_data()</a></code> (and so the
 other <code>extract_*()</code> functions) add the class to the <code>sources</code> they return,
 including for databases built before the class existed. An object carrying
