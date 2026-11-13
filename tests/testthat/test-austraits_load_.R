@@ -1,3 +1,7 @@
+# These tests download AusTraits releases from Zenodo
+skip_on_cran()
+skip_if_offline()
+
 
 versions <- c("3.0.2", "4.2.0", "5.0.0")
 path = "ignore/data/austraits"

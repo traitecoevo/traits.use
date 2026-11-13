@@ -267,3 +267,18 @@ test_that("Extract function works with partial match parameter", {
   expect_equal(Acacia_dealbata_exact$traits %>% dplyr::distinct(taxon_name) %>% nrow(), 1)
 })
 
+
+test_that("extract_data() on contexts honours partial_matches_allowed", {
+  db <- austraits_5.0.0_lite
+  n_rows <- function(...) nrow(extract_data(db, "contexts", "value", ...)$traits)
+  # Partial matching is case-insensitive, as for every other table
+  expect_identical(n_rows("FEMALE"), n_rows("female"))
+  # Exact matching reads brackets literally rather than as a regex group
+  expect_gt(n_rows("dry (July-October)", partial_matches_allowed = FALSE), 0)
+  # Several values are combined, not paired with rows in turn
+  expect_identical(
+    n_rows(c("female", "dry (July-October)"), partial_matches_allowed = FALSE),
+    n_rows("female", partial_matches_allowed = FALSE) +
+      n_rows("dry (July-October)", partial_matches_allowed = FALSE)
+  )
+})

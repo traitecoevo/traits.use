@@ -2,10 +2,10 @@
 #'
 #' @description Function to subset all data associated with a particular trait from a traits.build relational database.
 #' 
-#' @usage extract_trait(database, trait_names, taxon_names)
 #' @param database traits.build database (list object)
 #' @param trait_names character string of trait(s) for which data will be extracted
 #' @param taxon_names optional argument, specifying taxa for which data will be extracted 
+#' @param partial_matches_allowed logical. If `TRUE` (the default), each value is matched as a case-insensitive regular expression, so `"Acacia"` also matches `"Acacia celsa"`; characters with special meaning in regular expressions, such as brackets, then need escaping. If `FALSE`, only exact matches are kept.
 #' @return List of tibbles containing all traits.build data and metadata for the specified trait(s).
 #' @details
 #' `extract_trait` has been developed to extract data for specific traits from databases built using the traits.build workflow. 

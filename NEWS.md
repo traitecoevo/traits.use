@@ -1,6 +1,7 @@
 # traits.use 0.1.0
 
 - First release as `traits.use`, a generic package for loading and wrangling any traits.build database. The code and history come from the `austraits` package (version 3.1.1 and earlier, listed below), which becomes a thin AusTraits-specific layer over `traits.use` (austraits#188).
+- `extract_data()` on the contexts table now honours `partial_matches_allowed`: matching is case-insensitive by default, exact with `FALSE` (so brackets are read literally), and several values are combined. `partial_matches_allowed` is now documented in all `extract_*()` functions.
 - Support databases built with traits.build 2.3, where every observation names the reference it was taken from in `source_id` (the `dataset_id` unless it came from another study) and the methods table's reference columns are `dataset_id_type`, `dataset_id_citation`, `secondary_id` and `secondary_citation` (traitecoevo/traits.build#296). Older databases still work.
 - New function `join_sources()` adds each observation's references to the traits table: `dataset_id_citation`, `source_id_citation` (formatted from `sources[[source_id]]`), `secondary_id` and `secondary_citation`.
 - `flatten_database()` takes its references from `join_sources()`, so the flattened table has those columns in place of the methods table's `source_*` columns.

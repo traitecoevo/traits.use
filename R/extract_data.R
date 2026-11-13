@@ -10,6 +10,7 @@
 #' @param table Table within a traits.build database
 #' @param col Column name within the specified table.
 #' @param col_value Value (of column, from with a table) that is used to subset database. This can be a single value or a vector. It includes partial string matches. 
+#' @param partial_matches_allowed logical. If `TRUE` (the default), each value is matched as a case-insensitive regular expression, so `"Acacia"` also matches `"Acacia celsa"`; characters with special meaning in regular expressions, such as brackets, then need escaping. If `FALSE`, only exact matches are kept.
 #' @importFrom rlang :=
 #' @return subset traits.build database
 #' @export
@@ -160,8 +161,21 @@ extract_data <- function(database, table = NA, col, col_value, partial_matches_a
     # If the context table is queried need to convert the word "contexts" into a vector that indicates which of the 5 context categories have matches
     if (table == "contexts") {
   
-      table_tmp <- database$contexts %>% 
-        dplyr::filter(stringr::str_detect(database$contexts[[col]], col_value)) %>%
+      # Match the same way as the context tables are searched below, so
+      # partial_matches_allowed applies and several values are OR-ed
+      if (partial_matches_allowed == TRUE) {
+        context_rows <- purrr::map(col_value, ~{
+          stringr::str_which(database$contexts[[col]],
+                             pattern = stringr::regex(.x, ignore_case = TRUE))
+        })
+      } else {
+        context_rows <- purrr::map(col_value, ~{
+          which(database$contexts[[col]] == .x)
+        })
+      }
+
+      table_tmp <- database$contexts %>%
+        dplyr::slice(purrr::reduce(context_rows, union, .init = integer())) %>%
         dplyr::distinct(link_id)
       
       table <- as.vector(table_tmp[[1]])
@@ -237,7 +251,7 @@ extract_data <- function(database, table = NA, col, col_value, partial_matches_a
         if (nrow(ret_tmp[["excluded_data"]]) == 0) {
             ret[["excluded_data"]] <- database[["traits"]][0,] %>% 
               dplyr::mutate(error = character()) %>%
-              dplyr::select(error, everything())
+              dplyr::select(dplyr::all_of("error"), tidyselect::everything())
         } else {
             ret[["excluded_data"]] <- ret_tmp[["excluded_data"]] 
         }
