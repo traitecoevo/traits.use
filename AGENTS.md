@@ -5,7 +5,7 @@
 ## Repo-local guidance
 
 - **Code:** `R/` (functions), `tests/` (testthat), `man/` (generated docs), `NAMESPACE`,
-  `data-raw/` and `inst/` hold raw assets (incl. the cheatsheet); `R/sysdata.rda` holds the test fixtures.
+  `data-raw/` and `inst/` hold raw assets (incl. the cheatsheet); `data/austraits_lite.rda` is the exported example database (also the tests' main fixture, aliased as `austraits_5.0.0_lite` in `tests/testthat/helper.R`); `R/sysdata.rda` holds two tiny 3.0.2/4.2.0 fixtures for version checks. Regenerate both with `data-raw/create_data.R`.
 - **Access entry point:** `load_database()` (`R/load_database.R`) loads any traits.build database from its doi
   (Zenodo, Figshare, or a doi resolving directly to an `.rds`).
 - **AusTraits-specific code lives in `austraits`, not here** (decided 2026-11-14, #13): `load_austraits()`,

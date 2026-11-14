@@ -1,0 +1,23 @@
+The R code of traits.use is released under the MIT licence (see LICENSE).
+
+data/austraits_lite.rda (the dataset `austraits_lite`) is a subset of a
+different work, with different copyright holders and licence:
+
+  Title:    AusTraits: a curated plant trait database for the Australian flora
+  Version:  5.0.0
+  DOI:      https://doi.org/10.5281/zenodo.10156222
+  Holders:  the AusTraits contributors, listed in the release and in the
+            `contributors` table of the dataset
+  Licence:  Creative Commons Attribution 4.0 International (CC BY 4.0),
+            https://creativecommons.org/licenses/by/4.0/
+            The `taxa` table, compiled from curated taxon lists such as the
+            Australian Plant Census, is released under CC BY 3.0
+            (https://creativecommons.org/licenses/by/3.0/).
+  Changes:  cut down to 23 of its datasets with traits.use::extract_dataset(),
+            by data-raw/create_data.R in the package's GitHub repository
+            (https://github.com/traitecoevo/traits.use).
+
+Please cite AusTraits as: Falster D, Gallagher R, Wenk EH, et al. (2021)
+AusTraits, a curated plant trait database for the Australian flora.
+Scientific Data 8: 254. https://doi.org/10.1038/s41597-021-01006-6
+and the original studies, listed in the dataset's `sources`.

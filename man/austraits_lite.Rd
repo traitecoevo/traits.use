@@ -9,8 +9,8 @@ A list of class \code{traits.build}, with the tables of a traits.build
 database: \code{traits} (115,733 values of 143 traits for 7,324 taxa),
 \code{locations}, \code{contexts}, \code{methods}, \code{excluded_data}, \code{taxonomic_updates},
 \code{taxa}, \code{contributors}, \code{sources}, \code{definitions}, \code{schema}, \code{metadata}
-and \code{build_info}. AusTraits 5.0.0 predates the \code{identifiers} table and
-the \code{source_id} column, which newer releases add.
+and \code{build_info}. AusTraits 5.0.0 predates the \code{identifiers} table, and
+fills in \code{source_id} for only a few datasets.
 }
 \source{
 AusTraits 5.0.0, \doi{10.5281/zenodo.10156222}, licensed under
@@ -18,7 +18,11 @@ CC BY 4.0 (\url{https://creativecommons.org/licenses/by/4.0/}), cut down to
 23 datasets with \code{\link[=extract_dataset]{extract_dataset()}} (the script is \code{data-raw/create_data.R}
 in the package's GitHub repository). Please cite AusTraits as described
 in Falster et al. (2021) \doi{10.1038/s41597-021-01006-6}, and the
-original studies, listed in \code{sources}.
+original studies, listed in \code{sources} (as in the full release, a few keys
+in \code{source_id} and the \code{methods} table, such as unpublished data, have no
+entry). The \code{taxa} table, compiled from curated taxon lists such as the
+Australian Plant Census, is released under CC BY 3.0, as its description
+in \code{schema} says. See the file \code{COPYRIGHTS} installed with the package.
 }
 \usage{
 austraits_lite

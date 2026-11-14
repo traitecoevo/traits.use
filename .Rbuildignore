@@ -9,6 +9,7 @@
 ^docs$
 ^pkgdown$
 ^ignore$
+^data/austraits$
 ^austraits$
 ^codecov\.yml$
 ^inst/cheatsheet/.*\.ppt$

@@ -122,7 +122,9 @@ get_traits_table <- function(database){
 #' @noRd
 
 clean_NA <- function(x) {
-  ifelse(x == "NA", NA_character_, x)
+  # Not ifelse(), which returns a logical vector when every element is NA
+  x[x %in% "NA"] <- NA_character_
+  x
 }
 
 #' Print version of AusTraits object
