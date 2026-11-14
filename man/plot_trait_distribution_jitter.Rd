@@ -41,8 +41,6 @@ The x-axis is on a log scale when the values are all positive and the
 largest is more than about 13 times the smallest (so the axis, padded by
 20\% each side, spans more than a factor of 20). Values recorded as a bin
 or range are left out.
-
-Replaces \code{\link[=plot_trait_distribution_beeswarm]{plot_trait_distribution_beeswarm()}}, drawing many times faster.
 }
 \examples{
 \dontshow{if (rlang::is_installed(c("ggplot2", "forcats", "scales"))) withAutoprint(\{ # examplesIf}

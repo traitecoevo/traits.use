@@ -5,11 +5,17 @@ test_that("Function doesn't throw error", {
   
   expect_s3_class(austraits_5.0.0_lite %>% plot_trait_distribution_jitter("leaf_mass_per_area", "dataset_id", "Bloomfield_2018"), "ggplot")
 
-  # The beeswarm plot is deprecated: it draws the jitter plot instead
-  lifecycle::expect_deprecated(
-    p <- austraits_5.0.0_lite %>% plot_trait_distribution_beeswarm("leaf_mass_per_area", "dataset_id")
-  )
-  expect_s3_class(p, "ggplot")
+  # The highlight label must draw on the pdf() device R CMD check uses: a
+  # non-ASCII marker gave "conversion failure ... in 'mbcsToSbcs'" (U+25CF on
+  # one R build, U+2022 on another)
+  p <- austraits_5.0.0_lite %>% plot_trait_distribution_jitter("leaf_mass_per_area", "dataset_id", "Bloomfield_2018")
+  pdf_file <- withr::local_tempfile(fileext = ".pdf")
+  grDevices::pdf(pdf_file)
+  withr::defer(grDevices::dev.off())
+  expect_no_warning(print(p))
+  # ...and stays ASCII, which the line above catches only on affected R builds
+  label <- Filter(function(l) inherits(l$geom, "GeomText"), p$layers)[[1]]$aes_params$label
+  expect_true(all(utf8ToInt(label) < 128))
   
   # this function is currently really slow, blocking effective testing
   expect_invisible((austraits_5.0.0_lite %>% extract_trait("wood_density") %>% join_location_coordinates())$trait %>% plot_locations())
@@ -269,7 +275,7 @@ test_that("plot_trait_distribution_jitter highlights several groups and labels w
 
   # The highlighted groups are named in the corner, in the highlight colour
   label <- p$layers[[2]]
-  expect_equal(label$aes_params$label, "\u25CF A, C")
+  expect_equal(label$aes_params$label, "A, C")
   expect_equal(label$aes_params$colour, "deeppink3")
   expect_no_warning(ggplot2::ggplotGrob(p))
 })
