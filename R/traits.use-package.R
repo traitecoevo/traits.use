@@ -18,7 +18,7 @@ if(getRversion() >= "2.15.1")  utils::globalVariables(c(".", "dplyr::n()"))
 NULL
 
 utils::globalVariables(c(
-  "counts", "counts_per_value", "family_order", "prop", "row_counter",
+  "counts", "counts_per_value", "family_order", "n_taxa", "prop", "row_counter",
   "scaled_by_obs", "species_per_family", "total_counts",
   "aus_traits",
   "..density..",

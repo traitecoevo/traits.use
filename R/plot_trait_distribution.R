@@ -297,15 +297,15 @@ plot_trait_distribution_jitter <- function(database,
   }
 
   # Name the highlighted groups in the bottom-right corner, which matters
-  # when hide_ids hides the group labels. A text layer (annotate), not a grid
-  # grob, so that plotly::ggplotly() keeps it. Inf/-Inf anchor it to the
-  # corner whatever the scales.
+  # when hide_ids hides the group labels. Inf/-Inf anchor it to the corner
+  # whatever the scales. plotly::ggplotly() cannot place an Inf position, so
+  # the label shows in static plots only.
   if (length(highlighted) > 0) {
     p <- p +
       ggplot2::annotate(
         "text",
         x = Inf, y = -Inf, hjust = 1.05, vjust = -0.75,
-        label = paste("●", paste(highlighted, collapse = ", ")),
+        label = paste("\u25CF", paste(highlighted, collapse = ", ")),
         colour = highlight_colour, size = 4
       )
   }
