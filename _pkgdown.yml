@@ -43,7 +43,7 @@ reference:
   - bind_databases
   
 - title: Quick data visualisations
-  desc: Plot site or variance distributions
+  desc: Plot trait distributions and where the data were collected
 - contents:
   - starts_with("plot")
   
