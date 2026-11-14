@@ -59,9 +59,11 @@ plot_trait_distribution <- function(database, trait_name, ...) {
 #'   trait, plots the proportion of each family's taxa with each value of the
 #'   trait. Each taxon counts once: within a dataset, a taxon's distinct values
 #'   share its weight equally (a value cell such as `"simple compound"` counts
-#'   as both values), and its datasets are then combined. Values are ordered
-#'   from most to least common in the families shown. Ties between families at
-#'   the `family_count` cut-off are broken alphabetically.
+#'   as both values), and its datasets are then combined. Point colour shows
+#'   that proportion, and point size the number of the family's taxa with any
+#'   record of the value. Values are ordered from most to least common in the
+#'   families shown. Ties between families at the `family_count` cut-off are
+#'   broken alphabetically.
 #'
 #' @inheritParams plot_trait_distribution
 #' @param family_count Number of families to show: those with the most taxa
@@ -112,7 +114,14 @@ plot_categorical_trait_distribution <- function(database, trait_name, family_cou
   prop_by_family <- prop_by_species %>%
     dplyr::filter(family %in% most_common_families$family) %>%
     dplyr::group_by(family, value) %>%
-    dplyr::summarise(counts_per_value = sum(prop), .groups = "drop") %>%
+    dplyr::summarise(
+      counts_per_value = sum(prop),
+      # Taxa with any record of the value, which sizes the points. Not
+      # counts_per_value: a taxon whose records disagree is split across its
+      # values, so that fractional total under-counts taxa
+      n_taxa = dplyr::n_distinct(taxon_name),
+      .groups = "drop"
+    ) %>%
     dplyr::group_by(family) %>%
     dplyr::mutate(prop = counts_per_value / sum(counts_per_value)) %>%
     dplyr::ungroup()
@@ -143,7 +152,7 @@ plot_categorical_trait_distribution <- function(database, trait_name, family_cou
     dplyr::filter(!is.na(family), prop > 0) %>%
     dplyr::arrange(family)
 
-  ggplot2::ggplot(prop_by_family, ggplot2::aes(y = family, x = value, fill = prop, size = counts_per_value)) +
+  ggplot2::ggplot(prop_by_family, ggplot2::aes(y = family, x = value, fill = prop, size = n_taxa)) +
     ggplot2::geom_jitter(shape = 21, width = 0.15, height = 0) +
     ggplot2::scale_size_continuous() +
     ggplot2::scale_fill_viridis_c(option = "D") +
@@ -166,7 +175,9 @@ plot_categorical_trait_distribution <- function(database, trait_name, family_cou
 #' @title Plot the distribution of a numeric trait by group
 #' @description Plots the values of a numeric trait as points, one row per
 #'   group (e.g. dataset or family), with groups ordered by their mean value.
-#'   The shape of each point shows whether it is a minimum, mean or maximum.
+#'   The shape of each point shows whether it is a minimum, mean, maximum or
+#'   raw value. Highlighted groups are drawn in pink and named in the
+#'   bottom-right corner, so they can be found with `hide_ids = TRUE`.
 #'   The x-axis is on a log scale when the values are all positive and the
 #'   largest is more than about 13 times the smallest (so the axis, padded by
 #'   20% each side, spans more than a factor of 20). Values recorded as a bin
@@ -178,7 +189,7 @@ plot_categorical_trait_distribution <- function(database, trait_name, family_cou
 #' @param y_axis_category Column to group values by, e.g. `"dataset_id"` or
 #'   `"family"`. `family` and `genus` are added from the taxa table when
 #'   `database` is a whole database.
-#' @param highlight One or more groups to highlight in a different colour
+#' @param highlight One or more groups to highlight, e.g. a `dataset_id`
 #' @param hide_ids Hide the group labels on the y-axis?
 #'
 #' @return A ggplot object, or a blank plot saying there are no numeric values
@@ -213,10 +224,11 @@ plot_trait_distribution_jitter <- function(database,
     return(no_data_plot(paste0("No numeric values of ", trait_name, " to plot")))
   }
 
-  my_shapes <- c("Minimum" = 60, "Mean" = 16, "Maximum" = 62, "Unknown" = 18)
+  my_shapes <- c("Minimum" = 60, "Mean" = 16, "Maximum" = 62, "Raw" = 1, "Unknown" = 18)
 
   as_shape <- function(value_type) {
     p <- rep("Unknown", length(value_type))
+    p[grepl("raw", value_type)] <- "Raw"
     p[grepl("mean", value_type)] <- "Mean"
     p[grepl("min", value_type)] <- "Minimum"
     p[grepl("max", value_type)] <- "Maximum"
@@ -239,8 +251,9 @@ plot_trait_distribution_jitter <- function(database,
   # Alternate the colours of neighbouring groups
   data$colour <- ifelse(data$Group %in% levels(data$Group)[seq(1, n_group, by = 2)], "a", "b")
 
-  if (!all(is.na(highlight)) && any(highlight %in% data$Group)) {
-    data <- dplyr::mutate(data, colour = ifelse(Group %in% highlight, "c", colour))
+  highlighted <- intersect(levels(data$Group), highlight)
+  if (length(highlighted) > 0) {
+    data <- dplyr::mutate(data, colour = ifelse(Group %in% highlighted, "c", colour))
   }
 
   # Pad the limits outwards by 20%, whatever the sign of the values
@@ -251,6 +264,7 @@ plot_trait_distribution_jitter <- function(database,
   )
 
   y.text <- ifelse(n_group > 20, 0.75, 1)
+  highlight_colour <- "deeppink3"
 
   p <-
     ggplot2::ggplot(data, ggplot2::aes(
@@ -262,9 +276,11 @@ plot_trait_distribution_jitter <- function(database,
     )) +
     ggplot2::geom_jitter(width = 0) +
     ggplot2::ylab(paste("By", y_axis_category)) +
-    # Shapes for minimum, mean, maximum, unknown
-    ggplot2::scale_shape_manual(values = my_shapes, name = "Value Type", drop = FALSE) +
-    ggplot2::scale_color_manual(values = c("a" = "#0072B2", "b" = "#E69F00", "c" = "#D55E00")) +
+    # Shapes for minimum, mean, maximum, raw, unknown. The legend lists only
+    # those present: ggplot2 draws unused levels as keys with no symbol
+    ggplot2::scale_shape_manual(values = my_shapes, name = "Value Type") +
+    # The highlight is pink, which stands out from both alternating colours
+    ggplot2::scale_color_manual(values = c("a" = "#0072B2", "b" = "#E69F00", "c" = highlight_colour)) +
     ggplot2::theme_bw() +
     ggplot2::theme(
       legend.position = "right",
@@ -278,6 +294,20 @@ plot_trait_distribution_jitter <- function(database,
 
   if (hide_ids) {
     p <- p + ggplot2::theme(axis.text.y = ggplot2::element_blank())
+  }
+
+  # Name the highlighted groups in the bottom-right corner, which matters
+  # when hide_ids hides the group labels. A text layer (annotate), not a grid
+  # grob, so that plotly::ggplotly() keeps it. Inf/-Inf anchor it to the
+  # corner whatever the scales.
+  if (length(highlighted) > 0) {
+    p <- p +
+      ggplot2::annotate(
+        "text",
+        x = Inf, y = -Inf, hjust = 1.05, vjust = -0.75,
+        label = paste("●", paste(highlighted, collapse = ", ")),
+        colour = highlight_colour, size = 4
+      )
   }
 
   x_label <- if (is.na(data$unit[1])) trait_name else paste0(trait_name, " (", data$unit[1], ")")

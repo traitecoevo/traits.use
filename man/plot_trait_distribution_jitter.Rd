@@ -22,7 +22,7 @@ plot_trait_distribution_jitter(
 \code{"family"}. \code{family} and \code{genus} are added from the taxa table when
 \code{database} is a whole database.}
 
-\item{highlight}{One or more groups to highlight in a different colour}
+\item{highlight}{One or more groups to highlight, e.g. a \code{dataset_id}}
 
 \item{hide_ids}{Hide the group labels on the y-axis?}
 }
@@ -34,7 +34,9 @@ to plot. Each point also carries a \code{text} aesthetic
 \description{
 Plots the values of a numeric trait as points, one row per
 group (e.g. dataset or family), with groups ordered by their mean value.
-The shape of each point shows whether it is a minimum, mean or maximum.
+The shape of each point shows whether it is a minimum, mean, maximum or
+raw value. Highlighted groups are drawn in pink and named in the
+bottom-right corner, so they can be found with \code{hide_ids = TRUE}.
 The x-axis is on a log scale when the values are all positive and the
 largest is more than about 13 times the smallest (so the axis, padded by
 20\% each side, spans more than a factor of 20). Values recorded as a bin
