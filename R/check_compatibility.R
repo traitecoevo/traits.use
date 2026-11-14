@@ -4,7 +4,7 @@
 #' @param database traits.build database (list object)
 #' @param single_table_allowed logical for when the input might be a single table instead of a complete database; defaults to FALSE
 #'
-#' @return logical (T/F) output and messaging for uncompatible versions
+#' @return logical (T/F) output and messaging for incompatible versions
 #' @keywords internal
 #'
 #' @examples

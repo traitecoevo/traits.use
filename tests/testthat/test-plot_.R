@@ -106,3 +106,19 @@ test_that("Function throws error", {
 
 # Tear down code
 unlink("Rplots.pdf")
+test_that("plotting functions say which suggested packages they need", {
+  # Calls go through rlang::check_installed(), which stops when one is missing
+  needed <- NULL
+  local_mocked_bindings(
+    check_installed = function(pkg, reason = NULL, ...) {
+      needed <<- c(needed, pkg)
+      rlang::abort(paste("needs", paste(pkg, collapse = ", ")))
+    },
+    .package = "rlang"
+  )
+  expect_error(plot_locations(austraits_5.0.0_lite), "needs ggplot2, ggpointdensity, viridis")
+  expect_error(
+    plot_trait_distribution_beeswarm(austraits_5.0.0_lite, "leaf_mass_per_area", "dataset_id"),
+    "needs ggplot2, ggbeeswarm"
+  )
+})

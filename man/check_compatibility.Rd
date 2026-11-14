@@ -12,7 +12,7 @@ check_compatibility(database, single_table_allowed = FALSE)
 \item{single_table_allowed}{logical for when the input might be a single table instead of a complete database; defaults to FALSE}
 }
 \value{
-logical (T/F) output and messaging for uncompatible versions
+logical (T/F) output and messaging for incompatible versions
 }
 \description{
 Function to check whether the data object has been compiled by the traits.build workflow and

@@ -33,6 +33,8 @@
 
 plot_locations <- function(database, feature="trait_name", ..., basemap = NULL){
 
+  rlang::check_installed(c("ggplot2", "ggpointdensity", "viridis"), reason = "to use `plot_locations()`")
+
   if(identical(basemap, "australia")){
     cli::cli_abort(c(
       "The map of Australia is now in the {.pkg austraits} package.",

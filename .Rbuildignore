@@ -21,3 +21,4 @@
 ^tests/testthat/_problems$
 testthat-problems\.rds$
 ^tests/testthat/ignore$
+^cran-comments\.md$
