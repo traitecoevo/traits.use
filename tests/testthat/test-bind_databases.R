@@ -64,3 +64,19 @@ test_that("`extract_data` keeps the references the extracted observations cite",
   expect_true("Apgaua_2017" %in% names(a$sources))
   expect_false("Choat_2006" %in% names(a$sources))
 })
+
+test_that("bind_databases() orders sources and definitions the same in any locale", {
+  # A locale whose collation differs from C, e.g. "bark_B_..." sorts before
+  # "bark_C_..." in C but after "bark_ash_..." elsewhere
+  withr::local_locale(c(LC_COLLATE = "en_US.UTF-8"))
+  skip_if_not(Sys.getlocale("LC_COLLATE") == "en_US.UTF-8", "en_US.UTF-8 locale not available")
+  skip_if(identical(sort(c("bark_B", "bark_ash")), sort(c("bark_B", "bark_ash"), method = "radix")),
+          "this locale collates like C")
+
+  a <- extract_dataset(austraits_5.0.0_lite, c("Falster_2005_1", "Westoby_2014"))
+  b <- extract_dataset(austraits_5.0.0_lite, c("Falster_2003", "Crous_2013", "Kew_2019_2"))
+  bound <- suppressWarnings(bind_databases(a, b))
+
+  expect_identical(names(bound$definitions), sort(names(bound$definitions), method = "radix"))
+  expect_identical(names(bound$sources), sort(names(bound$sources), method = "radix"))
+})

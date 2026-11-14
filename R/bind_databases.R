@@ -37,7 +37,9 @@ bind_databases <- function(..., databases = list(...)) {
   # Bind sources and remove duplicates
   sources <- databases %>% lapply("[[", "sources")
   check_conflicting_sources(sources, databases)
-  keys <- sources %>% lapply(names) %>% unlist() %>% unique() %>% sort()
+  # Sorted in the C locale (radix), as dplyr::arrange() does, so the order
+  # doesn't depend on the machine that built the database (#6)
+  keys <- sources %>% lapply(names) %>% unlist() %>% unique() %>% sort(method = "radix")
   sources <- sources %>% purrr::reduce(c)
   sources <- sources[keys]
   
@@ -48,7 +50,7 @@ bind_databases <- function(..., databases = list(...)) {
   
   definitions <- databases %>% lapply("[[", "definitions") %>% purrr::reduce(c)
   definitions <- definitions[!duplicated(names(definitions))]
-  definitions <- definitions[sort(names(definitions))]
+  definitions <- definitions[sort(names(definitions), method = "radix")]
   
   # Drop null datasets
   databases[sapply(databases, is.null)] <- NULL
