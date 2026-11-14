@@ -4,15 +4,16 @@
 \alias{load_database}
 \title{Load any traits.build database into R console}
 \usage{
-load_database(doi = NULL, path, update = TRUE)
+load_database(doi = NULL, path = NULL, update = TRUE)
 }
 \arguments{
 \item{doi}{character string - doi of the database, e.g. "10.5281/zenodo.11188867".
 A Zenodo concept doi will load the latest version of that record.}
 
-\item{path}{folder the database is downloaded to and cached in, e.g.
-\code{"data/traits.build"} in a project, or \code{tempdir()} for one session. There
-is no default, so nothing is written unless you say where.}
+\item{path}{folder the database is downloaded to and cached in. If \code{NULL}
+(the default), the folder shared by all your projects, given by
+\code{\link[=database_cache_dir]{database_cache_dir()}}. Give a folder such as \code{"data/austraits"} to keep a
+copy with a project instead, or \code{tempdir()} for one session.}
 
 \item{update}{if TRUE, the record's metadata .json will be re-downloaded}
 }
@@ -21,17 +22,26 @@ a large list containing traits.build data tables
 }
 \description{
 Loads a traits.build formatted database, given its doi. The doi is resolved to its repository, the
-relational database \code{.rds} file is downloaded to \code{path} (if not already
-there, or if the copy there does not match the record's md5 checksum) and
-then loaded. Zenodo and Figshare records are supported, as are dois that
-resolve directly to an \code{.rds} file.
+relational database \code{.rds} file is downloaded (if there is no copy already,
+or if the copy does not match the record's md5 checksum) and then loaded.
+Zenodo and Figshare records are supported, as are dois that resolve directly
+to an \code{.rds} file.
+
+By default the download is kept in a folder shared by all your projects
+(see \code{\link[=database_cache_dir]{database_cache_dir()}}), so each release is downloaded once per
+computer. Use \code{\link[=list_cached_databases]{list_cached_databases()}} and \code{\link[=clear_database_cache]{clear_database_cache()}} to see
+and delete what is there.
 }
 \examples{
 \dontrun{
+# Downloaded the first time, then loaded from the cache
+austraits <- load_database(doi = "10.5281/zenodo.11188867")
+
+# Keeping a copy with a project instead
 austraits <- load_database(doi = "10.5281/zenodo.11188867", path = "data/austraits")
 }
 }
 \seealso{
-\code{austraits::load_austraits()}, which loads a release of
-AusTraits by version number
+\code{\link[=database_cache_dir]{database_cache_dir()}}; \code{austraits::load_austraits()}, which loads
+a release of AusTraits by version number
 }

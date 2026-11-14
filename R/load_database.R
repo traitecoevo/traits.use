@@ -1,37 +1,52 @@
 #' Load any traits.build database into R console
 #'
 #' @description Loads a traits.build formatted database, given its doi. The doi is resolved to its repository, the
-#' relational database `.rds` file is downloaded to `path` (if not already
-#' there, or if the copy there does not match the record's md5 checksum) and
-#' then loaded. Zenodo and Figshare records are supported, as are dois that
-#' resolve directly to an `.rds` file.
+#' relational database `.rds` file is downloaded (if there is no copy already,
+#' or if the copy does not match the record's md5 checksum) and then loaded.
+#' Zenodo and Figshare records are supported, as are dois that resolve directly
+#' to an `.rds` file.
+#'
+#' By default the download is kept in a folder shared by all your projects
+#' (see [database_cache_dir()]), so each release is downloaded once per
+#' computer. Use [list_cached_databases()] and [clear_database_cache()] to see
+#' and delete what is there.
 #'
 #' @param doi character string - doi of the database, e.g. "10.5281/zenodo.11188867".
 #' A Zenodo concept doi will load the latest version of that record.
-#' @param path folder the database is downloaded to and cached in, e.g.
-#'   `"data/traits.build"` in a project, or `tempdir()` for one session. There
-#'   is no default, so nothing is written unless you say where.
+#' @param path folder the database is downloaded to and cached in. If `NULL`
+#'   (the default), the folder shared by all your projects, given by
+#'   [database_cache_dir()]. Give a folder such as `"data/austraits"` to keep a
+#'   copy with a project instead, or `tempdir()` for one session.
 #' @param update if TRUE, the record's metadata .json will be re-downloaded
 #'
 #' @return a large list containing traits.build data tables
 #' @export
-#' @seealso `austraits::load_austraits()`, which loads a release of
-#'   AusTraits by version number
+#' @seealso [database_cache_dir()]; `austraits::load_austraits()`, which loads
+#'   a release of AusTraits by version number
 #'
 #' @examples
 #' \dontrun{
+#' # Downloaded the first time, then loaded from the cache
+#' austraits <- load_database(doi = "10.5281/zenodo.11188867")
+#'
+#' # Keeping a copy with a project instead
 #' austraits <- load_database(doi = "10.5281/zenodo.11188867", path = "data/austraits")
 #' }
 
-load_database <- function(doi = NULL, path, update = TRUE){
+load_database <- function(doi = NULL, path = NULL, update = TRUE){
   # Is doi supplied?
   if(is.null(doi)){
     stop("Please supply a doi!")
   }
 
-  # Is path supplied?
-  if(missing(path) || is.null(path)){
-    stop("File path must be supplied!")
+  # No path means the cache folder shared by all projects
+  use_cache <- is.null(path)
+  if(use_cache){
+    path <- database_cache_dir()
+  }
+
+  if(!is.character(path) || length(path) != 1 || is.na(path) || !nzchar(path)){
+    rlang::abort("`path` must be a single folder path, or NULL for the cache folder.")
   }
 
   # Remove any url prefix from doi
@@ -93,6 +108,14 @@ load_database <- function(doi = NULL, path, update = TRUE){
 
     if(! file_matches_md5(file_nm, md5)){
       rlang::abort(paste0("Downloaded '", file_nm, "' does not match the md5 checksum for doi '", doi, "'"))
+    }
+
+    # Old releases stay in the cache until deleted, so say how big it is
+    if(use_cache){
+      cached <- list_cached_databases(path)
+      message("The cache in '", path, "' now holds ", nrow(cached), " database(s), ",
+              round(sum(cached$size_mb), 1), " MB. ",
+              "See list_cached_databases() and clear_database_cache() to manage it.")
     }
   }
 
