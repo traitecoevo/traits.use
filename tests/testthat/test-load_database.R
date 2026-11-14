@@ -245,11 +245,12 @@ test_that("Only the databases load_database() can download count, not other file
   # A record listing the relational and flattened .rds (both downloadable
   # with load_database()), an extra .rds it never downloads, and a .zip
   record <- list(doi = "10.5281/zenodo.7", source = "zenodo", version = "7",
-                 files = data.frame(key = c("db-7.rds", "db-7-flattened.rds", "db-7-flattened-2.rds", "db-7.zip"),
+                 files = data.frame(key = c("db-7.rds", "db-7-flattened.rds", "db-7-v2-flattened.rds", "db-7.zip"),
                                     url = "file:///nowhere", md5 = NA))
   jsonlite::write_json(record, file.path(path, "10.5281_zenodo.7.json"))
-  # Two flattened files, so neither is the one load_database() would pick
-  for (f in c("db-7.rds", "db-7-flattened.rds", "db-7-flattened-2.rds", "db-7.zip")) saveRDS(1, file.path(path, f))
+  # All present; with two flattened files, neither is the one
+  # load_database() would pick
+  for (f in c("db-7.rds", "db-7-flattened.rds", "db-7-v2-flattened.rds", "db-7.zip")) saveRDS(1, file.path(path, f))
   # Files named like a record that load_database() did not write
   writeLines("[1, 2]", file.path(path, "10.1000_array.json"))
   writeLines("not json", file.path(path, "10.1000_broken.json"))
@@ -260,16 +261,16 @@ test_that("Only the databases load_database() can download count, not other file
 
   expect_identical(list_cached_databases(path)$file, "db-7.rds")
   suppressMessages(clear_database_cache(path = path, ask = FALSE))
-  expect_setequal(list.files(path), c("db-7-flattened.rds", "db-7-flattened-2.rds", "db-7.zip",
+  expect_setequal(list.files(path), c("db-7-flattened.rds", "db-7-v2-flattened.rds", "db-7.zip",
                                       "10.1000_array.json", "10.1000_broken.json"))
 
   # With one flattened .rds, it is claimed too
-  record$files <- record$files[record$files$key != "db-7-flattened-2.rds", ]
+  record$files <- record$files[record$files$key != "db-7-v2-flattened.rds", ]
   jsonlite::write_json(record, file.path(path, "10.5281_zenodo.7.json"))
   saveRDS(1, file.path(path, "db-7.rds"))
   expect_setequal(list_cached_databases(path)$file, c("db-7.rds", "db-7-flattened.rds"))
   suppressMessages(clear_database_cache(path = path, ask = FALSE))
-  expect_setequal(list.files(path), c("db-7-flattened-2.rds", "db-7.zip", "10.1000_array.json", "10.1000_broken.json"))
+  expect_setequal(list.files(path), c("db-7-v2-flattened.rds", "db-7.zip", "10.1000_array.json", "10.1000_broken.json"))
 })
 
 test_that("flattened = TRUE loads the flattened table from the same record", {
@@ -301,6 +302,25 @@ test_that("flattened = TRUE loads the flattened table from the same record", {
   release$files <- release$files[1, ]
   expect_error(suppressMessages(load_database(doi = "10.5281/zenodo.7", flattened = TRUE)),
                "No flattened .rds file found")
+
+  # Two flattened files; case doesn't matter, and "flattened" must end the name
+  release$files <- rbind(release$files,
+    data.frame(key = c("A-Flattened.RDS", "B-FLATTENED.rds", "notflattened.rds"), url = "file:///nowhere", md5 = NA))
+  expect_error(suppressMessages(load_database(doi = "10.5281/zenodo.7", flattened = TRUE)),
+               "More than one flattened .rds file found.*A-Flattened.RDS, B-FLATTENED.rds")
+  release$files <- release$files[1, ]
+
+  # A table without the columns of a traits table
+  odd <- file.path(src, "7", "ODD-flattened.rds")
+  saveRDS(data.frame(dataset_id = "A_2001", value = "1"), odd)
+  release$files <- rbind(release$files,
+    data.frame(key = "ODD-flattened.rds", url = file_url(odd), md5 = unname(tools::md5sum(odd))))
+  expect_error(suppressMessages(load_database(doi = "10.5281/zenodo.7", flattened = TRUE)),
+               "not a flattened traits.build database")
+  release$files <- release$files[1, ]
+
+  expect_error(load_database(doi = "10.5281/zenodo.7", flattened = "TRUE"), "TRUE or FALSE")
+  expect_error(load_database(doi = "10.5281/zenodo.7", flattened = NA), "TRUE or FALSE")
 
   # A flattened file that is not a table
   bad <- file.path(src, "7", "BAD-flattened.rds")

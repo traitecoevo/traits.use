@@ -21,8 +21,12 @@ concept doi loads the version last fetched into \code{path}, which for the
 cache folder may have been by another project.}
 
 \item{flattened}{if \code{TRUE}, load the flattened version of the database
-instead: one table with the other tables joined to the traits table, as
-made by \code{\link[=flatten_database]{flatten_database()}}. Releases of AusTraits from 7.0.0 include it.
+instead: one table with the other tables joined to the traits table,
+made with \code{\link[=flatten_database]{flatten_database()}} when the release was built. Releases of
+AusTraits from 7.0.0 include it. Its reference columns follow the
+\code{flatten_database()} of that time, so may differ from what
+\code{flatten_database()} makes now (e.g. AusTraits 7.0.0 has
+\code{source_primary_citation}, not \code{dataset_id_citation}).
 It is several times larger than the relational database (AusTraits 7.0.0:
 a 77 MB download, about 1 GB once loaded).}
 }
@@ -32,7 +36,8 @@ a large list containing traits.build data tables, or with
 }
 \description{
 Loads a traits.build formatted database, given its doi. The doi is resolved to its repository, the
-relational database \code{.rds} file is downloaded (if there is no copy already,
+relational database \code{.rds} file (or with \code{flattened = TRUE}, the flattened
+one) is downloaded (if there is no copy already,
 or if the copy does not match the record's md5 checksum) and then loaded.
 Zenodo and Figshare records are supported, as are dois that resolve directly
 to an \code{.rds} file.
