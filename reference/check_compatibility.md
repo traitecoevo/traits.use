@@ -28,11 +28,3 @@ logical (T/F) output and messaging for incompatible versions
 ## Author
 
 Elizabeth Wenk - e.wenk@unsw.edu.au
-
-## Examples
-
-``` r
-if (FALSE) { # \dontrun{
-check_compatibility(database)
-} # }
-```

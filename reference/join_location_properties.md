@@ -55,7 +55,21 @@ Note to AusTraits users:
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-(database %>% join_location_properties(format = "single_column_pretty", vars = "all"))$traits
-} # }
+(austraits_lite %>% extract_dataset("Falster_2003") %>%
+  join_location_properties(format = "single_column_pretty", vars = "all"))$traits %>%
+  dplyr::select(trait_name, value, location_name, location_properties)
+#> # A tibble: 114 × 4
+#>    trait_name             value  location_name               location_properties
+#>    <chr>                  <chr>  <chr>                       <chr>              
+#>  1 leaf_area              142    Ku-ring-gai Chase National… description==fire-…
+#>  2 leaf_inclination_angle 57     Ku-ring-gai Chase National… description==fire-…
+#>  3 leaf_compoundness      simple NA                          NA                 
+#>  4 leaf_area              319    Ku-ring-gai Chase National… description==fire-…
+#>  5 leaf_inclination_angle 66.1   Ku-ring-gai Chase National… description==fire-…
+#>  6 leaf_compoundness      simple NA                          NA                 
+#>  7 leaf_area              562    Ku-ring-gai Chase National… description==fire-…
+#>  8 leaf_inclination_angle 71.7   Ku-ring-gai Chase National… description==fire-…
+#>  9 leaf_compoundness      simple NA                          NA                 
+#> 10 leaf_area              1590   Ku-ring-gai Chase National… description==fire-…
+#> # ℹ 104 more rows
 ```

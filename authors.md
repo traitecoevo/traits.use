@@ -11,6 +11,12 @@
 
 - **Dony Indiarto**. Author. [](https://orcid.org/0000-0001-9546-8201)
 
+- **Trait Ecology and Evolution**. Copyright holder.  
+  copyright holder of the code, see LICENSE
+
+- **AusTraits contributors**. Copyright holder.  
+  AusTraits data in austraits_lite and the test data, see COPYRIGHTS
+
 ## Citation
 
 Source:

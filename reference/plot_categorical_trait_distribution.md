@@ -38,7 +38,5 @@ A ggplot object, or a blank plot saying there are no values to plot
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-austraits %>% plot_categorical_trait_distribution("leaf_compoundness", family_count = 20)
-} # }
+austraits_lite %>% plot_categorical_trait_distribution("leaf_compoundness", family_count = 20)
 ```

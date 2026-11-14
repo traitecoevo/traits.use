@@ -77,13 +77,50 @@ Learn more at:
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="va">austraits_5.0.0_lite</span><span class="op">$</span><span class="va">traits</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">dataset_id</span> <span class="op">==</span> <span class="st">"Falster_2003"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">data</span> <span class="co">#long format </span></span></span>
-<span class="r-in"><span><span class="va">traits_wide</span> <span class="op">&lt;-</span> <span class="fu">trait_pivot_wider</span><span class="op">(</span><span class="va">data</span><span class="op">)</span> </span></span>
-<span class="r-in"><span><span class="va">traits_wide</span> <span class="co">#wide format</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="va">austraits_lite</span><span class="op">$</span><span class="va">traits</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">dataset_id</span> <span class="op">==</span> <span class="st">"Falster_2003"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">data</span> <span class="co"># long format</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 114 × 26</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    dataset_id   taxon_name     observation_id trait_name value unit  entity_type</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> Falster_2003 Acacia florib… 01             leaf_area  142   mm2   population </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> Falster_2003 Acacia florib… 01             leaf_incl… 57    deg   population </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> Falster_2003 Acacia florib… 02             leaf_comp… simp… <span style="color: #BB0000;">NA</span>    species    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> Falster_2003 Acacia myrtif… 03             leaf_area  319   mm2   population </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> Falster_2003 Acacia myrtif… 03             leaf_incl… 66.1  deg   population </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> Falster_2003 Acacia myrtif… 04             leaf_comp… simp… <span style="color: #BB0000;">NA</span>    species    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> Falster_2003 Acacia suaveo… 05             leaf_area  562   mm2   population </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> Falster_2003 Acacia suaveo… 05             leaf_incl… 71.7  deg   population </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> Falster_2003 Acacia suaveo… 06             leaf_comp… simp… <span style="color: #BB0000;">NA</span>    species    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> Falster_2003 Angophora his… 07             leaf_area  1590  mm2   population </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 104 more rows</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 19 more variables: value_type &lt;chr&gt;, basis_of_value &lt;chr&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   replicates &lt;chr&gt;, basis_of_record &lt;chr&gt;, life_stage &lt;chr&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   population_id &lt;chr&gt;, individual_id &lt;chr&gt;, repeat_measurements_id &lt;chr&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   temporal_context_id &lt;chr&gt;, source_id &lt;chr&gt;, location_id &lt;chr&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   entity_context_id &lt;chr&gt;, plot_context_id &lt;chr&gt;, treatment_context_id &lt;chr&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   collection_date &lt;chr&gt;, measurement_remarks &lt;chr&gt;, method_id &lt;chr&gt;, …</span></span>
+<span class="r-in"><span><span class="va">traits_wide</span> <span class="op">&lt;-</span> <span class="fu">trait_pivot_wider</span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">traits_wide</span> <span class="co"># wide format</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 76 × 22</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    dataset_id   taxon_name observation_id entity_type basis_of_record life_stage</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> Falster_2003 Acacia fl… 01             population  field           adult     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> Falster_2003 Acacia fl… 02             species     field           adult     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> Falster_2003 Acacia my… 03             population  field           adult     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> Falster_2003 Acacia my… 04             species     field           adult     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> Falster_2003 Acacia su… 05             population  field           adult     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> Falster_2003 Acacia su… 06             species     field           adult     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> Falster_2003 Angophora… 07             population  field           adult     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> Falster_2003 Angophora… 08             species     field           adult     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> Falster_2003 Astrotric… 09             population  field           adult     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> Falster_2003 Astrotric… 10             species     field           adult     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 66 more rows</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 16 more variables: population_id &lt;chr&gt;, individual_id &lt;chr&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   repeat_measurements_id &lt;chr&gt;, temporal_context_id &lt;chr&gt;, source_id &lt;chr&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   location_id &lt;chr&gt;, entity_context_id &lt;chr&gt;, plot_context_id &lt;chr&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   treatment_context_id &lt;chr&gt;, collection_date &lt;chr&gt;, method_id &lt;chr&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   method_context_id &lt;chr&gt;, original_name &lt;chr&gt;, leaf_area &lt;chr&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   leaf_inclination_angle &lt;chr&gt;, leaf_compoundness &lt;chr&gt;</span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

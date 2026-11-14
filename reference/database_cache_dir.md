@@ -14,8 +14,9 @@ session that loads it.
 - `clear_database_cache()` deletes some or all of them, e.g. those not
   used for six months with `older_than = 180`.
 
-A release of AusTraits is around 100 MB or more, and each new release is
-usually kept beside the old ones, so delete the ones you no longer use.
+A release of AusTraits is about 20 MB (its flattened table several times
+that), and each new release is usually kept beside the old ones, so
+delete the ones you no longer use.
 
 The folder is, in order of preference:
 
@@ -96,8 +97,6 @@ list_cached_databases()
 #> # A tibble: 0 × 3
 #> # ℹ 3 variables: file <chr>, size_mb <dbl>, last_used <dttm>
 
-# Delete the cached databases not used for six months
-if (FALSE) { # \dontrun{
-clear_database_cache(older_than = 180)
-} # }
+# Delete the cached databases not used for six months, with
+# clear_database_cache(older_than = 180)
 ```

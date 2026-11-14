@@ -64,7 +64,5 @@ Daniel Falster - daniel.falster@unsw.edu.au
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-austraits %>% plot_trait_distribution_jitter("wood_density", "dataset_id", "Westoby_2014")
-} # }
+austraits_lite %>% plot_trait_distribution_jitter("wood_density", "dataset_id", "Westoby_2014")
 ```

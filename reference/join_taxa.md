@@ -48,8 +48,21 @@ Note to AusTraits users:
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-#Append taxonomic details
-(database %>% join_taxa)$traits
-} # }
+# Append taxonomic details
+(austraits_lite %>% extract_dataset("Falster_2003") %>% join_taxa())$traits %>%
+  dplyr::select(taxon_name, trait_name, value, family, genus, taxon_rank)
+#> # A tibble: 114 × 6
+#>    taxon_name        trait_name             value  family    genus    taxon_rank
+#>    <chr>             <chr>                  <chr>  <chr>     <chr>    <chr>     
+#>  1 Acacia floribunda leaf_area              142    Fabaceae  Acacia   species   
+#>  2 Acacia floribunda leaf_inclination_angle 57     Fabaceae  Acacia   species   
+#>  3 Acacia floribunda leaf_compoundness      simple Fabaceae  Acacia   species   
+#>  4 Acacia myrtifolia leaf_area              319    Fabaceae  Acacia   species   
+#>  5 Acacia myrtifolia leaf_inclination_angle 66.1   Fabaceae  Acacia   species   
+#>  6 Acacia myrtifolia leaf_compoundness      simple Fabaceae  Acacia   species   
+#>  7 Acacia suaveolens leaf_area              562    Fabaceae  Acacia   species   
+#>  8 Acacia suaveolens leaf_inclination_angle 71.7   Fabaceae  Acacia   species   
+#>  9 Acacia suaveolens leaf_compoundness      simple Fabaceae  Acacia   species   
+#> 10 Angophora hispida leaf_area              1590   Myrtaceae Angopho… species   
+#> # ℹ 104 more rows
 ```

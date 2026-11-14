@@ -79,9 +79,23 @@ Learn more at:
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="op">(</span><span class="va">database</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> <span class="fu">join_location_properties</span><span class="op">(</span>format <span class="op">=</span> <span class="st">"single_column_pretty"</span>, vars <span class="op">=</span> <span class="st">"all"</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="va">traits</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="op">(</span><span class="va">austraits_lite</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> <span class="fu"><a href="extract_dataset.html">extract_dataset</a></span><span class="op">(</span><span class="st">"Falster_2003"</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
+<span class="r-in"><span>  <span class="fu">join_location_properties</span><span class="op">(</span>format <span class="op">=</span> <span class="st">"single_column_pretty"</span>, vars <span class="op">=</span> <span class="st">"all"</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="va">traits</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
+<span class="r-in"><span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">trait_name</span>, <span class="va">value</span>, <span class="va">location_name</span>, <span class="va">location_properties</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 114 × 4</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    trait_name             value  location_name               location_properties</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>              </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> leaf_area              142    Ku-ring-gai Chase National… description==fire-…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> leaf_inclination_angle 57     Ku-ring-gai Chase National… description==fire-…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> leaf_compoundness      simple <span style="color: #BB0000;">NA</span>                          <span style="color: #BB0000;">NA</span>                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> leaf_area              319    Ku-ring-gai Chase National… description==fire-…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> leaf_inclination_angle 66.1   Ku-ring-gai Chase National… description==fire-…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> leaf_compoundness      simple <span style="color: #BB0000;">NA</span>                          <span style="color: #BB0000;">NA</span>                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> leaf_area              562    Ku-ring-gai Chase National… description==fire-…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> leaf_inclination_angle 71.7   Ku-ring-gai Chase National… description==fire-…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> leaf_compoundness      simple <span style="color: #BB0000;">NA</span>                          <span style="color: #BB0000;">NA</span>                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> leaf_area              1590   Ku-ring-gai Chase National… description==fire-…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 104 more rows</span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

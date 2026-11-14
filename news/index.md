@@ -15,6 +15,34 @@
   map of Australia used by
   [`plot_locations()`](https://traitecoevo.github.io/traits.use/reference/plot_locations.md).
 - Requires R 4.1.0 or later, as the code uses the native pipe `|>`.
+- New dataset `austraits_lite`: 24 datasets from AusTraits 7.0.0 (CC BY
+  4.0), a small traits.build database to try the package on without
+  downloading anything. The examples now use it and run; those of
+  [`load_database()`](https://traitecoevo.github.io/traits.use/reference/load_database.md),
+  which download, run only in interactive sessions.
+- Fix bug in
+  [`as_wide_table()`](https://traitecoevo.github.io/traits.use/reference/as_wide_table.md),
+  which failed on a database without contexts or without known location
+  properties (8 of the 23 AusTraits 5.0.0 datasets we tried, each on its
+  own). Such databases now give the same columns, empty where there is
+  nothing to fill. The location columns now always come in the order
+  `latitude (deg)`, `longitude (deg)`, `location`.
+- Fix bug in
+  [`separate_trait_values()`](https://traitecoevo.github.io/traits.use/reference/separate_trait_values.md),
+  which lost values: rows whose `method_context_id` or
+  `repeat_measurements_id` was `NA` were merged before being separated
+  (AusTraits 5.0.0’s ABRS_1981 went from 36,603 rows to 28,138 when
+  bound and 19,675 when separated again; it now returns to 36,603). It
+  also returned `NULL` when there was nothing to separate, and left
+  missing values as the text `"NA"` in `basis_of_value`. Its
+  `definitions` argument is no longer needed.
+- `extract_*()` return the tables in the order of a release and
+  [`bind_databases()`](https://traitecoevo.github.io/traits.use/reference/bind_databases.md),
+  with `identifiers` before `contributors`.
+- [`join_identifiers()`](https://traitecoevo.github.io/traits.use/reference/join_identifiers.md)
+  works on a database without an identifiers table (built before
+  traits.build added it), adding an empty `identifier_types` column as
+  for an empty table, rather than failing.
 - New plotting functions from austraits.portal
   ([\#15](https://github.com/traitecoevo/traits.use/issues/15),
   [\#7](https://github.com/traitecoevo/traits.use/issues/7)):

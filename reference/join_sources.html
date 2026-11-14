@@ -75,9 +75,23 @@ Learn more at:
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="op">(</span><span class="va">database</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> <span class="fu">join_sources</span><span class="op">(</span>vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dataset_id_citation"</span>, <span class="st">"source_id_citation"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="va">traits</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="op">(</span><span class="va">austraits_lite</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> <span class="fu"><a href="extract_dataset.html">extract_dataset</a></span><span class="op">(</span><span class="st">"Yang_2023"</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
+<span class="r-in"><span>  <span class="fu">join_sources</span><span class="op">(</span>vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dataset_id_citation"</span>, <span class="st">"source_id_citation"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="va">traits</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
+<span class="r-in"><span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">trait_name</span>, <span class="va">value</span>, <span class="va">source_id</span>, <span class="va">dataset_id_citation</span>, <span class="va">source_id_citation</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2,635 × 5</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    trait_name            value  source_id dataset_id_citation source_id_citation</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                 <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>               <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> resprouting_capacity  fire_… ABRS_2022 S. Yang. “Unpublis… Australian Biolog…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> post_fire_recruitment post_… ABRS_2022 S. Yang. “Unpublis… Australian Biolog…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> post_fire_recruitment post_… ABRS_2022 S. Yang. “Unpublis… Australian Biolog…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> resprouting_capacity  fire_… ABRS_2022 S. Yang. “Unpublis… Australian Biolog…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> resprouting_capacity  fire_… ABRS_2022 S. Yang. “Unpublis… Australian Biolog…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> bud_bank_location     basal… ABRS_2022 S. Yang. “Unpublis… Australian Biolog…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> resprouting_capacity  respr… ABRS_2022 S. Yang. “Unpublis… Australian Biolog…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> post_fire_recruitment post_… ABRS_2022 S. Yang. “Unpublis… Australian Biolog…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> resprouting_capacity  fire_… ABRS_2022 S. Yang. “Unpublis… Australian Biolog…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> bud_bank_location     basal… ABRS_2022 S. Yang. “Unpublis… Australian Biolog…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 2,625 more rows</span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

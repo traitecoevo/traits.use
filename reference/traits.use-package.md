@@ -36,3 +36,11 @@ Authors:
   ([ORCID](https://orcid.org/0000-0002-9814-092X))
 
 - Dony Indiarto ([ORCID](https://orcid.org/0000-0001-9546-8201))
+
+Other contributors:
+
+- Trait Ecology and Evolution (copyright holder of the code, see
+  LICENSE) \[copyright holder\]
+
+- AusTraits contributors (AusTraits data in austraits_lite and the test
+  data, see COPYRIGHTS) \[copyright holder\]

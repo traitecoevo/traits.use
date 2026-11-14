@@ -42,8 +42,7 @@ trait not in it), a blank plot saying so.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-austraits %>% plot_trait_distribution("wood_density")
-austraits %>% plot_trait_distribution("leaf_compoundness")
-} # }
+austraits_lite %>% plot_trait_distribution("wood_density")
+
+austraits_lite %>% plot_trait_distribution("leaf_compoundness")
 ```

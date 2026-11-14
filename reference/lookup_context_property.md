@@ -25,7 +25,6 @@ vector containing context properties that contains search term
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-austraits %>% lookup_context_property("temperature")
-} # }
+austraits_lite %>% lookup_context_property("temperature")
+#> [1] "measurement temperature" "temperature treatment"  
 ```

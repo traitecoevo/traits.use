@@ -11,7 +11,11 @@ becoming a thin AusTraits-specific layer over it. The first CRAN release
 
 - **Code:** `R/` (functions), `tests/` (testthat), `man/` (generated
   docs), `NAMESPACE`, `data-raw/` and `inst/` hold raw assets (incl. the
-  cheatsheet); `R/sysdata.rda` holds the test fixtures.
+  cheatsheet); `data/austraits_lite.rda` is the exported example
+  database (24 datasets of AusTraits 7.0.0, used by the examples);
+  `R/sysdata.rda` holds the tests’ fixtures: `austraits_5.0.0_lite` (23
+  datasets of 5.0.0, the main one) and tiny 3.0.2/4.2.0 ones for version
+  checks. Regenerate both with `data-raw/create_data.R`.
 - **Access entry point:**
   [`load_database()`](https://traitecoevo.github.io/traits.use/reference/load_database.md)
   (`R/load_database.R`) loads any traits.build database from its doi

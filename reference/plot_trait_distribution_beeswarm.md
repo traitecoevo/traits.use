@@ -55,7 +55,6 @@ invisibly, after drawing it
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-austraits %>% plot_trait_distribution_jitter("wood_density", "dataset_id", "Westoby_2014")
-} # }
+# Use plot_trait_distribution_jitter() instead
+austraits_lite %>% plot_trait_distribution_jitter("wood_density", "dataset_id", "Westoby_2014")
 ```

@@ -62,10 +62,36 @@
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="fu">summarise_database</span><span class="op">(</span>database <span class="op">=</span> <span class="va">austraits</span>, <span class="st">"trait_name"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">summarise_database</span><span class="op">(</span>database <span class="op">=</span> <span class="va">austraits</span>, <span class="st">"family"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">summarise_database</span><span class="op">(</span>database <span class="op">=</span> <span class="va">austraits_lite</span>, <span class="st">"trait_name"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 151 × 5</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    trait_name                    n_records n_dataset n_taxa percent_total</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                             <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> atmospheric_CO2_concentration       217         1     17     0.002<span style="text-decoration: underline;">4</span>   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> bark_C_per_dry_mass                 159         1     17     0.001<span style="text-decoration: underline;">76</span>  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> bark_N_per_dry_mass                 159         1     17     0.001<span style="text-decoration: underline;">76</span>  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> bark_delta13C                       159         1     17     0.001<span style="text-decoration: underline;">76</span>  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> bark_delta15N                       159         1     17     0.001<span style="text-decoration: underline;">76</span>  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> bark_thickness                      198         2     17     0.002<span style="text-decoration: underline;">19</span>  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> branch_mass_fraction                 45         1     45     0.000<span style="text-decoration: underline;">497</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> bud_bank_location                   218         2    204     0.002<span style="text-decoration: underline;">41</span>  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> clonal_spread_mechanism               7         1      7     0.000<span style="text-decoration: underline;">077</span>3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> dispersal_appendage                  13         1     13     0.000<span style="text-decoration: underline;">144</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 141 more rows</span></span>
+<span class="r-in"><span><span class="fu">summarise_database</span><span class="op">(</span>database <span class="op">=</span> <span class="va">austraits_lite</span>, <span class="st">"family"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 207 × 5</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    family           n_records n_dataset n_taxa percent_total</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> Acanthaceae            177         1     14     0.001<span style="text-decoration: underline;">95</span>  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> Achariaceae             38         2      2     0.000<span style="text-decoration: underline;">42</span>  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> Actinidiaceae           13         1      1     0.000<span style="text-decoration: underline;">144</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> Agapanthaceae            3         1      1     0.000<span style="text-decoration: underline;">033</span>1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> Akaniaceae              11         1      1     0.000<span style="text-decoration: underline;">121</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> Alismataceae             1         1      1     0.000<span style="text-decoration: underline;">011</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> Alliaceae               11         2      9     0.000<span style="text-decoration: underline;">121</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> Alseuosmiaceae          26         1      2     0.000<span style="text-decoration: underline;">287</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> Alstroemeriaceae        11         2      2     0.000<span style="text-decoration: underline;">121</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> Amaranthaceae           37         2      4     0.000<span style="text-decoration: underline;">409</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 197 more rows</span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

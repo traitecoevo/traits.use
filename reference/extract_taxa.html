@@ -93,10 +93,100 @@ Learn more at:
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="fu">extract_taxa</span><span class="op">(</span>database <span class="op">=</span> <span class="va">austraits</span>, family <span class="op">=</span> <span class="st">"Proteaceae"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">extract_taxa</span><span class="op">(</span>database <span class="op">=</span> <span class="va">austraits</span>, genus <span class="op">=</span> <span class="st">"Acacia"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">extract_taxa</span><span class="op">(</span>database <span class="op">=</span> <span class="va">austraits_lite</span>, family <span class="op">=</span> <span class="st">"Proteaceae"</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">This is 7.0.0 of AusTraits: a curated plant trait database for the Australian</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> This database is built using traits.build version 2.1.0</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> This database contains a total of 9069 records, for 1487 taxa and 111 traits.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">This object is a 'list' with the following components:</span> ──</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> • <span style="color: #00AF00; font-style: italic;">traits</span>: A table containing measurements of traits.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> • <span style="color: #00AF00; font-style: italic;">locations</span>: A table containing observations of location/site characteristics</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> associated with information in `traits`. Cross referencing between the two</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> dataframes is possible using combinations of the variables `dataset_id`,</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> `location_name`.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> • <span style="color: #00AF00; font-style: italic;">contexts</span>: A table containing observations of contextual characteristics</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> associated with information in `traits`. Cross referencing between the two</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> dataframes is possible using combinations of the variables `dataset_id`,</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> `link_id`, and `link_vals`.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> • <span style="color: #00AF00; font-style: italic;">methods</span>: A table containing details on methods with which data were</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> collected, including time frame and source. Cross referencing with the `traits`</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> table is possible using combinations of the variables `dataset_id`,</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> `trait_name`.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> • <span style="color: #00AF00; font-style: italic;">excluded_data</span>: A table of data that did not pass quality test and so were</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> excluded from the master dataset.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> • <span style="color: #00AF00; font-style: italic;">taxonomic_updates</span>: A table of all taxonomic changes implemented in the</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> construction of AusTraits. Changes are determined by comparing against the APC</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> (Australian Plant Census) and APNI (Australian Plant Names Index).</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> • <span style="color: #00AF00; font-style: italic;">taxa</span>: A table containing details on taxa associated with information in</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> `traits`. This information has been sourced from the APC (Australian Plant</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Census) and APNI (Australian Plant Names Index) and is released under a CC-BY3</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> license.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> • <span style="color: #00AF00; font-style: italic;">contributors</span>: A table of people contributing to each study.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> • <span style="color: #00AF00; font-style: italic;">identifiers</span>: A table of identifiers that cross-references observations</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> between datasets or with other data resources such as museum or herbarium</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> specimens.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> • <span style="color: #00AF00; font-style: italic;">sources</span>: Bibtex entries for all primary and secondary sources in the</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> compilation.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> • <span style="color: #00AF00; font-style: italic;">definitions</span>: A copy of the definitions for all tables and terms. Information</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> included here was used to process data and generate any documentation for the</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> study.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> • <span style="color: #00AF00; font-style: italic;">schema</span>: A copy of the schema for all tables and terms. Information included</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> here was used to process data and generate any documentation for the study.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> • <span style="color: #00AF00; font-style: italic;">metadata</span>: Metadata associated with the dataset, including title, creators,</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> license, subject, funding sources.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> • <span style="color: #00AF00; font-style: italic;">build_info</span>: A description of the computing environment used to create this</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> version of the dataset, including version number, git commit and R</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> session_info.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> To access a component, try using the $ e.g. database$traits</span>
+<span class="r-in"><span><span class="fu">extract_taxa</span><span class="op">(</span>database <span class="op">=</span> <span class="va">austraits_lite</span>, genus <span class="op">=</span> <span class="st">"Acacia"</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">This is 7.0.0 of AusTraits: a curated plant trait database for the Australian</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> This database is built using traits.build version 2.1.0</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> This database contains a total of 5571 records, for 267 taxa and 102 traits.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">This object is a 'list' with the following components:</span> ──</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> • <span style="color: #00AF00; font-style: italic;">traits</span>: A table containing measurements of traits.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> • <span style="color: #00AF00; font-style: italic;">locations</span>: A table containing observations of location/site characteristics</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> associated with information in `traits`. Cross referencing between the two</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> dataframes is possible using combinations of the variables `dataset_id`,</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> `location_name`.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> • <span style="color: #00AF00; font-style: italic;">contexts</span>: A table containing observations of contextual characteristics</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> associated with information in `traits`. Cross referencing between the two</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> dataframes is possible using combinations of the variables `dataset_id`,</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> `link_id`, and `link_vals`.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> • <span style="color: #00AF00; font-style: italic;">methods</span>: A table containing details on methods with which data were</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> collected, including time frame and source. Cross referencing with the `traits`</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> table is possible using combinations of the variables `dataset_id`,</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> `trait_name`.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> • <span style="color: #00AF00; font-style: italic;">excluded_data</span>: A table of data that did not pass quality test and so were</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> excluded from the master dataset.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> • <span style="color: #00AF00; font-style: italic;">taxonomic_updates</span>: A table of all taxonomic changes implemented in the</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> construction of AusTraits. Changes are determined by comparing against the APC</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> (Australian Plant Census) and APNI (Australian Plant Names Index).</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> • <span style="color: #00AF00; font-style: italic;">taxa</span>: A table containing details on taxa associated with information in</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> `traits`. This information has been sourced from the APC (Australian Plant</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Census) and APNI (Australian Plant Names Index) and is released under a CC-BY3</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> license.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> • <span style="color: #00AF00; font-style: italic;">contributors</span>: A table of people contributing to each study.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> • <span style="color: #00AF00; font-style: italic;">identifiers</span>: A table of identifiers that cross-references observations</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> between datasets or with other data resources such as museum or herbarium</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> specimens.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> • <span style="color: #00AF00; font-style: italic;">sources</span>: Bibtex entries for all primary and secondary sources in the</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> compilation.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> • <span style="color: #00AF00; font-style: italic;">definitions</span>: A copy of the definitions for all tables and terms. Information</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> included here was used to process data and generate any documentation for the</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> study.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> • <span style="color: #00AF00; font-style: italic;">schema</span>: A copy of the schema for all tables and terms. Information included</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> here was used to process data and generate any documentation for the study.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> • <span style="color: #00AF00; font-style: italic;">metadata</span>: Metadata associated with the dataset, including title, creators,</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> license, subject, funding sources.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> • <span style="color: #00AF00; font-style: italic;">build_info</span>: A description of the computing environment used to create this</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> version of the dataset, including version number, git commit and R</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> session_info.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> To access a component, try using the $ e.g. database$traits</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

@@ -43,7 +43,7 @@ This function separates values that were concatenated so that studies that have 
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">separate_trait_values</span><span class="op">(</span><span class="va">trait_data</span>, <span class="va">definitions</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">separate_trait_values</span><span class="op">(</span><span class="va">trait_data</span>, definitions <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -51,16 +51,18 @@ This function separates values that were concatenated so that studies that have 
 
 
 <dl><dt id="arg-trait-data">trait_data<a class="anchor" aria-label="anchor" href="#arg-trait-data"></a></dt>
-<dd><p>The traits table in a traits.build database - see example</p></dd>
+<dd><p>The traits table in a traits.build database, after
+<code><a href="bind_trait_values.html">bind_trait_values()</a></code> - see example</p></dd>
 
 
 <dt id="arg-definitions">definitions<a class="anchor" aria-label="anchor" href="#arg-definitions"></a></dt>
-<dd><p>The austraits definitions data frame</p></dd>
+<dd><p>Not used; kept so that existing code passing the
+database's definitions still works.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>trait tibble</p>
+    <p>trait tibble, with one row per value</p>
     </div>
     <div class="section level2">
     <h2 id="author">Author<a class="anchor" aria-label="anchor" href="#author"></a></h2>
@@ -69,13 +71,37 @@ This function separates values that were concatenated so that studies that have 
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="va">trait_data</span> <span class="op">&lt;-</span> <span class="va">austraits</span><span class="op">$</span><span class="va">traits</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> </span></span>
-<span class="r-in"><span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">dataset_id</span> <span class="op">==</span> <span class="st">"Falster_2005_1"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">trait_data</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># A dataset with several values per observation and trait</span></span></span>
+<span class="r-in"><span><span class="va">trait_data</span> <span class="op">&lt;-</span> <span class="va">austraits_lite</span><span class="op">$</span><span class="va">traits</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
+<span class="r-in"><span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">dataset_id</span> <span class="op">==</span> <span class="st">"Apgaua_2017"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">trait_data</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1080</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># One row per observation and trait, values joined with "--"</span></span></span>
 <span class="r-in"><span><span class="va">traits_bind</span> <span class="op">&lt;-</span> <span class="fu"><a href="bind_trait_values.html">bind_trait_values</a></span><span class="op">(</span><span class="va">trait_data</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">separate_trait_values</span><span class="op">(</span><span class="va">traits_bind</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">traits_bind</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 990</span>
+<span class="r-in"><span><span class="va">traits_bind</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
+<span class="r-in"><span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grepl</a></span><span class="op">(</span><span class="st">"--"</span>, <span class="va">value</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
+<span class="r-in"><span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">observation_id</span>, <span class="va">trait_name</span>, <span class="va">value</span>, <span class="va">value_type</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 90 × 4</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    observation_id trait_name           value                    value_type   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> 001            stem_vessel_diameter 53.95769819--82.51063733 mean--maximum</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> 003            stem_vessel_diameter 183.7818765--250.0572818 mean--maximum</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> 005            stem_vessel_diameter 107.4165069--162.7522903 mean--maximum</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> 007            stem_vessel_diameter 111.8421742--193.0407842 mean--maximum</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> 009            stem_vessel_diameter 22.89204368--29.2235397  mean--maximum</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> 013            stem_vessel_diameter 56.48465445--74.97623139 mean--maximum</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> 015            stem_vessel_diameter 71.9452453--99.04573875  mean--maximum</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> 017            stem_vessel_diameter 24.74156122--39.85608429 mean--maximum</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> 019            stem_vessel_diameter 137.106731--264.2239295  mean--maximum</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> 021            stem_vessel_diameter 23.24565594--33.69488496 mean--maximum</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 80 more rows</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Back to one row per value</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="fu">separate_trait_values</span><span class="op">(</span><span class="va">traits_bind</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1080</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

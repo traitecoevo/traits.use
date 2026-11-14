@@ -63,6 +63,10 @@ library(traits.use)
 # `path` to keep a copy with a project instead
 database <- load_database("10.5281/zenodo.11188867")
 
+# Or try the package without downloading anything, on the small subset of
+# AusTraits that comes with it
+database <- austraits_lite
+
 # Pick out the traits you want, then add site coordinates to each value
 wood_density <- database |>
   extract_trait("wood_density") |>
@@ -196,6 +200,9 @@ Infrastructure Strategy](https://www.education.gov.au/ncris) (NCRIS).
   [`list_cached_databases()`](https://traitecoevo.github.io/traits.use/reference/database_cache_dir.md)
   [`clear_database_cache()`](https://traitecoevo.github.io/traits.use/reference/database_cache_dir.md)
   : Manage the folder where downloaded databases are kept
+
+- [`austraits_lite`](https://traitecoevo.github.io/traits.use/reference/austraits_lite.md)
+  : A small subset of AusTraits, for examples
 
 - [`get_compiled_by_traits.build()`](https://traitecoevo.github.io/traits.use/reference/get_compiled_by_traits.build.md)
   : Retrieve compiled by information from metadata table

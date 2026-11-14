@@ -44,7 +44,20 @@ Note to AusTraits users:
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-(database %>% join_methods)$traits
-} # }
+(austraits_lite %>% extract_dataset("Falster_2003") %>% join_methods())$traits %>%
+  dplyr::select(trait_name, value, methods)
+#> # A tibble: 114 × 3
+#>    trait_name             value  methods                                        
+#>    <chr>                  <chr>  <chr>                                          
+#>  1 leaf_area              142    For each individual, architectural information…
+#>  2 leaf_inclination_angle 57     For each individual, architectural information…
+#>  3 leaf_compoundness      simple expert opinion                                 
+#>  4 leaf_area              319    For each individual, architectural information…
+#>  5 leaf_inclination_angle 66.1   For each individual, architectural information…
+#>  6 leaf_compoundness      simple expert opinion                                 
+#>  7 leaf_area              562    For each individual, architectural information…
+#>  8 leaf_inclination_angle 71.7   For each individual, architectural information…
+#>  9 leaf_compoundness      simple expert opinion                                 
+#> 10 leaf_area              1590   For each individual, architectural information…
+#> # ℹ 104 more rows
 ```

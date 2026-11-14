@@ -75,6 +75,15 @@ looked up by key with <code>$</code> as well as <code>[[</code> and <code>[</cod
     <div class="dont-index"><p><a href="traits_build_sources.html">traits_build_sources</a> for looking up <code>sources</code> by key</p></div>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">a</span> <span class="op">&lt;-</span> <span class="fu"><a href="extract_dataset.html">extract_dataset</a></span><span class="op">(</span><span class="va">austraits_lite</span>, <span class="st">"Falster_2003"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">b</span> <span class="op">&lt;-</span> <span class="fu"><a href="extract_dataset.html">extract_dataset</a></span><span class="op">(</span><span class="va">austraits_lite</span>, <span class="st">"Falster_2005_1"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">both</span> <span class="op">&lt;-</span> <span class="fu">bind_databases</span><span class="op">(</span><span class="va">a</span>, <span class="va">b</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">both</span><span class="op">$</span><span class="va">traits</span><span class="op">$</span><span class="va">dataset_id</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Falster_2003"   "Falster_2005_1"</span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

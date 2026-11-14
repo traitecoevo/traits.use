@@ -37,3 +37,13 @@ e.g. `database$sources$Falster_2005`.
 
 [traits_build_sources](https://traitecoevo.github.io/traits.use/reference/traits_build_sources.md)
 for looking up `sources` by key
+
+## Examples
+
+``` r
+a <- extract_dataset(austraits_lite, "Falster_2003")
+b <- extract_dataset(austraits_lite, "Falster_2005_1")
+both <- bind_databases(a, b)
+unique(both$traits$dataset_id)
+#> [1] "Falster_2003"   "Falster_2005_1"
+```

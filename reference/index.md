@@ -10,6 +10,9 @@
   [`clear_database_cache()`](https://traitecoevo.github.io/traits.use/reference/database_cache_dir.md)
   : Manage the folder where downloaded databases are kept
 
+- [`austraits_lite`](https://traitecoevo.github.io/traits.use/reference/austraits_lite.md)
+  : A small subset of AusTraits, for examples
+
 - [`get_compiled_by_traits.build()`](https://traitecoevo.github.io/traits.use/reference/get_compiled_by_traits.build.md)
   : Retrieve compiled by information from metadata table
 
