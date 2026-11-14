@@ -4,13 +4,15 @@
 \alias{load_database}
 \title{Load any traits.build database into R console}
 \usage{
-load_database(doi = NULL, path = "data/traits.build", update = TRUE)
+load_database(doi = NULL, path, update = TRUE)
 }
 \arguments{
 \item{doi}{character string - doi of the database, e.g. "10.5281/zenodo.11188867".
 A Zenodo concept doi will load the latest version of that record.}
 
-\item{path}{file path to where the database will be downloaded}
+\item{path}{folder the database is downloaded to and cached in, e.g.
+\code{"data/traits.build"} in a project, or \code{tempdir()} for one session. There
+is no default, so nothing is written unless you say where.}
 
 \item{update}{if TRUE, the record's metadata .json will be re-downloaded}
 }

@@ -30,7 +30,7 @@ Description: Load, explore and wrangle data from relational trait databases
     visualise the distribution of the data.
 License: MIT + file LICENSE
 Encoding: UTF-8
-Language: en
+Language: en-GB
 Roxygen: list(markdown = TRUE)
 Depends: 
     R (>= 4.1.0),
