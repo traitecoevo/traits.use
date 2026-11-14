@@ -17,12 +17,18 @@
 #'   (the default), the folder shared by all your projects, given by
 #'   [database_cache_dir()]. Give a folder such as `"data/austraits"` to keep a
 #'   copy with a project instead, or `tempdir()` for one session.
+#' @param flattened if `TRUE`, load the flattened version of the database
+#'   instead: one table with the other tables joined to the traits table, as
+#'   made by [flatten_database()]. Releases of AusTraits from 7.0.0 include it.
+#'   It is several times larger than the relational database (AusTraits 7.0.0:
+#'   a 77 MB download, about 1 GB once loaded).
 #' @param update if TRUE, the record's metadata .json will be re-downloaded;
 #'   if that fails (e.g. offline), the saved copy is used. With `FALSE`, a
 #'   concept doi loads the version last fetched into `path`, which for the
 #'   cache folder may have been by another project.
 #'
-#' @return a large list containing traits.build data tables
+#' @return a large list containing traits.build data tables, or with
+#'   `flattened = TRUE`, a single table (tibble)
 #' @export
 #' @seealso [database_cache_dir()]; `austraits::load_austraits()`, which loads
 #'   a release of AusTraits by version number
@@ -36,7 +42,7 @@
 #' austraits <- load_database(doi = "10.5281/zenodo.11188867", path = "data/austraits")
 #' }
 
-load_database <- function(doi = NULL, path = NULL, update = TRUE){
+load_database <- function(doi = NULL, path = NULL, update = TRUE, flattened = FALSE){
   # Is doi supplied?
   if(is.null(doi)){
     stop("Please supply a doi!")
@@ -69,8 +75,8 @@ load_database <- function(doi = NULL, path = NULL, update = TRUE){
     message("doi '", doi, "' is version ", record$version)
   }
 
-  # The relational database .rds among the record's files
-  files <- database_file(record$files, doi)
+  # The relational (or flattened) database .rds among the record's files
+  files <- database_file(record$files, doi, flattened = flattened)
 
   url <- files$url
   file_nm <- file.path(path, basename(files$key))
@@ -110,6 +116,13 @@ load_database <- function(doi = NULL, path = NULL, update = TRUE){
   # Loading the .rds
   message("Loading data from '", file_nm,"'")
   data <- readRDS(file_nm)
+
+  if(isTRUE(flattened)){
+    if(! is.data.frame(data) || ! all(c("dataset_id", "taxon_name", "trait_name", "value") %in% names(data))){
+      rlang::abort(paste0("'", file_nm, "' is not a flattened traits.build database!"))
+    }
+    return(dplyr::as_tibble(data))
+  }
 
   # Check it looks like a traits.build database
   if(! is.list(data) | ! all(c("traits", "taxa", "methods") %in% names(data))){
@@ -159,13 +172,14 @@ load_record_json <- function(doi, path, update){
 #'
 #' @param files data frame of the record's files (`key`, `url`, `md5`)
 #' @param doi the doi, used in messages
+#' @param flattened if `TRUE`, pick the flattened database .rds instead
 #' @return the one row of `files` that load_database() downloads; an error if
 #'   there is not exactly one. clear_database_cache() uses this too, so it
-#'   only ever claims the file load_database() wrote.
+#'   only ever claims the files load_database() wrote.
 #' @noRd
 #' @keywords internal
 
-database_file <- function(files, doi){
+database_file <- function(files, doi, flattened = FALSE){
   is_rds <- grepl("\\.rds$", files$key, ignore.case = TRUE)
 
   if(! any(is_rds)){
@@ -174,6 +188,22 @@ database_file <- function(files, doi){
   }
 
   files <- files[is_rds, , drop = FALSE]
+
+  if(isTRUE(flattened)){
+    files <- files[stringr::str_detect(files$key, "flattened"), , drop = FALSE]
+
+    if(nrow(files) == 0) {
+      rlang::abort(paste0("No flattened .rds file found for doi '", doi,
+                          "'; load the relational database with `flattened = FALSE`"))
+    }
+
+    if(nrow(files) > 1) {
+      rlang::abort(paste0("More than one flattened .rds file found for doi '", doi, "': ",
+                          paste(files$key, collapse = ", ")))
+    }
+
+    return(files)
+  }
 
   # Ignore flattened database files, even when one is the only .rds
   files <- files[!stringr::str_detect(files$key, "flattened"), , drop = FALSE]

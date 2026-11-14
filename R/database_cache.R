@@ -24,7 +24,8 @@
 #' To keep a copy of a database with a project instead, give
 #' [load_database()] a `path`; the functions here take the same `path`. They
 #' only ever touch the files [load_database()] wrote there: the database
-#' `.rds` files named in its record files (`10.*.json`, one per doi).
+#' `.rds` files (relational or flattened) named in its record files
+#' (`10.*.json`, one per doi).
 #'
 #' @param path folder to list or clear; the cache folder by default.
 #' @param files names of the database `.rds` files to delete, as listed by
@@ -173,9 +174,15 @@ cached_records <- function(path) {
       if(!is.list(record) || !is.data.frame(record$files) || is.null(record$files$key)) {
         return(NULL)
       }
-      # Only the file load_database() downloads; NA for a record it refused
-      key <- tryCatch(basename(database_file(record$files, json)$key), error = function(e) NA_character_)
-      data.frame(json = json, file = key)
+      # Only the files load_database() downloads (relational and flattened);
+      # NA for a record it refused
+      pick <- function(flattened) {
+        tryCatch(basename(database_file(record$files, json, flattened = flattened)$key),
+                 error = function(e) NA_character_)
+      }
+      keys <- c(pick(FALSE), pick(TRUE))
+      keys <- if (all(is.na(keys))) NA_character_ else keys[!is.na(keys)]
+      data.frame(json = json, file = keys)
     }, error = function(e) NULL)
   })
 

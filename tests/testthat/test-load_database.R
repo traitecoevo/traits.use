@@ -237,17 +237,19 @@ test_that("The default cache folder is removed once cleared", {
   expect_message(clear_database_cache(ask = FALSE), "does not exist")
 })
 
-test_that("Only the database load_database() downloaded counts, not other files a record lists", {
+test_that("Only the databases load_database() can download count, not other files a record lists", {
   path <- tempfile("project")
   dir.create(path)
   on.exit(unlink(path, recursive = TRUE), add = TRUE)
 
-  # A record listing the relational and flattened .rds, both present
+  # A record listing the relational and flattened .rds (both downloadable
+  # with load_database()), an extra .rds it never downloads, and a .zip
   record <- list(doi = "10.5281/zenodo.7", source = "zenodo", version = "7",
-                 files = data.frame(key = c("db-7.rds", "db-7-flattened.rds", "db-7.zip"),
+                 files = data.frame(key = c("db-7.rds", "db-7-flattened.rds", "db-7-flattened-2.rds", "db-7.zip"),
                                     url = "file:///nowhere", md5 = NA))
   jsonlite::write_json(record, file.path(path, "10.5281_zenodo.7.json"))
-  for (f in c("db-7.rds", "db-7-flattened.rds")) saveRDS(1, file.path(path, f))
+  # Two flattened files, so neither is the one load_database() would pick
+  for (f in c("db-7.rds", "db-7-flattened.rds", "db-7-flattened-2.rds", "db-7.zip")) saveRDS(1, file.path(path, f))
   # Files named like a record that load_database() did not write
   writeLines("[1, 2]", file.path(path, "10.1000_array.json"))
   writeLines("not json", file.path(path, "10.1000_broken.json"))
@@ -258,7 +260,55 @@ test_that("Only the database load_database() downloaded counts, not other files 
 
   expect_identical(list_cached_databases(path)$file, "db-7.rds")
   suppressMessages(clear_database_cache(path = path, ask = FALSE))
-  expect_setequal(list.files(path), c("db-7-flattened.rds", "10.1000_array.json", "10.1000_broken.json"))
+  expect_setequal(list.files(path), c("db-7-flattened.rds", "db-7-flattened-2.rds", "db-7.zip",
+                                      "10.1000_array.json", "10.1000_broken.json"))
+
+  # With one flattened .rds, it is claimed too
+  record$files <- record$files[record$files$key != "db-7-flattened-2.rds", ]
+  jsonlite::write_json(record, file.path(path, "10.5281_zenodo.7.json"))
+  saveRDS(1, file.path(path, "db-7.rds"))
+  expect_setequal(list_cached_databases(path)$file, c("db-7.rds", "db-7-flattened.rds"))
+  suppressMessages(clear_database_cache(path = path, ask = FALSE))
+  expect_setequal(list.files(path), c("db-7-flattened-2.rds", "db-7.zip", "10.1000_array.json", "10.1000_broken.json"))
+})
+
+test_that("flattened = TRUE loads the flattened table from the same record", {
+  src <- tempfile("releases")
+  cache <- tempfile("cache")
+  on.exit(unlink(c(src, cache), recursive = TRUE), add = TRUE)
+  withr::local_options(traits.use.cache_dir = cache)
+
+  release <- make_release(src, "7", 3)
+  flat_file <- file.path(src, "7", "MYtraits-flattened.rds")
+  flat <- data.frame(dataset_id = "A_2001", taxon_name = c("Acacia a", "Acacia b"),
+                     trait_name = "leaf_area", value = c("1", "2"))
+  saveRDS(flat, flat_file)
+  release$files <- rbind(release$files,
+    data.frame(key = c("MYtraits-flattened.rds", "MYtraits-flattened.parquet"),
+               url = c(file_url(flat_file), "file:///nowhere.parquet"),
+               md5 = c(unname(tools::md5sum(flat_file)), NA)))
+  local_mocked_bindings(resolve_doi_files = function(doi) release)
+
+  out <- suppressMessages(load_database(doi = "10.5281/zenodo.7", flattened = TRUE))
+  expect_s3_class(out, "tbl_df")
+  expect_equal(as.data.frame(out), flat)
+  # The relational database still loads from the same record
+  db <- suppressMessages(load_database(doi = "10.5281/zenodo.7", update = FALSE))
+  expect_s3_class(db, "traits.build")
+  expect_setequal(list_cached_databases()$file, c("MYtraits.rds", "MYtraits-flattened.rds"))
+
+  # A release without a flattened file
+  release$files <- release$files[1, ]
+  expect_error(suppressMessages(load_database(doi = "10.5281/zenodo.7", flattened = TRUE)),
+               "No flattened .rds file found")
+
+  # A flattened file that is not a table
+  bad <- file.path(src, "7", "BAD-flattened.rds")
+  saveRDS(list(a = 1), bad)
+  release$files <- rbind(release$files,
+    data.frame(key = "BAD-flattened.rds", url = file_url(bad), md5 = unname(tools::md5sum(bad))))
+  expect_error(suppressMessages(load_database(doi = "10.5281/zenodo.7", flattened = TRUE)),
+               "not a flattened traits.build database")
 })
 
 test_that("A path keeps the database with a project, and clearing it leaves other files", {

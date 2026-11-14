@@ -62,7 +62,8 @@ follows each operating system's convention for cache files (and the
 To keep a copy of a database with a project instead, give
 \code{\link[=load_database]{load_database()}} a \code{path}; the functions here take the same \code{path}. They
 only ever touch the files \code{\link[=load_database]{load_database()}} wrote there: the database
-\code{.rds} files named in its record files (\code{10.*.json}, one per doi).
+\code{.rds} files (relational or flattened) named in its record files
+(\code{10.*.json}, one per doi).
 }
 \details{
 With neither \code{files} nor \code{older_than}, \code{clear_database_cache()}
