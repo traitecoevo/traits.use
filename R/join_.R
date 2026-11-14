@@ -609,7 +609,7 @@ join_location_properties <- function(database,
 #' (austraits_lite %>% extract_dataset("Crous_2013") %>%
 #'   join_context_properties(format = "many_columns", vars = "all",
 #'     include_description = TRUE))$traits %>%
-#'   dplyr::select(trait_name, value, dplyr::contains("context_properties"))
+#'   dplyr::select(trait_name, value, dplyr::contains("_context: "))
 join_context_properties <- function(database,
                                     format = "single_column_pretty",
                                     vars =  "all",

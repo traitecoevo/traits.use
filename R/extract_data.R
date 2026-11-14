@@ -261,9 +261,9 @@ extract_data <- function(database, table = NA, col, col_value, partial_matches_a
     ret[["metadata"]] <- database[["metadata"]]
     ret[["build_info"]] <- database[["build_info"]]
     
-    # Reorder list to match database
+    # Reorder list to match database (as a release and bind_databases() order it)
     ret <- ret[c("traits", "locations", "contexts", "methods", "excluded_data", "taxonomic_updates", 
-                 "taxa", "contributors", "identifiers", "sources", "definitions", "schema", "metadata", "build_info")]
+                 "taxa", "identifiers", "contributors", "sources", "definitions", "schema", "metadata", "build_info")]
 
     if (is.null(database$identifiers)) {
       ret$identifiers <- NULL

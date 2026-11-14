@@ -31,7 +31,7 @@ Authors:
 Other contributors:
 \itemize{
   \item Trait Ecology and Evolution (copyright holder of the code, see LICENSE) [copyright holder]
-  \item AusTraits contributors (data in austraits_lite, see COPYRIGHTS) [copyright holder]
+  \item AusTraits contributors (AusTraits data in austraits_lite and the test data, see COPYRIGHTS) [copyright holder]
 }
 
 }

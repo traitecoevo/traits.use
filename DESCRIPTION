@@ -24,7 +24,7 @@ Authors@R:
       person("Trait Ecology and Evolution", role = "cph",
              comment = "copyright holder of the code, see LICENSE"),
       person("AusTraits contributors", role = "cph",
-             comment = "data in austraits_lite, see COPYRIGHTS"))
+             comment = "AusTraits data in austraits_lite and the test data, see COPYRIGHTS"))
 Description: Load, explore and wrangle data from relational trait databases
     built with 'traits.build' <https://github.com/traitecoevo/traits.build>,
     such as AusTraits, the Australian plant trait database (Falster et al.
@@ -33,11 +33,13 @@ Description: Load, explore and wrangle data from relational trait databases
     or datasets, combine several databases, look up references, and
     visualise the distribution of the data.
 License: MIT + file LICENSE
-Copyright: See file COPYRIGHTS: the bundled dataset austraits_lite is a
-    CC BY 4.0 subset of AusTraits 7.0.0, held by its contributors.
+Copyright: See file COPYRIGHTS: the bundled dataset austraits_lite and
+    the internal test data are CC BY 4.0 subsets of AusTraits releases,
+    held by their contributors.
 Encoding: UTF-8
 LazyData: true
 LazyDataCompression: xz
+SysDataCompression: xz
 Language: en-GB
 Roxygen: list(markdown = TRUE)
 Depends: 

@@ -5,6 +5,9 @@ test_that("austraits_lite is a complete traits.build database", {
   expect_identical(length(unique(austraits_lite$traits$dataset_id)), 24L)
   expect_identical(austraits_lite$metadata$version, "7.0.0")
   expect_gt(nrow(austraits_lite$identifiers), 0)
+  # The tables in the order of a release
+  test_database_structure(austraits_lite)
+  expect_identical(length(austraits_lite$sources), 61L)
 
   # Every dataset's reference is kept, bar Westoby_2014, which has none in
   # the full release either

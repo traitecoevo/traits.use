@@ -1,7 +1,15 @@
 The R code of traits.use is released under the MIT licence (see LICENSE).
 
-data/austraits_lite.rda (the dataset `austraits_lite`) is a subset of a
-different work, with different copyright holders and licence:
+The package includes subsets of a different work, AusTraits, with different
+copyright holders and licence:
+
+- data/austraits_lite.rda (the dataset `austraits_lite`), from AusTraits 7.0.0;
+- R/sysdata.rda (`austraits_5.0.0_lite` and two tiny fixtures), internal
+  data for the tests, from AusTraits 5.0.0, 4.2.0 and 3.0.2;
+- tests/testthat/benchmarks/austraits_identifiers.rds, a test fixture from a
+  development build of AusTraits 6.0.0.
+
+The release `austraits_lite` comes from:
 
   Title:    AusTraits: a curated plant trait database for the Australian flora
   Version:  7.0.0
@@ -16,6 +24,12 @@ different work, with different copyright holders and licence:
   Changes:  cut down to 24 of its datasets with traits.use::extract_dataset(),
             by data-raw/create_data.R in the package's GitHub repository
             (https://github.com/traitecoevo/traits.use).
+
+The test data come in the same way from AusTraits 5.0.0
+(https://doi.org/10.5281/zenodo.10156222, 23 datasets), 4.2.0
+(https://doi.org/10.5281/zenodo.8353840) and 3.0.2
+(https://doi.org/10.5281/zenodo.5112001), all under CC BY 4.0, and from a
+development build of 6.0.0 (two datasets, Schulze_2006 and Schulze_2014).
 
 Please cite AusTraits as: Falster D, Gallagher R, Wenk EH, et al. (2021)
 AusTraits, a curated plant trait database for the Australian flora.
