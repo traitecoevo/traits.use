@@ -1,5 +1,3 @@
-
-
 test_database_structure <- function(database, taxa = NA, dataset_id = NA, n_row = NA) {
   
   table_names <- c("traits", "locations", "contexts", "methods", "excluded_data", "taxonomic_updates", "taxa", "identifiers", "contributors", 

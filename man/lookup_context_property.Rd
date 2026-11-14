@@ -18,7 +18,5 @@ vector containing context properties that contains search term
 Look up context properties that contain a specific search term.
 }
 \examples{
-\dontrun{
-austraits \%>\% lookup_context_property("temperature")
-}
+austraits_lite \%>\% lookup_context_property("temperature")
 }

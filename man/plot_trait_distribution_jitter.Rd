@@ -43,9 +43,9 @@ or range are left out.
 Replaces \code{\link[=plot_trait_distribution_beeswarm]{plot_trait_distribution_beeswarm()}}, drawing many times faster.
 }
 \examples{
-\dontrun{
-austraits \%>\% plot_trait_distribution_jitter("wood_density", "dataset_id", "Westoby_2014")
-}
+\dontshow{if (rlang::is_installed(c("ggplot2", "forcats", "scales"))) withAutoprint(\{ # examplesIf}
+austraits_lite \%>\% plot_trait_distribution_jitter("wood_density", "dataset_id", "Westoby_2014")
+\dontshow{\}) # examplesIf}
 }
 \author{
 Daniel Falster - daniel.falster@unsw.edu.au

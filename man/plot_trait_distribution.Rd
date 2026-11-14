@@ -29,8 +29,8 @@ trait's type: \code{\link[=plot_trait_distribution_jitter]{plot_trait_distributi
 trait, \code{\link[=plot_categorical_trait_distribution]{plot_categorical_trait_distribution()}} for a categorical one.
 }
 \examples{
-\dontrun{
-austraits \%>\% plot_trait_distribution("wood_density")
-austraits \%>\% plot_trait_distribution("leaf_compoundness")
-}
+\dontshow{if (rlang::is_installed(c("ggplot2", "forcats", "scales"))) withAutoprint(\{ # examplesIf}
+austraits_lite \%>\% plot_trait_distribution("wood_density")
+austraits_lite \%>\% plot_trait_distribution("leaf_compoundness")
+\dontshow{\}) # examplesIf}
 }

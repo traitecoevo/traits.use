@@ -18,8 +18,6 @@ dataframe of unique levels of variable with counts and percentage
 Summarise counts for a particular variable of interest
 }
 \examples{
-\dontrun{
-summarise_database(database = austraits, "trait_name")
-summarise_database(database = austraits, "family")
-}
+summarise_database(database = austraits_lite, "trait_name")
+summarise_database(database = austraits_lite, "family")
 }

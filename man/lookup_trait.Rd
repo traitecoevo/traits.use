@@ -18,7 +18,5 @@ vector containing traits that contains search term
 Look up a particular trait term
 }
 \examples{
-\dontrun{
-austraits \%>\% lookup_trait("leaf") \%>\% extract_trait(database = austraits, .)
-}
+austraits_lite \%>\% lookup_trait("leaf") \%>\% extract_trait(database = austraits_lite, .)
 }

@@ -1,3 +1,4 @@
+ABRS
 ARDC
 AusTraits
 Beeswarm
@@ -10,6 +11,7 @@ RefManageR
 RefManageR's
 Zenodo
 austraits
+beeswarm
 com
 daniel
 dataset's
@@ -23,15 +25,18 @@ ggbeeswarm
 ggplot
 ggpointdensity
 github
+gridExtra
 indiarto
 json
 kar
+lite
 magrittr
 md
 nyk
 org
 pointdensity
 rds
+taxon's
 tibble
 tibbles
 traitecoevo

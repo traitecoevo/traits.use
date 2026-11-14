@@ -26,3 +26,17 @@ test_that("function `collapse_cols` works", {
     expect_equal(stringr::str_count(data_collapsed, "="), 5)
     expect_equal(stringr::str_count(data_collapsed, "; "), 4)
 })
+
+test_that("A database without contexts or locations gives the same columns and values", {
+  full <- as_wide_table(austraits_5.0.0_lite)
+  # No contexts; no locations (a flora); locations without known values
+  for (id in c("Falster_2003", "ABRS_1981", "Yang_2023")) {
+    wide <- as_wide_table(extract_dataset(austraits_5.0.0_lite, id))
+    expected <- full[full$dataset_id == id, ]
+    expect_identical(names(wide), names(full), info = id)
+    expect_identical(nrow(wide), nrow(expected), info = id)
+    for (col in names(wide)) {
+      expect_identical(as.character(wide[[col]]), as.character(expected[[col]]), info = paste(id, col))
+    }
+  }
+})

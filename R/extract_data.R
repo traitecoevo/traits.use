@@ -16,10 +16,8 @@
 #' @export
 #'
 #' @examples 
-#' \dontrun{
-#' extract_data(database = traits.build_database, table = "traits", 
-#' col = "trait_name", col_value = "leaf_area")
-#' }
+#' extract_data(database = austraits_lite, table = "traits",
+#'   col = "trait_name", col_value = "leaf_area")
 extract_data <- function(database, table = NA, col, col_value, partial_matches_allowed = TRUE) {
   
   # Check missingness
@@ -263,9 +261,9 @@ extract_data <- function(database, table = NA, col, col_value, partial_matches_a
     ret[["metadata"]] <- database[["metadata"]]
     ret[["build_info"]] <- database[["build_info"]]
     
-    # Reorder list to match database
+    # Reorder list to match database (as a release and bind_databases() order it)
     ret <- ret[c("traits", "locations", "contexts", "methods", "excluded_data", "taxonomic_updates", 
-                 "taxa", "contributors", "identifiers", "sources", "definitions", "schema", "metadata", "build_info")]
+                 "taxa", "identifiers", "contributors", "sources", "definitions", "schema", "metadata", "build_info")]
 
     if (is.null(database$identifiers)) {
       ret$identifiers <- NULL

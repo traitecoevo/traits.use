@@ -20,13 +20,10 @@
 #' 
 
 #' @examples 
-#' \dontrun{
-#' 
-#' data <- austraits_5.0.0_lite$traits %>% filter(dataset_id == "Falster_2003")
-#' data #long format 
-#' traits_wide <- trait_pivot_wider(data) 
-#' traits_wide #wide format
-#' }
+#' data <- austraits_lite$traits %>% dplyr::filter(dataset_id == "Falster_2003")
+#' data # long format
+#' traits_wide <- trait_pivot_wider(data)
+#' traits_wide # wide format
 #' @author Daniel Falster - daniel.falster@unsw.edu.au
 #' @export
 

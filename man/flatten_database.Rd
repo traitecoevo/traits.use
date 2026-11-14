@@ -30,3 +30,9 @@ but all measurement-related metadata (methods, location properties, context prop
 are now included as additional columns in a single table. References are joined by \code{\link[=join_sources]{join_sources()}}, so
 \code{vars$sources} selects among its columns, and the reference columns of the methods table are not repeated.
 }
+\examples{
+flat <- austraits_lite \%>\%
+  extract_dataset("Falster_2003") \%>\%
+  flatten_database()
+flat
+}

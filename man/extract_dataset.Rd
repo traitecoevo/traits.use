@@ -32,9 +32,7 @@ Note to AusTraits users:
 }
 }
 \examples{
-\dontrun{
-extract_dataset(database, "Falster_2003")
-}
+extract_dataset(austraits_lite, "Falster_2003")
 }
 \author{
 Daniel Falster - daniel.falster@unsw.edu.au

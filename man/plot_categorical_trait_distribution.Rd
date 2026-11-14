@@ -28,7 +28,7 @@ from most to least common in the families shown. Ties between families at
 the \code{family_count} cut-off are broken alphabetically.
 }
 \examples{
-\dontrun{
-austraits \%>\% plot_categorical_trait_distribution("leaf_compoundness", family_count = 20)
-}
+\dontshow{if (rlang::is_installed("ggplot2")) withAutoprint(\{ # examplesIf}
+austraits_lite \%>\% plot_categorical_trait_distribution("leaf_compoundness", family_count = 20)
+\dontshow{\}) # examplesIf}
 }

@@ -32,7 +32,8 @@ Note to AusTraits users:
 }
 }
 \examples{
-\dontrun{
-(database \%>\% join_identifiers(format = "single_column_pretty", vars = "all"))$traits
-}
+# Schulze_2014 records the tree each observation was taken from
+(austraits_lite \%>\% extract_dataset("Schulze_2014") \%>\%
+  join_identifiers(format = "single_column_pretty", vars = "all"))$traits \%>\%
+  dplyr::select(observation_id, trait_name, value, identifier_types)
 }

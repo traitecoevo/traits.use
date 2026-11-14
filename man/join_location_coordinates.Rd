@@ -30,8 +30,8 @@ Note to AusTraits users:
 }
 }
 \examples{
-\dontrun{
-(database \%>\% join_location_coordinates)$traits
-}
+(austraits_lite \%>\% extract_dataset("Falster_2003") \%>\% join_location_coordinates())$traits \%>\%
+  dplyr::select(observation_id, trait_name, value, location_name,
+    `latitude (deg)`, `longitude (deg)`)
 
 }

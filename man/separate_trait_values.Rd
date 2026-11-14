@@ -4,28 +4,37 @@
 \alias{separate_trait_values}
 \title{Separate bounded trait values}
 \usage{
-separate_trait_values(trait_data, definitions)
+separate_trait_values(trait_data, definitions = NULL)
 }
 \arguments{
-\item{trait_data}{The traits table in a traits.build database - see example}
+\item{trait_data}{The traits table in a traits.build database, after
+\code{\link[=bind_trait_values]{bind_trait_values()}} - see example}
 
-\item{definitions}{The austraits definitions data frame}
+\item{definitions}{Not used; kept so that existing code passing the
+database's definitions still works.}
 }
 \value{
-trait tibble
+trait tibble, with one row per value
 }
 \description{
 This function reverts the action of bind_trait_values.
 This function separates values that were concatenated so that studies that have multiple observations for a given trait will have separate row for each observation.
 }
 \examples{
-\dontrun{
-trait_data <- austraits$traits \%>\% 
-dplyr::filter(dataset_id == "Falster_2005_1")
-trait_data
+# A dataset with several values per observation and trait
+trait_data <- austraits_lite$traits \%>\%
+  dplyr::filter(dataset_id == "Apgaua_2017")
+nrow(trait_data)
+
+# One row per observation and trait, values joined with "--"
 traits_bind <- bind_trait_values(trait_data)
-separate_trait_values(traits_bind)
-}
+nrow(traits_bind)
+traits_bind \%>\%
+  dplyr::filter(grepl("--", value)) \%>\%
+  dplyr::select(observation_id, trait_name, value, value_type)
+
+# Back to one row per value
+nrow(separate_trait_values(traits_bind))
 }
 \author{
 Daniel Falster - daniel.falster@unsw.edu.au
