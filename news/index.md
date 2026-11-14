@@ -88,8 +88,27 @@
   output are unchanged.
 - Added new function `load_database` which loads any traits.build
   database from its doi (Zenodo, Figshare or a doi resolving directly to
-  an .rds file). Its `path` has no default, so nothing is written to the
-  working directory unless you say where.
+  an .rds file). By default it keeps downloads in a per-user cache
+  folder ([`tools::R_user_dir()`](https://rdrr.io/r/tools/userdir.html),
+  or the `traits.use.cache_dir` option), so each release is downloaded
+  once per computer and shared by every project
+  ([\#22](https://github.com/traitecoevo/traits.use/issues/22)); give
+  `path` to keep a copy with a project instead. Nothing is written to
+  the working directory unasked.
+- New functions
+  [`database_cache_dir()`](https://traitecoevo.github.io/traits.use/reference/database_cache_dir.md),
+  [`list_cached_databases()`](https://traitecoevo.github.io/traits.use/reference/database_cache_dir.md)
+  and
+  [`clear_database_cache()`](https://traitecoevo.github.io/traits.use/reference/database_cache_dir.md)
+  show where the cache is, what it holds, how big it is and when each
+  database was last used, and delete releases you no longer need
+  (`clear_database_cache(older_than = 180)` deletes those not used for
+  six months). They only touch files
+  [`load_database()`](https://traitecoevo.github.io/traits.use/reference/load_database.md)
+  wrote, also in a folder given as `path`.
+- [`load_database()`](https://traitecoevo.github.io/traits.use/reference/load_database.md)
+  loads a saved database when the repository cannot be reached
+  (e.g. offline), using its saved record, rather than failing.
 - Fix bug in `load_database` downloads: when the temporary folder was on
   a different drive to `path`, the file was saved under its temporary
   name and could not be loaded. The user’s `timeout` option is now also

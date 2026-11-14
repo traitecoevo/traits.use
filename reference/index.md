@@ -5,6 +5,11 @@
 - [`load_database()`](https://traitecoevo.github.io/traits.use/reference/load_database.md)
   : Load any traits.build database into R console
 
+- [`database_cache_dir()`](https://traitecoevo.github.io/traits.use/reference/database_cache_dir.md)
+  [`list_cached_databases()`](https://traitecoevo.github.io/traits.use/reference/database_cache_dir.md)
+  [`clear_database_cache()`](https://traitecoevo.github.io/traits.use/reference/database_cache_dir.md)
+  : Manage the folder where downloaded databases are kept
+
 - [`get_compiled_by_traits.build()`](https://traitecoevo.github.io/traits.use/reference/get_compiled_by_traits.build.md)
   : Retrieve compiled by information from metadata table
 

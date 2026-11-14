@@ -55,7 +55,7 @@
 <p><code>traits.use</code> helps you <strong>load, explore and wrangle data</strong> from trait databases built with <a href="https://github.com/traitecoevo/traits.build" class="external-link">traits.build</a>, such as <a href="https://austraits.org/" class="external-link">AusTraits</a>, the Australian plant trait database. It works with any traits.build database, whichever group of organisms or region it covers.</p>
 <p>With <code>traits.use</code> you can:</p>
 <ul>
-<li>load a database from its DOI (<code><a href="reference/load_database.html">load_database()</a></code>), with local caching;</li>
+<li>load a database from its DOI (<code><a href="reference/load_database.html">load_database()</a></code>), downloading each release once per computer and keeping it in a cache shared by all your projects;</li>
 <li>filter it to particular traits, taxa or datasets (<code><a href="reference/extract_trait.html">extract_trait()</a></code>, <code><a href="reference/extract_taxa.html">extract_taxa()</a></code>, <code><a href="reference/extract_dataset.html">extract_dataset()</a></code>, <code><a href="reference/extract_data.html">extract_data()</a></code>), keeping every table consistent;</li>
 <li>join information from the database’s other tables onto the trait values (<code><a href="reference/join_location_coordinates.html">join_location_coordinates()</a></code>, <code><a href="reference/join_taxa.html">join_taxa()</a></code>, <code><a href="reference/join_methods.html">join_methods()</a></code>, <code><a href="reference/join_context_properties.html">join_context_properties()</a></code> and more);</li>
 <li>reshape and flatten it (<code><a href="reference/trait_pivot_wider.html">trait_pivot_wider()</a></code>, <code><a href="reference/as_wide_table.html">as_wide_table()</a></code>, <code><a href="reference/flatten_database.html">flatten_database()</a></code>), or combine several databases (<code><a href="reference/bind_databases.html">bind_databases()</a></code>);</li>
@@ -76,8 +76,10 @@
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://traitecoevo.github.io/traits.use/">traits.use</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Load any traits.build database from its DOI; the .rds is cached in `path`</span></span>
-<span><span class="va">database</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/load_database.html">load_database</a></span><span class="op">(</span><span class="st">"10.5281/zenodo.11188867"</span>, path <span class="op">=</span> <span class="st">"data/austraits"</span><span class="op">)</span></span>
+<span><span class="co"># Load any traits.build database from its DOI. It is downloaded the first</span></span>
+<span><span class="co"># time and loaded from your cache after that (see ?database_cache_dir); give</span></span>
+<span><span class="co"># `path` to keep a copy with a project instead</span></span>
+<span><span class="va">database</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/load_database.html">load_database</a></span><span class="op">(</span><span class="st">"10.5281/zenodo.11188867"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Pick out the traits you want, then add site coordinates to each value</span></span>
 <span><span class="va">wood_density</span> <span class="op">&lt;-</span> <span class="va">database</span> <span class="op">|&gt;</span></span>

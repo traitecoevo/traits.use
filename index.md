@@ -11,7 +11,8 @@ With `traits.use` you can:
 
 - load a database from its DOI
   ([`load_database()`](https://traitecoevo.github.io/traits.use/reference/load_database.md)),
-  with local caching;
+  downloading each release once per computer and keeping it in a cache
+  shared by all your projects;
 - filter it to particular traits, taxa or datasets
   ([`extract_trait()`](https://traitecoevo.github.io/traits.use/reference/extract_trait.md),
   [`extract_taxa()`](https://traitecoevo.github.io/traits.use/reference/extract_taxa.md),
@@ -57,8 +58,10 @@ packages used for plotting.
 
 library(traits.use)
 
-# Load any traits.build database from its DOI; the .rds is cached in `path`
-database <- load_database("10.5281/zenodo.11188867", path = "data/austraits")
+# Load any traits.build database from its DOI. It is downloaded the first
+# time and loaded from your cache after that (see ?database_cache_dir); give
+# `path` to keep a copy with a project instead
+database <- load_database("10.5281/zenodo.11188867")
 
 # Pick out the traits you want, then add site coordinates to each value
 wood_density <- database |>
