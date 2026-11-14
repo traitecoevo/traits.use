@@ -198,6 +198,12 @@ test_that("plot_categorical_trait_distribution plots proportions by family", {
   props <- p$data
   expect_equal(levels(props$value), c("simple", "compound"))
   expect_equal(props$prop[props$family == "A" & props$value == "simple"], 1.75 / 2)
+  # Point size is the number of taxa with any record of the value: family A's
+  # T1 and T2 are both simple, though T1's fractional weight is only 0.75
+  expect_equal(rlang::as_label(p$mapping$size), "n_taxa")
+  expect_equal(props$n_taxa[props$family == "A" & props$value == "simple"], 2)
+  expect_equal(props$n_taxa[props$family == "A" & props$value == "compound"], 1)
+  expect_equal(props$counts_per_value[props$family == "A" & props$value == "compound"], 0.25)
   expect_equal(props$prop[props$family == "A" & props$value == "compound"], 0.25 / 2)
   expect_equal(props$prop[props$family == "B"], 1)
   expect_equal(as.vector(tapply(props$prop, props$family, sum)), c(1, 1, 1))
@@ -260,4 +266,32 @@ test_that("plot_trait_distribution_jitter highlights several groups and labels w
   p <- plot_trait_distribution_jitter(t, "leaf_area", "family", highlight = c("A", "C"))
   expect_equal(sort(as.character(p$data$Group[p$data$colour == "c"])), c("A", "C"))
   expect_equal(p$scales$get_scales("x")$name, "leaf_area")
+
+  # The highlighted groups are named in the corner, in the highlight colour,
+  # and the label survives conversion to plotly
+  label <- p$layers[[2]]
+  expect_equal(label$aes_params$label, "● A, C")
+  expect_equal(label$aes_params$colour, "deeppink3")
+  expect_no_warning(ggplot2::ggplotGrob(p))
+  skip_if_not_installed("plotly")
+  texts <- unlist(lapply(plotly::plotly_build(plotly::ggplotly(p))$x$data, `[[`, "text"))
+  expect_true(any(grepl("A, C", texts, fixed = TRUE)))
+})
+
+test_that("plot_trait_distribution_jitter labels nothing when no group is highlighted", {
+  t <- trait_table(1:4, family = c("A", "B", "C", "D"))
+  expect_length(plot_trait_distribution_jitter(t, "leaf_area", "family")$layers, 1)
+  # A highlight that matches no group is ignored
+  p <- plot_trait_distribution_jitter(t, "leaf_area", "family", highlight = "Z")
+  expect_length(p$layers, 1)
+  expect_false("c" %in% p$data$colour)
+})
+
+test_that("plot_trait_distribution_jitter gives raw values their own shape", {
+  t <- trait_table(1:6, value_type = c("raw", "mean", "minimum", "maximum", "median", "mode"))
+  p <- plot_trait_distribution_jitter(t, "leaf_area", "family")
+  expect_equal(as.character(p$data$shapes), c("Raw", "Mean", "Minimum", "Maximum", "Unknown", "Unknown"))
+  # The legend lists only the value types present
+  keys <- ggplot2::get_guide_data(plot_trait_distribution_jitter(t[1:2, ], "leaf_area", "family"), "shape")
+  expect_equal(keys$.label, c("Mean", "Raw"))
 })
