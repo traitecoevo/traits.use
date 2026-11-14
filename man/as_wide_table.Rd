@@ -11,7 +11,8 @@ as_wide_table(database)
 }
 \value{
 A single wide table with collapsed contexts and locations text and with
-some cols renamed for alignment with other resources
+some cols renamed for alignment with other resources. The most-used columns come
+first; the other columns of the traits, methods and taxa tables follow them.
 }
 \description{
 Create a single wide table from a traits.build data object

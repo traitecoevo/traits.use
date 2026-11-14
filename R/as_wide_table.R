@@ -2,8 +2,9 @@
 #'
 #' @param database traits.build database (list object)
 #'
-#' @return A single wide table with collapsed contexts and locations text and with 
-#' some cols renamed for alignment with other resources
+#' @return A single wide table with collapsed contexts and locations text and with
+#' some cols renamed for alignment with other resources. The most-used columns come
+#' first; the other columns of the traits, methods and taxa tables follow them.
 #' @export
 #'
 #' @examples
@@ -86,8 +87,9 @@ as_wide_table <- function(database){
     dplyr::left_join(by=c("dataset_id", "method_id", "trait_name"), database$methods) %>%
     dplyr::left_join(by=c("taxon_name"), database$taxa)
 
-    # reorder the names to be more intuitive
-    database_wide %>% dplyr::select(
+  # Put the most-used columns first. The rest (e.g. source_id and
+  # repeat_measurements_id, which trait_pivot_wider() needs) follow them.
+  database_wide <- database_wide %>% dplyr::relocate(
       
     # The most useful (if you are filtering for just one taxon_name)
       "dataset_id", "observation_id", "trait_name", "taxon_name", "value", "unit", 
