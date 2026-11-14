@@ -170,17 +170,9 @@ join_taxonomic_updates <- function(database, vars =  c("aligned_name")) {
 #' @export
 #' 
 #' @examples
-#' database <- extract_dataset(austraits_lite, "Falster_2003")
-#'
-#' # austraits_lite predates the identifiers table, so add a small one
-#' database$identifiers <- dplyr::tibble(
-#'   dataset_id = "Falster_2003",
-#'   observation_id = unique(database$traits$observation_id)[1:2],
-#'   identifier_type = "catalogNumber",
-#'   identifier_value = c("NSW 101", "NSW 102"),
-#'   institution_code = "NSW"
-#' )
-#' (database %>% join_identifiers(format = "single_column_pretty", vars = "all"))$traits %>%
+#' # Schulze_2014 records the tree each observation was taken from
+#' (austraits_lite %>% extract_dataset("Schulze_2014") %>%
+#'   join_identifiers(format = "single_column_pretty", vars = "all"))$traits %>%
 #'   dplyr::select(observation_id, trait_name, value, identifier_types)
 join_identifiers <- function(database,
                                      format = "single_column_pretty",

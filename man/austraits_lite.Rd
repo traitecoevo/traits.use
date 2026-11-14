@@ -6,16 +6,18 @@
 \title{A small subset of AusTraits, for examples}
 \format{
 A list of class \code{traits.build}, with the tables of a traits.build
-database: \code{traits} (115,733 values of 143 traits for 7,324 taxa),
+database: \code{traits} (90,568 values of 151 traits for 7,259 taxa),
 \code{locations}, \code{contexts}, \code{methods}, \code{excluded_data}, \code{taxonomic_updates},
-\code{taxa}, \code{contributors}, \code{sources}, \code{definitions}, \code{schema}, \code{metadata}
-and \code{build_info}. AusTraits 5.0.0 predates the \code{identifiers} table, and
-fills in \code{source_id} for only a few datasets.
+\code{taxa}, \code{identifiers}, \code{contributors}, \code{sources}, \code{definitions}, \code{schema},
+\code{metadata} and \code{build_info}. AusTraits 7.0.0 fills in \code{source_id} for
+only a few datasets, and predates the reference columns of the \code{methods}
+table that traits.build 2.3 introduced (it has \code{source_primary_key} and
+others; see \code{\link[=join_sources]{join_sources()}}).
 }
 \source{
-AusTraits 5.0.0, \doi{10.5281/zenodo.10156222}, licensed under
+AusTraits 7.0.0, \doi{10.5281/zenodo.15718081}, licensed under
 CC BY 4.0 (\url{https://creativecommons.org/licenses/by/4.0/}), cut down to
-23 datasets with \code{\link[=extract_dataset]{extract_dataset()}} (the script is \code{data-raw/create_data.R}
+24 datasets with \code{\link[=extract_dataset]{extract_dataset()}} (the script is \code{data-raw/create_data.R}
 in the package's GitHub repository). Please cite AusTraits as described
 in Falster et al. (2021) \doi{10.1038/s41597-021-01006-6}, and the
 original studies, listed in \code{sources} (as in the full release, a few keys
@@ -28,8 +30,8 @@ in \code{schema} says. See the file \code{COPYRIGHTS} installed with the package
 austraits_lite
 }
 \description{
-A traits.build database with 23 of the datasets in AusTraits
-5.0.0, the Australian plant trait database. It is in the same form as the
+A traits.build database with 24 of the datasets in AusTraits
+7.0.0, the Australian plant trait database. It is in the same form as the
 databases \code{\link[=load_database]{load_database()}} downloads, so every function in the package
 works on it, and the examples use it. For analysis, load a full release
 with \code{\link[=load_database]{load_database()}} instead.
