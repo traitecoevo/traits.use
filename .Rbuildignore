@@ -20,3 +20,4 @@
 ^inst/cheatsheet$
 ^tests/testthat/_problems$
 testthat-problems\.rds$
+^tests/testthat/ignore$

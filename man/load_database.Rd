@@ -18,8 +18,7 @@ A Zenodo concept doi will load the latest version of that record.}
 a large list containing traits.build data tables
 }
 \description{
-Works like \code{\link[=load_austraits]{load_austraits()}}, but accepts the doi of any
-traits.build formatted database. The doi is resolved to its repository, the
+Loads a traits.build formatted database, given its doi. The doi is resolved to its repository, the
 relational database \code{.rds} file is downloaded to \code{path} (if not already
 there, or if the copy there does not match the record's md5 checksum) and
 then loaded. Zenodo and Figshare records are supported, as are dois that
@@ -31,5 +30,6 @@ austraits <- load_database(doi = "10.5281/zenodo.11188867", path = "data/austrai
 }
 }
 \seealso{
-load_austraits
+\code{austraits::load_austraits()}, which loads a release of
+AusTraits by version number
 }

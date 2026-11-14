@@ -45,7 +45,7 @@ remotes::install_github("traitecoevo/traits.use", dependencies = TRUE, upgrade =
 ```
 
 Leave out `dependencies = TRUE` for a lighter installation without the
-packages used for plotting and building the vignettes.
+packages used for plotting.
 
 ## Getting started
 
@@ -64,8 +64,9 @@ summarise_database(wood_density, "family")
 ```
 
 The [Getting Started
-tutorial](https://traitecoevo.github.io/traits.use/articles/austraits.html)
-walks through these functions using AusTraits. The [traits.build
+tutorial](https://traitecoevo.github.io/austraits/articles/austraits.html)
+in the `austraits` package walks through these functions using
+AusTraits. The [traits.build
 book](https://traitecoevo.github.io/traits.build-book/) explains how a
 traits.build database is structured: its tables, identifiers and how
 they link.
@@ -73,11 +74,14 @@ they link.
 ## For AusTraits users
 
 AusTraits is built with traits.build, so everything in `traits.use`
-works on it. `load_austraits()` loads a released AusTraits version by
-version number, and AusTraits releases on
-[Zenodo](https://doi.org/10.5281/zenodo.3568417) also include the data
-as plain-text `.csv` files for users of Python and other tools. You can
-look up each trait’s definition in the [AusTraits Plant
+works on it: load a release with `load_database()` and its DOI. The
+[`austraits`](https://github.com/traitecoevo/austraits) package adds
+what is specific to AusTraits: `load_austraits()` loads a release by
+version number, `plot_locations()` draws a map of Australia, and the
+Getting Started tutorial uses AusTraits throughout. AusTraits releases
+on [Zenodo](https://doi.org/10.5281/zenodo.3568417) also include the
+data as plain-text `.csv` files for users of Python and other tools. You
+can look up each trait’s definition in the [AusTraits Plant
 Dictionary](https://w3id.org/APD).
 
 The current functions support AusTraits 5.0.0 and later. For older

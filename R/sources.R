@@ -39,7 +39,7 @@
 #' replacement functions (`[<-`, `[[<-`, `names<-`) return a plain
 #' `BibEntry`, and so does `merge()` when it adds entries.
 #'
-#' [bind_databases()], [load_austraits()] and [extract_data()] (and so the
+#' [bind_databases()], [load_database()] and [extract_data()] (and so the
 #' other `extract_*()` functions) add the class to the `sources` they return,
 #' including for databases built before the class existed. An object carrying
 #' the class behaves as a plain `BibEntry` in a session where traits.use is not
@@ -56,7 +56,7 @@
 #'   `name` for every entry. For `$<-`, `[` and `c()`, a
 #'   `traits_build_sources` object.
 #'
-#' @seealso [bind_databases()], [load_austraits()], [RefManageR::BibEntry()]
+#' @seealso [bind_databases()], [load_database()], [RefManageR::BibEntry()]
 #' @name traits_build_sources
 #'
 #' @examples
@@ -79,7 +79,7 @@
 #' # Without the class, `$` with a key returns a list of NULLs
 #' database$sources$Falster_2005
 #'
-#' # bind_databases(), load_austraits() and extract_data() add the class
+#' # bind_databases(), load_database() and extract_data() add the class
 #' class(database$sources) <- c("traits_build_sources", class(database$sources))
 #' database$sources$Falster_2005
 #' database$sources[["Falster_2005"]]

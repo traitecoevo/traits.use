@@ -6,7 +6,7 @@ test_that("Dataframe is extracted correctly", {
   # Downloads AusTraits 5.0.0 from Zenodo unless it is already cached
   skip_on_cran()
   skip_if_offline()
-  austraits <- load_austraits(version = "5.0.0", path = "ignore/data/austraits")
+  austraits <- suppressMessages(load_database(doi = "10.5281/zenodo.10156222", path = "ignore/data/austraits"))
   
   # Extract Veronica first
   veronica <- extract_taxa(austraits, genus = "Veronica")

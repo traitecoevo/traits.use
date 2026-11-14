@@ -4,7 +4,7 @@
 \alias{plot_locations}
 \title{Produce location maps of trait values}
 \usage{
-plot_locations(database, feature = "trait_name", ..., basemap = "australia")
+plot_locations(database, feature = "trait_name", ..., basemap = NULL)
 }
 \arguments{
 \item{database}{traits.build database OR traits table from a traits.build database. Note location details must be joined. See join_location_coordinates and examples}
@@ -13,11 +13,13 @@ plot_locations(database, feature = "trait_name", ..., basemap = "australia")
 
 \item{...}{arguments passed to ggpointdensity::geom_pointdensity()}
 
-\item{basemap}{\code{"australia"} (the default) draws the locations over a map
-of Australia, and leaves out any location beyond the map, with a message
-saying how many records that affects; if no location lies on the map, it
-stops with an error. \code{NULL} draws every location without a map, for
-databases from outside Australia.}
+\item{basemap}{\code{NULL} (the default) draws every location without a map.
+Or a data frame of map cells to draw the locations over, with numeric
+columns \code{x} (longitude) and \code{y} (latitude), one row per land cell, as used
+by \code{\link[ggplot2:geom_raster]{ggplot2::geom_raster()}}; other columns are ignored. Locations beyond
+the map (plus half a degree) are left out, with a message saying how many
+records that affects; if no location lies on the map, it stops with an
+error. The \code{austraits} package passes a map of Australia here.}
 }
 \value{
 ggplot of sites
@@ -35,8 +37,9 @@ data \%>\% plot_locations("trait_name")
 data <- austraits \%>\% extract_trait(trait_names = c("plant_height")) \%>\% join_location_coordinates()
 data$traits \%>\% plot_locations("trait_name")
 
-#Every location, without the map of Australia
-data$traits \%>\% plot_locations("trait_name", basemap = NULL)
+#Over a map: a data frame of land cells with columns x and y
+land <- expand.grid(x = seq(140, 154, by = 0.1), y = seq(-38, -28, by = 0.1))
+data$traits \%>\% plot_locations("trait_name", basemap = land)
 }
 }
 \author{

@@ -27,7 +27,7 @@ utils::globalVariables(c(
   "genus",
   "Group",
   "abort",
-  "australia",
+  "land",
   "basis_of_value",
   "category",
   "colour",

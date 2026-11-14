@@ -1,7 +1,6 @@
 #' Load any traits.build database into R console
 #'
-#' @description Works like [load_austraits()], but accepts the doi of any
-#' traits.build formatted database. The doi is resolved to its repository, the
+#' @description Loads a traits.build formatted database, given its doi. The doi is resolved to its repository, the
 #' relational database `.rds` file is downloaded to `path` (if not already
 #' there, or if the copy there does not match the record's md5 checksum) and
 #' then loaded. Zenodo and Figshare records are supported, as are dois that
@@ -14,7 +13,8 @@
 #'
 #' @return a large list containing traits.build data tables
 #' @export
-#' @seealso load_austraits
+#' @seealso `austraits::load_austraits()`, which loads a release of
+#'   AusTraits by version number
 #'
 #' @examples
 #' \dontrun{
@@ -87,7 +87,7 @@ load_database <- function(doi = NULL, path = "data/traits.build", update = TRUE)
   #Check if doi is downloaded, if not download
   if(! file.exists(file_nm)){
     # Downloading file
-    download_austraits(url, file_nm, path = path, name = "your traits.build database")
+    download_database(url, file_nm, path = path, name = "your traits.build database")
 
     if(! file_matches_md5(file_nm, md5)){
       rlang::abort(paste0("Downloaded '", file_nm, "' does not match the md5 checksum for doi '", doi, "'"))
@@ -103,7 +103,7 @@ load_database <- function(doi = NULL, path = "data/traits.build", update = TRUE)
     rlang::abort(paste0("'", file_nm, "' is not a traits.build database!"))
   }
 
-  # Assign class, and let `$` look up sources by key (as load_austraits() does)
+  # Assign class, and let `$` look up sources by key
   attr(data, "class") <- "traits.build"
   data <- classify_sources(data)
 
@@ -246,4 +246,42 @@ resolve_doi <- function(doi){
   }
 
   res$values$data$value[res$values$type == "URL"][[1]]
+}
+
+
+#' Download a database file, saving it only once the download is complete
+#'
+#' @param url url of download via Zenodo API
+#' @param filename path the file is saved to, e.g. data/traits.build/austraits-7.0.0.rds
+#' @param path folder the file is saved in, used in messages
+#' @param name name of the database, used in messages
+#' @noRd
+#' @keywords internal
+
+download_database <- function(url, filename, path, name = "the database") {
+  # Allow at least 300s for large downloads, restoring the user's timeout after
+  o <- options(timeout = max(300, getOption("timeout")))
+  on.exit(options(o), add = TRUE)
+
+  # Download to a temporary file, so a failed download leaves nothing at `filename`
+  fn <- paste0(tempfile(), ".download")
+  on.exit(unlink(fn), add = TRUE)
+
+  message("Downloading ", name, " to '", path,"'")
+
+  res <- utils::download.file(url=url, destfile=fn, method="auto", quiet = FALSE, mode = "wb", cacheOK = TRUE)
+
+  if (res != 0) {
+    stop("Could not download ", name, "!")
+  }
+
+  # file.rename() fails when the temporary folder is on a different device to
+  # `filename` (e.g. another drive on Windows), so fall back to copying
+  if (! suppressWarnings(file.rename(fn, filename))) {
+    if (! file.copy(fn, filename, overwrite = TRUE)) {
+      stop("Could not save ", name, " to '", filename, "'")
+    }
+  }
+
+  invisible(filename)
 }

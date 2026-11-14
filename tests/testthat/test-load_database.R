@@ -76,7 +76,7 @@ test_that("A cached file from a different release is not reused", {
   )
 })
 
-test_that("download_austraits saves to the full path and restores the timeout", {
+test_that("download_database saves to the full path and restores the timeout", {
   src <- tempfile(fileext = ".rds")
   dest <- tempfile("dest")
   dir.create(dest)
@@ -89,7 +89,7 @@ test_that("download_austraits saves to the full path and restores the timeout", 
   on.exit(options(old), add = TRUE)
 
   filename <- file.path(dest, "db.rds")
-  suppressMessages(download_austraits(url, filename, path = dest, name = "test"))
+  suppressMessages(download_database(url, filename, path = dest, name = "test"))
 
   expect_equal(list.files(dest), "db.rds")
   expect_equal(readRDS(filename), 1:3)
