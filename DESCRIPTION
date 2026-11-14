@@ -4,12 +4,12 @@ Version: 0.1.0
 Authors@R:
     c(person(given = "Elizabeth",
              family = "Wenk",
-             role = c("aut", "cre"),
+             role = c("aut", "cre", "cph"),
              email = "e.wenk@unsw.edu.au",
              comment = c(ORCID = "0000-0001-5640-5910")),
       person(given = "Fonti",
              family = "Kar",
-             role = "aut",
+             role = c("aut", "cph"),
              email = "f.kar@unsw.edu.au",
              comment = c(ORCID = "0000-0002-2760-3974")),
       person(given = "Daniel",
@@ -21,8 +21,6 @@ Authors@R:
              family = "Indiarto",
              role = "aut",
              comment = c(ORCID = "0000-0001-9546-8201")),
-      person("Trait Ecology and Evolution", role = "cph",
-             comment = "copyright holder of the code, see LICENSE"),
       person("AusTraits contributors", role = "cph",
              comment = "AusTraits data in austraits_lite and the test data, see COPYRIGHTS"))
 Description: Load, explore and wrangle data from relational trait databases
