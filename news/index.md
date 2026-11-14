@@ -27,6 +27,15 @@
   own). Such databases now give the same columns, empty where there is
   nothing to fill. The location columns now always come in the order
   `latitude (deg)`, `longitude (deg)`, `location`.
+- [`as_wide_table()`](https://traitecoevo.github.io/traits.use/reference/as_wide_table.md)
+  now puts its most-used columns first, as it was meant to
+  ([\#25](https://github.com/traitecoevo/traits.use/issues/25)). Its
+  reordering had never been applied, so the columns came in the order of
+  the joins. No column is dropped: `source_id`, `repeat_measurements_id`
+  and the other columns of the traits, methods and taxa tables follow
+  the most-used ones, so
+  [`trait_pivot_wider()`](https://traitecoevo.github.io/traits.use/reference/trait_pivot_wider.md)
+  works on the result.
 - Fix bug in
   [`separate_trait_values()`](https://traitecoevo.github.io/traits.use/reference/separate_trait_values.md),
   which lost values: rows whose `method_context_id` or
