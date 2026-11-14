@@ -45,9 +45,12 @@ cited in more than one way gets the first type of \code{"dataset"}, \code{"sourc
 and \code{"secondary"}.
 
 In databases built with traits.build 2.3 or later, a dataset's own
-reference is keyed by its \code{dataset_id}. In older ones it is the methods
-table's \code{source_primary_key}, and the studies are also listed in its
-\code{source_original_dataset_key}.
+reference is keyed by its \code{dataset_id}, and every \code{source_id} is a key in
+\code{sources}. In older ones a dataset's own reference is the methods table's
+\code{source_primary_key}, the studies are listed in its
+\code{source_original_dataset_key}, and \code{source_id} was free text, so only the
+values that are keys in \code{sources} are read. Each dataset of a database
+combined with \code{\link[=bind_databases]{bind_databases()}} is read by the rules of its own build.
 
 A cited key with no entry in \code{sources} is listed with an \code{NA} citation and a
 warning, rather than silently dropped. A database can have such keys when a

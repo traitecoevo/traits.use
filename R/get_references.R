@@ -34,9 +34,12 @@
 #' and `"secondary"`.
 #'
 #' In databases built with traits.build 2.3 or later, a dataset's own
-#' reference is keyed by its `dataset_id`. In older ones it is the methods
-#' table's `source_primary_key`, and the studies are also listed in its
-#' `source_original_dataset_key`.
+#' reference is keyed by its `dataset_id`, and every `source_id` is a key in
+#' `sources`. In older ones a dataset's own reference is the methods table's
+#' `source_primary_key`, the studies are listed in its
+#' `source_original_dataset_key`, and `source_id` was free text, so only the
+#' values that are keys in `sources` are read. Each dataset of a database
+#' combined with [bind_databases()] is read by the rules of its own build.
 #'
 #' A cited key with no entry in `sources` is listed with an `NA` citation and a
 #' warning, rather than silently dropped. A database can have such keys when a
@@ -65,13 +68,18 @@
 #' unlink(bib_file)
 get_references <- function(database, file = NULL) {
 
-  if (is.data.frame(database) || !is.list(database) ||
-      !inherits(database[["sources"]], "BibEntry")) {
+  sources <- if (is.list(database) && !is.data.frame(database)) database[["sources"]]
+  # An extraction citing no reference in `sources` has an empty list there
+  no_sources <- is.list(sources) && length(sources) == 0
+  if (!inherits(sources, "BibEntry") && !no_sources) {
     rlang::abort(paste0(
       "`database` must be a traits.build database, or the result of an ",
       "`extract_*()` function, with its references in `sources`; a flattened ",
       "database has none."
     ))
+  }
+  if (!is.null(file) && !(is.character(file) && length(file) == 1 && !is.na(file))) {
+    rlang::abort("`file` must be a single file path, or `NULL`.")
   }
 
   # Check compatibility
@@ -79,7 +87,6 @@ get_references <- function(database, file = NULL) {
     function_not_supported(database)
   }
 
-  sources <- database[["sources"]]
   refs <- cited_references(database)
 
   # By position: given a character vector, `[` on a BibEntry searches rather
@@ -132,27 +139,37 @@ cited_references <- function(database, source_keys = names(database[["sources"]]
   }
   methods <- database[["methods"]]
 
-  # Built before traits.build 2.3?
-  old_schema <- "source_primary_key" %in% names(methods)
+  # Datasets built before traits.build 2.3. bind_databases() can mix them
+  # with later ones, whose rows then have no `source_primary_key`
+  old_datasets <- character()
+  if ("source_primary_key" %in% names(methods)) {
+    is_old <- !is.na(methods[["source_primary_key"]])
+    if (!any(c("dataset_id_citation", "secondary_id") %in% names(methods))) {
+      is_old[] <- TRUE
+    }
+    old_datasets <- unique(methods[["dataset_id"]][is_old])
+  }
 
   # A dataset's own reference: keyed by its `dataset_id` from traits.build
   # 2.3, and named in `source_primary_key` before
   dataset_keys <- methods[["dataset_id"]]
-  if (old_schema) {
+  if ("source_primary_key" %in% names(methods)) {
     dataset_keys <- dplyr::coalesce(as.character(methods[["source_primary_key"]]), dataset_keys)
   }
 
   # The study each observation was taken from. From traits.build 2.3 it must
   # be a key in `sources` (an observation from the dataset's own study names
   # the dataset, and so is typed as a dataset below). Before, it was free
-  # text, e.g. "44" (most of AusTraits 7.0.0's), so only the values that are
-  # keys count, and the studies are listed in `source_original_dataset_key`
-  observation_keys <- as.character(c(
-    database[["traits"]][["source_id"]],
-    database[["excluded_data"]][["source_id"]]
-  ))
-  if (old_schema) {
-    observation_keys <- observation_keys[observation_keys %in% source_keys]
+  # text, e.g. "44" (most of AusTraits 7.0.0's), so for those datasets only
+  # the values that are keys count, and the studies are listed in
+  # `source_original_dataset_key`
+  tables <- list(database[["traits"]], database[["excluded_data"]])
+  observation_keys <- character()
+  for (table in tables) {
+    if (is.null(table[["source_id"]])) next
+    keys <- as.character(table[["source_id"]])
+    free_text <- table[["dataset_id"]] %in% old_datasets & !keys %in% source_keys
+    observation_keys <- c(observation_keys, keys[!free_text])
   }
   study_keys <- c(
     observation_keys,

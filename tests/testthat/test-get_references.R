@@ -52,10 +52,17 @@ test_that("citations read as in join_sources() and the methods table", {
 
   # traits.build writes the methods table's citations with curly quotes
   methods <- dplyr::distinct(db$methods, source_primary_key, source_primary_citation)
-  expect_identical(
-    refs$citation[match(methods$source_primary_key, refs$key)],
-    gsub("[“”]", "\"", methods$source_primary_citation)
-  )
+  expected <- gsub("[\u201c\u201d]", "\"", methods$source_primary_citation)
+  expect_identical(refs$citation[match(methods$source_primary_key, refs$key)], expected)
+
+  # ... in any time zone. The references' dates are stored as midnight in
+  # Sydney, which is the day before in UTC, so 1 January 2003 was formatted
+  # as 2002 there
+  for (tz in c("UTC", "America/Los_Angeles", "Pacific/Auckland")) {
+    withr::with_timezone(tz, refs <- get_references(db))
+    expect_identical(refs$citation[match(methods$source_primary_key, refs$key)], expected)
+    expect_match(refs$citation[refs$key == "Falster_2003"], "(2003)", fixed = TRUE)
+  }
 })
 
 test_that("lists the references in the `sources` of an extract_*() result", {
@@ -86,6 +93,46 @@ test_that("a reference cited only by an observation's `source_id` is listed and 
   extracted <- extract_dataset(x, "Choat_2012")
   expect_contains(names(extracted$sources), "Extra_2000")
   expect_contains(get_references(extracted)$key, "Extra_2000")
+
+  # ... also from `excluded_data` (the fixture has none)
+  x <- db
+  x$sources <- c(x$sources, extra)
+  excluded <- x$traits[x$traits$dataset_id == "Choat_2012", ][1, ]
+  excluded$source_id <- "Extra_2000"
+  x$excluded_data <- dplyr::bind_rows(x$excluded_data, excluded)
+  refs <- get_references(x)
+  expect_identical(refs$type[refs$key == "Extra_2000"], "source")
+})
+
+test_that("each dataset of a combined database is read by its own build's rules", {
+  # Westoby_2014 as built by traits.build 2.3, citing a study with no reference
+  newer <- as_traits_build_2.3(extract_dataset(db, "Westoby_2014"))
+  newer$traits$source_id[1] <- "Missing_2099"
+  older <- extract_dataset(db, "Choat_2012")
+  expect_warning(
+    refs <- get_references(bind_databases(older, newer)),
+    "Missing_2099"
+  )
+  expect_contains(refs$key[is.na(refs$citation)], c("Missing_2099", "Westoby_2014"))
+  # Choat_2012's free-text `source_id` values are still not read as keys
+  free_text <- setdiff(older$traits$source_id, c(NA, names(older$sources)))
+  expect_gt(length(free_text), 0)
+  expect_false(any(free_text %in% refs$key))
+  expect_identical(
+    refs$key[refs$key %in% names(older$sources)],
+    sort(unname(names(older$sources)), method = "radix")
+  )
+})
+
+test_that("an extraction citing no reference in `sources` lists its keys", {
+  # extract_data() gives an empty list for `sources` here
+  x <- as_traits_build_2.3(db)
+  x$sources <- x$sources[which(names(x$sources) != "Falster_2003")]
+  extracted <- suppressMessages(extract_dataset(x, "Falster_2003"))
+  expect_length(extracted$sources, 0)
+  expect_warning(refs <- get_references(extracted), "Falster_2003")
+  expect_identical(refs$key, "Falster_2003")
+  expect_true(is.na(refs$citation))
 })
 
 test_that("keys with no reference in `sources` are listed with a warning", {
@@ -147,4 +194,10 @@ test_that("fails without a relational database", {
   expect_error(get_references(flatten_database(db)), "flattened")
   expect_error(get_references(list(traits = db$traits)), "sources")
   expect_error(get_references("Falster_2003"), "traits.build database")
+})
+
+test_that("`file` must be one path", {
+  for (file in list(c("a.bib", "b.bib"), NA_character_, 1, character())) {
+    expect_error(get_references(db, file = file), "single file path")
+  }
 })

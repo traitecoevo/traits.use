@@ -240,13 +240,8 @@ extract_data <- function(database, table = NA, col, col_value, partial_matches_a
     
     # Trim sources to the references the extracted observations cite: each dataset's
     # own, the source each observation was taken from (`source_id`), and each
-    # dataset's secondary references, as get_references() lists them. Each
-    # `dataset_id` is kept too, as before traits.build 2.3 a dataset's own
-    # reference could be keyed by another name
-    keys <- c(
-      ret$traits$dataset_id, ret$excluded_data$dataset_id,
-      cited_references(ret, names(database[["sources"]]))$key
-    )
+    # dataset's secondary references, as get_references() lists them
+    keys <- cited_references(ret, names(database[["sources"]]))$key
     # By position: given a character vector, `[` on a BibEntry searches rather
     # than indexes
     ret[["sources"]] <- database[["sources"]][which(names(database[["sources"]]) %in% keys)]
