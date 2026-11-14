@@ -10,10 +10,6 @@ about 13 times the smallest (so the axis, padded by 20% each side, spans
 more than a factor of 20). Values recorded as a bin or range are left
 out.
 
-Replaces
-[`plot_trait_distribution_beeswarm()`](https://traitecoevo.github.io/traits.use/reference/plot_trait_distribution_beeswarm.md),
-drawing many times faster.
-
 ## Usage
 
 ``` r

@@ -73,14 +73,18 @@
   under-counts taxa whose records disagree, while its legend said
   “species count”; the jitter plot draws highlighted groups in pink,
   which stands out from the alternating blue and orange, and names them
-  in the bottom-right corner (in static plots; `plotly::ggplotly()`
-  drops the label). Beyond what the report had, the jitter plot also
-  gives `raw` values their own shape, an open circle, rather than filing
-  them under “Unknown”, and its legend lists only the value types
-  present, rather than every type with blank keys for those missing.
-- [`plot_trait_distribution_beeswarm()`](https://traitecoevo.github.io/traits.use/reference/plot_trait_distribution_beeswarm.md)
-  is deprecated: it draws the jitter plot, with a warning. ggbeeswarm
-  and gridExtra are no longer needed.
+  in pink in the bottom-right corner (in static plots;
+  `plotly::ggplotly()` drops the label). Beyond what the report had, the
+  jitter plot also gives `raw` values their own shape, an open circle,
+  rather than filing them under “Unknown”, and its legend lists only the
+  value types present, rather than every type with blank keys for those
+  missing.
+- `plot_trait_distribution_beeswarm()` is removed: use
+  [`plot_trait_distribution_jitter()`](https://traitecoevo.github.io/traits.use/reference/plot_trait_distribution_jitter.md),
+  which draws the same distribution many times faster, or
+  [`plot_trait_distribution()`](https://traitecoevo.github.io/traits.use/reference/plot_trait_distribution.md),
+  which picks the plot from the trait’s type. ggbeeswarm and gridExtra
+  are no longer needed.
 - The plotting functions say which suggested packages they need (ggplot2
   and others) when one is not installed, rather than failing partway.
 - [`plot_locations()`](https://traitecoevo.github.io/traits.use/reference/plot_locations.md)
