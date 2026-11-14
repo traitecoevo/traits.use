@@ -105,12 +105,16 @@
 
 Plot site or variance distributions
 
+- [`plot_categorical_trait_distribution()`](https://traitecoevo.github.io/traits.use/reference/plot_categorical_trait_distribution.md)
+  : Plot the distribution of a categorical trait by family
 - [`plot_locations()`](https://traitecoevo.github.io/traits.use/reference/plot_locations.md)
   : Produce location maps of trait values
 - [`plot_site_locations()`](https://traitecoevo.github.io/traits.use/reference/plot_site_locations.md)
   **\[deprecated\]** : Produce location maps of trait values
-- [`plot_trait_distribution_beeswarm()`](https://traitecoevo.github.io/traits.use/reference/plot_trait_distribution_beeswarm.md)
-  : Beeswarm Trait distribution
+- [`plot_trait_distribution()`](https://traitecoevo.github.io/traits.use/reference/plot_trait_distribution.md)
+  : Plot the distribution of a trait
+- [`plot_trait_distribution_jitter()`](https://traitecoevo.github.io/traits.use/reference/plot_trait_distribution_jitter.md)
+  : Plot the distribution of a numeric trait by group
 
 ## Helpful functions
 

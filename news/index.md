@@ -15,6 +15,22 @@
   map of Australia used by
   [`plot_locations()`](https://traitecoevo.github.io/traits.use/reference/plot_locations.md).
 - Requires R 4.1.0 or later, as the code uses the native pipe `|>`.
+- New plotting functions from austraits.portal
+  ([\#15](https://github.com/traitecoevo/traits.use/issues/15),
+  [\#7](https://github.com/traitecoevo/traits.use/issues/7)):
+  [`plot_trait_distribution_jitter()`](https://traitecoevo.github.io/traits.use/reference/plot_trait_distribution_jitter.md)
+  plots a numeric trait by group, about 3 to 10 times faster than the
+  beeswarm plot on AusTraits 5.0.0 traits;
+  [`plot_categorical_trait_distribution()`](https://traitecoevo.github.io/traits.use/reference/plot_categorical_trait_distribution.md)
+  plots the proportion of each family’s taxa with each value of a
+  categorical trait;
+  [`plot_trait_distribution()`](https://traitecoevo.github.io/traits.use/reference/plot_trait_distribution.md)
+  picks between them from the trait’s type. They return a ggplot object,
+  match the trait name exactly, leave out bins and ranges, and keep
+  negative values within the x-axis limits.
+- [`plot_trait_distribution_beeswarm()`](https://traitecoevo.github.io/traits.use/reference/plot_trait_distribution_beeswarm.md)
+  is deprecated: it draws the jitter plot, with a warning. ggbeeswarm
+  and gridExtra are no longer needed.
 - The plotting functions say which suggested packages they need (ggplot2
   and others) when one is not installed, rather than failing partway.
 - [`plot_locations()`](https://traitecoevo.github.io/traits.use/reference/plot_locations.md)
