@@ -34,5 +34,6 @@ Note to AusTraits users:
 }
 \examples{
 # Append taxonomic details
-(austraits_lite \%>\% extract_dataset("Falster_2003") \%>\% join_taxa())$traits
+(austraits_lite \%>\% extract_dataset("Falster_2003") \%>\% join_taxa())$traits \%>\%
+  dplyr::select(taxon_name, trait_name, value, family, genus, taxon_rank)
 }

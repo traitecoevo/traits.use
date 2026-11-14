@@ -17,6 +17,11 @@
 #' @param include_description A logical indicating whether to include (TRUE) or omit (FALSE) the context_property descriptions; defaults to TRUE.
 #'
 #' @return A table combining information in 8 traits.build relational tables: traits, locations, contexts, methods, taxa, taxonomic_updates, contributors, and identifiers
+#' @examples
+#' flat <- austraits_lite %>%
+#'   extract_dataset("Falster_2003") %>%
+#'   flatten_database()
+#' flat
 #' @export
 #'
 #' @usage flatten_database(database, format, vars, include_description)

@@ -38,9 +38,10 @@ database <- extract_dataset(austraits_lite, "Falster_2003")
 database$identifiers <- dplyr::tibble(
   dataset_id = "Falster_2003",
   observation_id = unique(database$traits$observation_id)[1:2],
-  identifier_type = "collector_number",
-  identifier_value = c("DF 101", "DF 102"),
-  institution_code = NA_character_
+  identifier_type = "catalogNumber",
+  identifier_value = c("NSW 101", "NSW 102"),
+  institution_code = "NSW"
 )
-(database \%>\% join_identifiers(format = "single_column_pretty", vars = "all"))$traits
+(database \%>\% join_identifiers(format = "single_column_pretty", vars = "all"))$traits \%>\%
+  dplyr::select(observation_id, trait_name, value, identifier_types)
 }

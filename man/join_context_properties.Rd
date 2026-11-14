@@ -40,5 +40,7 @@ Note to AusTraits users:
 }
 \examples{
 (austraits_lite \%>\% extract_dataset("Crous_2013") \%>\%
-  join_context_properties(format = "many_columns", vars = "all", include_description = TRUE))$traits
+  join_context_properties(format = "many_columns", vars = "all",
+    include_description = TRUE))$traits \%>\%
+  dplyr::select(trait_name, value, dplyr::contains("context_properties"))
 }
