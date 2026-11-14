@@ -34,7 +34,7 @@ summarise_database_traits <-function(database, var) {
   ret <- 
     database[["traits"]] %>% 
     dplyr::pull({{var}}) %>% 
-    sort() %>% 
+    sort(method = "radix") %>% 
     janitor::tabyl() 
   
   # Fix first column name
@@ -68,7 +68,7 @@ summarise_database_taxa <-function(database, var) {
   # Create table
   ret <- database[["traits"]] %>% 
     dplyr::pull(var) %>% 
-    sort() %>% 
+    sort(method = "radix") %>% 
     janitor::tabyl() 
   
   # Fix first column name
