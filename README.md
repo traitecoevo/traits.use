@@ -130,7 +130,7 @@ citation("traits.use")
 #> 
 #>   Wenk, E., Kar, F., Falster, D. and Indiarto, D. (2026) traits.use:
 #>   Access and Wrangle Data from 'traits.build' Trait Databases. R
-#>   package version 0.1.0. https://github.com/traitecoevo/traits.use
+#>   package version 0.1.1. https://github.com/traitecoevo/traits.use
 #> 
 #>   Falster, D., Gallagher, R., Wenk, E.H. et al. (2021) AusTraits, a
 #>   curated plant trait database for the Australian flora. Scientific

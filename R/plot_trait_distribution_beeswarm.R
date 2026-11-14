@@ -21,7 +21,7 @@ plot_trait_distribution_beeswarm <- function(database,
                                              highlight = NA,
                                              hide_ids = FALSE) {
   lifecycle::deprecate_warn(
-    "0.1.0",
+    "0.1.1",
     "plot_trait_distribution_beeswarm()",
     "plot_trait_distribution_jitter()"
   )
