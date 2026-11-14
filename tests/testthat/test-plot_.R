@@ -3,9 +3,13 @@ not_supported_austraits <- list(austraits_3.0.2_lite, austraits_4.2.0_lite)
 
 test_that("Function doesn't throw error", {
   
-  #expect_invisible(austraits_5.0.0_lite %>% plot_trait_distribution_beeswarm("leaf_mass_per_area", "dataset_id", "Bloomfield_2018"))
-  
-  expect_invisible(austraits_5.0.0_lite %>% plot_trait_distribution_beeswarm("leaf_mass_per_area", "dataset_id"))
+  expect_s3_class(austraits_5.0.0_lite %>% plot_trait_distribution_jitter("leaf_mass_per_area", "dataset_id", "Bloomfield_2018"), "ggplot")
+
+  # The beeswarm plot is deprecated: it draws the jitter plot instead
+  lifecycle::expect_deprecated(
+    p <- austraits_5.0.0_lite %>% plot_trait_distribution_beeswarm("leaf_mass_per_area", "dataset_id")
+  )
+  expect_s3_class(p, "ggplot")
   
   # this function is currently really slow, blocking effective testing
   expect_invisible((austraits_5.0.0_lite %>% extract_trait("wood_density") %>% join_location_coordinates())$trait %>% plot_locations())
@@ -99,8 +103,8 @@ test_that("Function throws error", {
   expect_error(austraits_5.0.0_lite$traits |> plot_locations())
   expect_error(austraits_3.0.2_lite$traits |> plot_site_locations())
   expect_error(austraits_3.0.2_lite |> plot_site_locations())
-  expect_error(austraits_3.0.2_lite |> plot_trait_distribution_beeswarm())
-  expect_error(austraits_5.0.0_lite |> plot_trait_distribution_beeswarm("branch_mass_fraction", y_axis_category = "location_property"))
+  expect_error(austraits_3.0.2_lite |> plot_trait_distribution_jitter("leaf_area", "dataset_id"))
+  expect_error(austraits_5.0.0_lite |> plot_trait_distribution_jitter("branch_mass_fraction", y_axis_category = "location_property"), "Incorrect grouping variable")
 }) 
 
 
@@ -117,6 +121,110 @@ test_that("plotting functions say which suggested packages they need", {
   expect_error(plot_locations(austraits_5.0.0_lite), "needs")
   expect_equal(needed, c("ggplot2", "ggpointdensity", "viridis"))
   needed <- NULL
-  expect_error(plot_trait_distribution_beeswarm(austraits_5.0.0_lite, "leaf_mass_per_area", "dataset_id"), "needs")
-  expect_equal(needed, c("ggplot2", "ggbeeswarm (>= 0.7.1)", "gridExtra", "scales", "forcats"))
+  expect_error(plot_trait_distribution_jitter(austraits_5.0.0_lite, "leaf_mass_per_area", "dataset_id"), "needs")
+  expect_equal(needed, c("ggplot2", "forcats", "scales"))
+  needed <- NULL
+  expect_error(plot_categorical_trait_distribution(austraits_5.0.0_lite, "leaf_compoundness"), "needs")
+  expect_equal(needed, "ggplot2")
+})
+
+trait_table <- function(value, value_type = "mean", family = "Myrtaceae",
+                        trait_name = "leaf_area", unit = "mm2", ...) {
+  tibble::tibble(
+    dataset_id = "Test_2025", taxon_name = paste("Taxon", seq_along(value)),
+    trait_name = trait_name, value = as.character(value), unit = unit,
+    value_type = value_type, family = family, ...
+  )
+}
+
+test_that("plot_trait_distribution_jitter plots numeric values by group", {
+  d <- austraits_5.0.0_lite
+  p <- plot_trait_distribution_jitter(d, "leaf_mass_per_area", "family", highlight = "Proteaceae")
+  expect_s3_class(p, "ggplot")
+  built <- ggplot2::ggplot_build(p)
+
+  # family is joined from the taxa table, one row per family
+  lma <- d$traits[d$traits$trait_name == "leaf_mass_per_area", ]
+  families <- unique(d$taxa$family[d$taxa$taxon_name %in% lma$taxon_name])
+  expect_setequal(levels(p$data$Group), stats::na.omit(families))
+  expect_equal(nrow(p$data), nrow(lma))
+  expect_true(all(p$data$colour[p$data$Group == "Proteaceae"] == "c"))
+  # Values span more than a factor of 20, so the x-axis is on a log scale
+  expect_equal(p$scales$get_scales("x")$trans$name, "log-10")
+
+  # The trait name is matched exactly: leaf_area is not leaf_area_ratio etc.
+  t <- rbind(trait_table(1:3), trait_table(100, trait_name = "leaf_area_ratio"))
+  p <- plot_trait_distribution_jitter(t, "leaf_area", "family")
+  expect_equal(sort(p$data$value), 1:3)
+
+  # Bins, ranges and values that are not numbers are left out
+  t <- trait_table(c("1", "2--5", "3", "unknown"), value_type = c("mean", "bin", "range", "mean"))
+  p <- plot_trait_distribution_jitter(t, "leaf_area", "family")
+  expect_equal(p$data$value, 1)
+
+  # Nothing left to plot gives an empty plot saying so
+  p <- plot_trait_distribution_jitter(trait_table("2--5", value_type = "bin"), "leaf_area", "family")
+  expect_match(p$layers[[1]]$aes_params$label, "No numeric values of leaf_area")
+})
+
+test_that("plot_trait_distribution_jitter keeps every value within the limits", {
+  # 0.8 * min used to cut off the lowest negative values
+  t <- trait_table(c(-5, -1, 2, 10), family = c("A", "A", "B", "B"))
+  p <- plot_trait_distribution_jitter(t, "leaf_area", "family")
+  limits <- p$scales$get_scales("x")$limits
+  expect_true(limits[1] < -5 && limits[2] > 10)
+  expect_no_warning(ggplot2::ggplot_build(p))
+
+  # A single value, or all values zero, still plot
+  expect_no_warning(ggplot2::ggplot_build(plot_trait_distribution_jitter(trait_table(0), "leaf_area", "family")))
+  expect_no_warning(ggplot2::ggplot_build(plot_trait_distribution_jitter(trait_table(3), "leaf_area", "family")))
+})
+
+test_that("plot_categorical_trait_distribution plots proportions by family", {
+  # Taxon 1 is scored twice, once as "simple compound", so counts 0.75 simple
+  # and 0.25 compound; families are ordered by their proportion of the most
+  # common value
+  t <- tibble::tibble(
+    dataset_id = c("D1", "D2", "D1", "D1", "D1", "D1"),
+    taxon_name = c("T1", "T1", "T2", "T3", "T4", "T5"),
+    trait_name = "leaf_compoundness", unit = NA_character_, value_type = "mode",
+    value = c("simple", "simple compound", "simple", "compound", "compound", "simple"),
+    family = c("A", "A", "A", "B", "B", "C")
+  )
+  p <- plot_categorical_trait_distribution(t, "leaf_compoundness")
+  expect_s3_class(p, "ggplot")
+  props <- p$data
+  expect_equal(levels(props$value), c("simple", "compound"))
+  expect_equal(props$prop[props$family == "A" & props$value == "simple"], 1.75 / 2)
+  expect_equal(props$prop[props$family == "A" & props$value == "compound"], 0.25 / 2)
+  expect_equal(props$prop[props$family == "B"], 1)
+  expect_equal(as.vector(tapply(props$prop, props$family, sum)), c(1, 1, 1))
+  expect_equal(levels(props$family), c("C", "A", "B"))
+
+  # family_count keeps the families with the most taxa
+  p <- plot_categorical_trait_distribution(t, "leaf_compoundness", family_count = 1)
+  expect_equal(as.character(unique(p$data$family)), "A")
+
+  # A whole database gets family from its taxa table
+  p <- plot_categorical_trait_distribution(austraits_5.0.0_lite, "leaf_compoundness", family_count = 10)
+  expect_lte(length(unique(p$data$family)), 10)
+  expect_no_warning(ggplot2::ggplot_build(p))
+
+  expect_error(plot_categorical_trait_distribution(dplyr::select(t, -family), "leaf_compoundness"), "family")
+  expect_error(plot_categorical_trait_distribution(t, c("a", "b")), "single trait name")
+})
+
+test_that("plot_trait_distribution picks the plot from the trait's type", {
+  d <- austraits_5.0.0_lite
+  p <- plot_trait_distribution(d, "leaf_compoundness")
+  expect_true("counts_per_value" %in% names(p$data))
+  p <- plot_trait_distribution(d, "plant_height", hide_ids = TRUE)
+  expect_true("Group" %in% names(p$data))
+  expect_equal(p$labels$y, "By family")
+
+  # For a traits table, a trait without units is categorical
+  t <- trait_table(c("simple", "compound"), trait_name = "leaf_compoundness", unit = NA_character_)
+  expect_true("counts_per_value" %in% names(plot_trait_distribution(t, "leaf_compoundness")$data))
+  p <- plot_trait_distribution(trait_table(1:3), "leaf_area", y_axis_category = "dataset_id")
+  expect_equal(levels(p$data$Group), "Test_2025")
 })
