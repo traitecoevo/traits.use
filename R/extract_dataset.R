@@ -4,7 +4,7 @@
 #' 
 #' @param database traits.build database (list object)
 #' @param dataset_id character string that matches a `dataset_id` in the database
-#' @param partial_matches_allowed logical. If `TRUE` (the default), each value is matched as a case-insensitive regular expression, so `"Acacia"` also matches `"Acacia celsa"`; characters with special meaning in regular expressions, such as brackets, then need escaping. If `FALSE`, only exact matches are kept.
+#' @param partial_matches_allowed logical. If `TRUE` (the default), each value is matched as a case-insensitive regular expression, so `"Acacia"` also matches `"Acacia celsa"`; a value that matches exactly is always kept, even if it contains characters with special meaning in regular expressions, such as brackets. If `FALSE`, only exact matches are kept.
 #' @return List of tibbles containing all traits.build data and metadata for the specified dataset(s).
 #' @details
 #' `extract_dataset` has been developed to extract data for specific datasets from databases built using the traits.build workflow. 
