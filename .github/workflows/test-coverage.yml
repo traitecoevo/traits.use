@@ -44,5 +44,9 @@ jobs:
         shell: Rscript {0}
 
       - name: Test coverage
+        # traits.use's own upload token (codecov.io > traits.use > Settings);
+        # without it Codecov rate-limits the tokenless upload
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         run: covr::codecov()
         shell: Rscript {0}
