@@ -20,10 +20,6 @@
 # RStudio files
 .Rproj.user/
 
-# produced vignettes
-vignettes/*.html
-vignettes/*.pdf
-
 # produced docs
 doc/*.R
 doc/*.Rmd

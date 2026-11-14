@@ -314,7 +314,7 @@ test_that("bind_databases() gives the combined sources the class", {
 
 test_that("extract_*() keep the class, and add it to databases without it", {
   # austraits_5.0.0_lite lacks the class, as does any database read with
-  # readRDS() rather than load_austraits()
+  # readRDS() rather than load_database()
   extracted <- list(
     extract_dataset(austraits_5.0.0_lite, "Falster_2003"),
     extract_data(austraits_5.0.0_lite, "traits", "dataset_id", "Falster_2003"),

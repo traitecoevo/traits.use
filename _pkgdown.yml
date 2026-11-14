@@ -14,7 +14,6 @@ template:
 reference:
 - title: Accessing and exploring the database
 - contents:
-  - load_austraits
   - load_database
   - starts_with("get_")
   - summarise_database
@@ -55,7 +54,6 @@ navbar:
   structure:
     left:
     - home
-    - intro
     - reference
     - news
     right: [search, github]
@@ -66,10 +64,6 @@ navbar:
     reference:
       text: Reference
       href: reference/index.html
-    intro:
-      text: Get Started
-      href: articles/austraits.html
-
     news:
       text: News
       href: news/index.html

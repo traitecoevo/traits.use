@@ -5,16 +5,17 @@
 ## Repo-local guidance
 
 - **Code:** `R/` (functions), `tests/` (testthat), `man/` (generated docs), `NAMESPACE`,
-  `vignettes/`. `data/`, `data-raw/`, and `inst/` hold packaged/raw assets (incl. the cheatsheet).
-- **Access entry point:** `load_austraits()` (`R/load_austraits.R`) downloads/loads a released
-  AusTraits build (`.rds`); `get_versions()` / `get_version_latest()` resolve versions.
-  `load_database()` (`R/load_database.R`) loads any traits.build database from its doi
+  `data-raw/` and `inst/` hold raw assets (incl. the cheatsheet); `R/sysdata.rda` holds the test fixtures.
+- **Access entry point:** `load_database()` (`R/load_database.R`) loads any traits.build database from its doi
   (Zenodo, Figshare, or a doi resolving directly to an `.rds`).
+- **AusTraits-specific code lives in `austraits`, not here** (decided 2026-11-14, #13): `load_austraits()`,
+  `get_versions()` / `get_version_latest()`, the AusTraits vignette and the map of Australia. `plot_locations()`
+  takes a `basemap` data frame so `austraits` can pass its map.
 - **Wrangle/extract:** `extract_*()` (data/dataset/taxa/trait), `join_*()` (taxa, methods,
   contributors, locations, context/location properties), `lookup_*()`, `trait_pivot_longer/wider()`,
   `summarise_database()`, `bind_databases()`, `flatten_database()`, `as_wide_table()`.
 - **Build/test (standard R-package workflow):** `devtools::load_all()`, `devtools::test()`,
-  `devtools::check()`. The package targets `R >= 4.0.0`; tidyverse-style Imports (dplyr, tidyr,
+  `devtools::check()`. The package targets `R >= 4.1.0` (it uses `|>`); tidyverse-style Imports (dplyr, tidyr,
   purrr, etc.). Lifecycle badge is **experimental** until the first CRAN release.
 - **Default branch:** `master`. Docs/pkgdown site at <https://traitecoevo.github.io/traits.use/>.
 - **CRAN-bound:** `traits.use` must never `Import`/`Depend` on traits.build (not on CRAN, and +57 recursive dependencies). Keep network tests behind `skip_on_cran()` / `skip_if_offline()`.
@@ -36,7 +37,7 @@
 `traits.use` is part of the **AusTraits family** (a subset of the
 [`traitecoevo`](https://github.com/traitecoevo) org) — here, the user-facing access/wrangle API (R
 package) for traits.build-format databases, including AusTraits; loads the released `.rds` via
-`load_austraits()`. Family-wide concerns are documented centrally in
+`load_database()`. Family-wide concerns are documented centrally in
 **[austraits-meta](https://github.com/traitecoevo/austraits-meta)** — don't restate them here, read
 them there:
 

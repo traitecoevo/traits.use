@@ -3,11 +3,14 @@
 #' @param database traits.build database OR traits table from a traits.build database. Note location details must be joined. See join_location_coordinates and examples
 #' @param feature grouping/classification categories e.g trait_name, collection_type for <= v3.0.2, basis of record for >3.0.2
 #' @param ... arguments passed to ggpointdensity::geom_pointdensity()
-#' @param basemap `"australia"` (the default) draws the locations over a map
-#' of Australia, and leaves out any location beyond the map, with a message
-#' saying how many records that affects; if no location lies on the map, it
-#' stops with an error. `NULL` draws every location without a map, for
-#' databases from outside Australia.
+#' @param basemap `NULL` (the default) draws every location without a map.
+#' Or a data frame of map cells to draw the locations over, with numeric
+#' columns `x` (longitude) and `y` (latitude), one row per land cell, as used
+#' by [ggplot2::geom_raster()]; other columns, and rows missing `x` or `y`, are
+#' ignored. Locations beyond
+#' the map (plus half a degree) are left out, with a message saying how many
+#' records that affects; if no location lies on the map, it stops with an
+#' error. The `austraits` package passes a map of Australia here.
 #' @author Dony Indiarto - d.indiarto@student.unsw.edu.au
 #' @return ggplot of sites
 #' @examples
@@ -20,16 +23,27 @@
 #' data <- austraits %>% extract_trait(trait_names = c("plant_height")) %>% join_location_coordinates()
 #' data$traits %>% plot_locations("trait_name")
 #'
-#' #Every location, without the map of Australia
-#' data$traits %>% plot_locations("trait_name", basemap = NULL)
+#' #Over a map: a data frame of land cells with columns x and y, such as
+#' #`raster::as.data.frame(r, xy = TRUE, na.rm = TRUE)` of a land raster `r`
+#' land <- raster::as.data.frame(r, xy = TRUE, na.rm = TRUE)
+#' data$traits %>% plot_locations("trait_name", basemap = land)
 #' }
 #' @export
 
 
-plot_locations <- function(database, feature="trait_name", ..., basemap = "australia"){
+plot_locations <- function(database, feature="trait_name", ..., basemap = NULL){
 
-  if(!is.null(basemap) && !identical(basemap, "australia")){
-    cli::cli_abort("`basemap` must be \"australia\" or NULL")
+  if(identical(basemap, "australia")){
+    cli::cli_abort(c(
+      "The map of Australia is now in the {.pkg austraits} package.",
+      "i" = "Use {.fn austraits::plot_locations}, or pass a data frame of map cells as {.arg basemap}."
+    ))
+  }
+  if(!is.null(basemap) &&
+     !(is.data.frame(basemap) && all(c("x", "y") %in% names(basemap)) &&
+       is.numeric(basemap$x) && is.numeric(basemap$y) &&
+       any(!is.na(basemap$x) & !is.na(basemap$y)))){
+    cli::cli_abort("{.arg basemap} must be NULL or a data frame with numeric columns {.field x} (longitude) and {.field y} (latitude)")
   }
   
   # Check if traits.build object or the traits table
@@ -57,7 +71,7 @@ plot_locations <- function(database, feature="trait_name", ..., basemap = "austr
 
 #' Location plot for AusTraits versions > 3.0.2
 #' @noRd
-plot_locations2 <- function(database, feature, basemap = "australia", ...){
+plot_locations2 <- function(database, feature, basemap = NULL, ...){
   #Create site data
   sites <-
     database %>%
@@ -73,19 +87,22 @@ plot_locations2 <- function(database, feature, basemap = "australia", ...){
   site_map <- ggplot2::ggplot()
 
   if(!is.null(basemap)){
-    au_map <- australia_map_raster %>%
-      dplyr::mutate(australia = as.factor(australia))
+    map_cells <- basemap %>%
+      dplyr::ungroup() %>%
+      dplyr::select("x", "y") %>%
+      dplyr::filter(!is.na(x), !is.na(y)) %>%
+      dplyr::mutate(land = factor(1))
 
     # Leave out locations beyond the map (plus a margin), saying so, rather
     # than letting a handful of distant locations shrink the map
     margin <- 0.5
     inside <-
-      dplyr::between(sites$`longitude (deg)`, min(au_map$x) - margin, max(au_map$x) + margin) &
-      dplyr::between(sites$`latitude (deg)`, min(au_map$y) - margin, max(au_map$y) + margin)
+      dplyr::between(sites$`longitude (deg)`, min(map_cells$x) - margin, max(map_cells$x) + margin) &
+      dplyr::between(sites$`latitude (deg)`, min(map_cells$y) - margin, max(map_cells$y) + margin)
 
     if(!any(inside)){
       cli::cli_abort(paste0(
-        "None of the ", nrow(sites), " record(s) lie on the map of Australia. ",
+        "None of the ", nrow(sites), " record(s) lie on the map. ",
         "Use `basemap = NULL` to show every location."
       ))
     }
@@ -95,14 +112,14 @@ plot_locations2 <- function(database, feature, basemap = "australia", ...){
       n_locations <- nrow(dplyr::distinct(outside, `latitude (deg)`, `longitude (deg)`))
       cli::cli_alert_info(paste0(
         sum(!inside), " record(s) at ", n_locations,
-        " location(s) lie beyond the map of Australia and are not shown. ",
+        " location(s) lie beyond the map and are not shown. ",
         "Use `basemap = NULL` to show every location."
       ))
       sites <- sites[inside, ]
     }
 
     site_map <- site_map +
-      ggplot2::geom_raster(data = au_map, ggplot2::aes(x = x, y = y, fill = australia), show.legend = FALSE)
+      ggplot2::geom_raster(data = map_cells, ggplot2::aes(x = x, y = y, fill = land), show.legend = FALSE)
   }
 
   #Create site map

@@ -83,7 +83,7 @@ function_not_supported <- function(database, ...){
   # Formulate message
   cli::cli_abort(c(
     "x" = "{function_name} no longer supports this version of AusTraits, {AusTraits_version}",
-    "i" = "You can either update to a newer version of the data using `load_austraits()` OR",
+    "i" = "You can either load a newer version of the data, e.g. with `load_database()` or `austraits::load_austraits()`, OR",
     "i" = "Install an older version of the `austraits` package, e.g. `remotes::install_github(\"traitecoevo/austraits@v2.2.2\")`",
     "i" = "See https://github.com/traitecoevo/austraits for details."
   ),

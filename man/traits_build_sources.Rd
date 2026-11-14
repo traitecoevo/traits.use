@@ -75,7 +75,7 @@ it), as do the RefManageR methods built on \code{[}, such as \code{sort()},
 replacement functions (\verb{[<-}, \verb{[[<-}, \verb{names<-}) return a plain
 \code{BibEntry}, and so does \code{merge()} when it adds entries.
 
-\code{\link[=bind_databases]{bind_databases()}}, \code{\link[=load_austraits]{load_austraits()}} and \code{\link[=extract_data]{extract_data()}} (and so the
+\code{\link[=bind_databases]{bind_databases()}}, \code{\link[=load_database]{load_database()}} and \code{\link[=extract_data]{extract_data()}} (and so the
 other \verb{extract_*()} functions) add the class to the \code{sources} they return,
 including for databases built before the class existed. An object carrying
 the class behaves as a plain \code{BibEntry} in a session where traits.use is not
@@ -101,7 +101,7 @@ database <- list(sources = sources)
 # Without the class, `$` with a key returns a list of NULLs
 database$sources$Falster_2005
 
-# bind_databases(), load_austraits() and extract_data() add the class
+# bind_databases(), load_database() and extract_data() add the class
 class(database$sources) <- c("traits_build_sources", class(database$sources))
 database$sources$Falster_2005
 database$sources[["Falster_2005"]]
@@ -110,5 +110,5 @@ database$sources[["Falster_2005"]]
 database$sources$year
 }
 \seealso{
-\code{\link[=bind_databases]{bind_databases()}}, \code{\link[=load_austraits]{load_austraits()}}, \code{\link[RefManageR:BibEntry]{RefManageR::BibEntry()}}
+\code{\link[=bind_databases]{bind_databases()}}, \code{\link[=load_database]{load_database()}}, \code{\link[RefManageR:BibEntry]{RefManageR::BibEntry()}}
 }
