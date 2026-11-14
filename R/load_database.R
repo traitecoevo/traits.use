@@ -1,37 +1,55 @@
 #' Load any traits.build database into R console
 #'
 #' @description Loads a traits.build formatted database, given its doi. The doi is resolved to its repository, the
-#' relational database `.rds` file is downloaded to `path` (if not already
-#' there, or if the copy there does not match the record's md5 checksum) and
-#' then loaded. Zenodo and Figshare records are supported, as are dois that
-#' resolve directly to an `.rds` file.
+#' relational database `.rds` file is downloaded (if there is no copy already,
+#' or if the copy does not match the record's md5 checksum) and then loaded.
+#' Zenodo and Figshare records are supported, as are dois that resolve directly
+#' to an `.rds` file.
+#'
+#' By default the download is kept in a folder shared by all your projects
+#' (see [database_cache_dir()]), so each release is downloaded once per
+#' computer. Use [list_cached_databases()] and [clear_database_cache()] to see
+#' and delete what is there.
 #'
 #' @param doi character string - doi of the database, e.g. "10.5281/zenodo.11188867".
 #' A Zenodo concept doi will load the latest version of that record.
-#' @param path folder the database is downloaded to and cached in, e.g.
-#'   `"data/traits.build"` in a project, or `tempdir()` for one session. There
-#'   is no default, so nothing is written unless you say where.
-#' @param update if TRUE, the record's metadata .json will be re-downloaded
+#' @param path folder the database is downloaded to and cached in. If `NULL`
+#'   (the default), the folder shared by all your projects, given by
+#'   [database_cache_dir()]. Give a folder such as `"data/austraits"` to keep a
+#'   copy with a project instead, or `tempdir()` for one session.
+#' @param update if TRUE, the record's metadata .json will be re-downloaded;
+#'   if that fails (e.g. offline), the saved copy is used. With `FALSE`, a
+#'   concept doi loads the version last fetched into `path`, which for the
+#'   cache folder may have been by another project.
 #'
 #' @return a large list containing traits.build data tables
 #' @export
-#' @seealso `austraits::load_austraits()`, which loads a release of
-#'   AusTraits by version number
+#' @seealso [database_cache_dir()]; `austraits::load_austraits()`, which loads
+#'   a release of AusTraits by version number
 #'
 #' @examples
 #' \dontrun{
+#' # Downloaded the first time, then loaded from the cache
+#' austraits <- load_database(doi = "10.5281/zenodo.11188867")
+#'
+#' # Keeping a copy with a project instead
 #' austraits <- load_database(doi = "10.5281/zenodo.11188867", path = "data/austraits")
 #' }
 
-load_database <- function(doi = NULL, path, update = TRUE){
+load_database <- function(doi = NULL, path = NULL, update = TRUE){
   # Is doi supplied?
   if(is.null(doi)){
     stop("Please supply a doi!")
   }
 
-  # Is path supplied?
-  if(missing(path) || is.null(path)){
-    stop("File path must be supplied!")
+  # No path means the cache folder shared by all projects
+  use_cache <- is.null(path)
+  if(use_cache){
+    path <- database_cache_dir()
+  }
+
+  if(!is.character(path) || length(path) != 1 || is.na(path) || !nzchar(path)){
+    rlang::abort("`path` must be a single folder path, or NULL for the cache folder.")
   }
 
   # Remove any url prefix from doi
@@ -51,29 +69,8 @@ load_database <- function(doi = NULL, path, update = TRUE){
     message("doi '", doi, "' is version ", record$version)
   }
 
-  # Setting up the pars
-  files <- record$files
-  is_rds <- grepl("\\.rds$", files$key, ignore.case = TRUE)
-
-  if(! any(is_rds)){
-    rlang::abort(paste0("No .rds file found for doi '", doi,
-                        "'. Is this a traits.build database?"))
-  }
-
-  files <- files[is_rds, ]
-
-  # Ignore flattened database files, even when one is the only .rds
-  files <- files[!stringr::str_detect(files$key, "flattened"), ]
-
-  if(nrow(files) == 0) {
-    rlang::abort(paste0("Only flattened .rds files found for doi '", doi,
-                        "'; load_database() needs the relational database .rds"))
-  }
-
-  if(nrow(files) > 1) {
-    rlang::abort(paste0("More than one .rds file found for doi '", doi, "': ",
-                        paste(files$key, collapse = ", ")))
-  }
+  # The relational database .rds among the record's files
+  files <- database_file(record$files, doi)
 
   url <- files$url
   file_nm <- file.path(path, basename(files$key))
@@ -83,7 +80,12 @@ load_database <- function(doi = NULL, path, update = TRUE){
   # MYtraits.rds), so only reuse a cached file that matches the record's md5
   if(file.exists(file_nm) && ! file_matches_md5(file_nm, md5)){
     message("'", file_nm, "' does not match doi '", doi, "', downloading again")
-    file.remove(file_nm)
+    # A file another R session has open cannot be removed on Windows; going on
+    # would load the wrong release
+    if(! remove_file(file_nm)){
+      rlang::abort(paste0("Could not remove '", file_nm, "' to download doi '", doi,
+                          "'. Is it open in another R session?"))
+    }
   }
 
   #Check if doi is downloaded, if not download
@@ -94,6 +96,15 @@ load_database <- function(doi = NULL, path, update = TRUE){
     if(! file_matches_md5(file_nm, md5)){
       rlang::abort(paste0("Downloaded '", file_nm, "' does not match the md5 checksum for doi '", doi, "'"))
     }
+
+    # Old releases stay in the cache until deleted, so say what is there
+    if(use_cache){
+      record_cache_size(path, file_nm)
+    }
+  } else if(use_cache){
+    # Mark it used, so clear_database_cache(older_than) keeps it. This can
+    # fail quietly (e.g. a read-only cache), which only affects older_than
+    Sys.setFileTime(file_nm, Sys.time())
   }
 
   # Loading the .rds
@@ -127,14 +138,87 @@ load_record_json <- function(doi, path, update){
 
   # Does the .json exist?
   if(! file.exists(file_json) | update == TRUE){
-    # Retrieve the record
-    res <- resolve_doi_files(doi)
+    # Retrieve the record, falling back to the saved one when the repository
+    # cannot be reached. Other errors (e.g. a record since restricted) stop.
+    res <- tryCatch(resolve_doi_files(doi), error = function(e) {
+      unreachable <- ! inherits(e, "rlang_error") || inherits(e, "traits_use_unreachable")
+      if(! unreachable || ! file.exists(file_json)) stop(e)
+      message("Could not update the record for doi '", doi, "' (", conditionMessage(e),
+              "); using the copy saved in '", path, "'")
+      NULL
+    })
     # Save it
-    jsonlite::write_json(res, file_json)
+    if(! is.null(res)) jsonlite::write_json(res, file_json)
   }
 
   # Load the json
   jsonlite::fromJSON(file_json)
+}
+
+#' Pick the relational database .rds from a record's files
+#'
+#' @param files data frame of the record's files (`key`, `url`, `md5`)
+#' @param doi the doi, used in messages
+#' @return the one row of `files` that load_database() downloads; an error if
+#'   there is not exactly one. clear_database_cache() uses this too, so it
+#'   only ever claims the file load_database() wrote.
+#' @noRd
+#' @keywords internal
+
+database_file <- function(files, doi){
+  is_rds <- grepl("\\.rds$", files$key, ignore.case = TRUE)
+
+  if(! any(is_rds)){
+    rlang::abort(paste0("No .rds file found for doi '", doi,
+                        "'. Is this a traits.build database?"))
+  }
+
+  files <- files[is_rds, , drop = FALSE]
+
+  # Ignore flattened database files, even when one is the only .rds
+  files <- files[!stringr::str_detect(files$key, "flattened"), , drop = FALSE]
+
+  if(nrow(files) == 0) {
+    rlang::abort(paste0("Only flattened .rds files found for doi '", doi,
+                        "'; load_database() needs the relational database .rds"))
+  }
+
+  if(nrow(files) > 1) {
+    rlang::abort(paste0("More than one .rds file found for doi '", doi, "': ",
+                        paste(files$key, collapse = ", ")))
+  }
+
+  files
+}
+
+#' file.remove(), wrapped so tests can make it fail
+#' @noRd
+#' @keywords internal
+
+remove_file <- function(file){
+  file.remove(file)
+}
+
+#' Say what the cache holds after a download into it
+#'
+#' @param path the cache folder
+#' @param file_nm the database just downloaded
+#' @noRd
+#' @keywords internal
+
+record_cache_size <- function(path, file_nm){
+  cached <- list_cached_databases(path)
+  others <- cached[cached$file != basename(file_nm), ]
+
+  msg <- paste0("The cache in '", path, "' now holds ", nrow(cached), " database(s), ",
+                round(sum(cached$size_mb), 1), " MB.")
+  if(nrow(others) > 0){
+    days <- floor(as.numeric(difftime(Sys.time(), others$last_used, units = "days")))
+    msg <- paste0(msg, " Also there: ",
+                  paste0(others$file, " (", others$size_mb, " MB, last used ", days, " days ago)", collapse = ", "),
+                  ". Delete releases you no longer use with clear_database_cache().")
+  }
+  message(msg)
 }
 
 #' Find the files associated with a doi
@@ -244,7 +328,7 @@ resolve_doi <- function(doi){
   )
 
   if(is.null(res) || res$responseCode != 1){
-    rlang::abort(paste0("Could not resolve doi '", doi, "'"))
+    rlang::abort(paste0("Could not resolve doi '", doi, "'"), class = "traits_use_unreachable")
   }
 
   res$values$data$value[res$values$type == "URL"][[1]]
