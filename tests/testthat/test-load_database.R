@@ -194,15 +194,21 @@ test_that("Without a path, databases are kept in the per-user cache and reused",
   expect_equal(v1_again, v1)
   expect_identical(n_downloads, 1)
 
-  expect_message(load_database(doi = "10.5281/zenodo.4"), "now holds 2 database")
+  expect_message(load_database(doi = "10.5281/zenodo.4"), "now holds 2 database.*Also there: MYtraits.rds")
   cached <- list_cached_databases()
-  expect_named(cached, c("file", "size_mb", "modified"))
+  expect_named(cached, c("file", "size_mb", "last_used"))
   expect_setequal(cached$file, c("MYtraits.rds", "OTHERtraits.rds"))
 
   # Deleting one release, then the rest
   expect_error(clear_database_cache("nothere.rds", ask = FALSE), "Not a database")
-  expect_message(deleted <- clear_database_cache("MYtraits.rds", ask = FALSE), "Deleted 1 file")
-  expect_identical(basename(deleted), "MYtraits.rds")
+  expect_error(clear_database_cache("MYtraits.rds", older_than = 1), "not both")
+  local_mocked_bindings(ask_yes_no = function(msg) FALSE)
+  expect_message(clear_database_cache("MYtraits.rds", ask = TRUE), "Nothing deleted")
+  expect_length(list_cached_databases()$file, 2)
+  expect_message(deleted <- clear_database_cache(c("MYtraits.rds", "MYtraits.rds"), ask = FALSE),
+                 "Deleted 1 database")
+  # The record naming only that database goes with it
+  expect_setequal(basename(deleted), c("MYtraits.rds", "10.5281_zenodo.1.json"))
   expect_identical(list_cached_databases()$file, "OTHERtraits.rds")
 
   expect_message(clear_database_cache(ask = FALSE), "Deleted")
@@ -226,9 +232,61 @@ test_that("A path keeps the database with a project, and clearing it leaves othe
   expect_true(file.exists(file.path(project, "MYtraits.rds")))
   expect_false(dir.exists(cache))
 
+  # Files load_database() did not write are never deleted, nor the folder
   writeLines("x", file.path(project, "notes.csv"))
+  writeLines("{}", file.path(project, "config.json"))
+  saveRDS(1, file.path(project, "fitted_model.rds"))
+  expect_identical(list_cached_databases(project)$file, "MYtraits.rds")
   suppressMessages(clear_database_cache(path = project, ask = FALSE))
-  expect_identical(list.files(project), "notes.csv")
+  expect_setequal(list.files(project), c("notes.csv", "config.json", "fitted_model.rds"))
+
+  for (f in list.files(project, full.names = TRUE)) unlink(f)
+  suppressMessages(load_database(doi = "10.5281/zenodo.1", path = project))
+  suppressMessages(clear_database_cache(path = project, ask = FALSE))
+  expect_true(dir.exists(project))
+})
+
+test_that("Loading from the cache marks a database used, and older_than clears unused ones", {
+  src <- tempfile("releases")
+  cache <- tempfile("cache")
+  on.exit(unlink(c(src, cache), recursive = TRUE), add = TRUE)
+  withr::local_options(traits.use.cache_dir = cache)
+
+  releases <- list("10.5281/zenodo.1" = make_release(src, "1", 3),
+                   "10.5281/zenodo.4" = make_release(src, "4", 4))
+  releases[["10.5281/zenodo.4"]]$files$key <- "OTHERtraits.rds"
+  local_mocked_bindings(resolve_doi_files = function(doi) releases[[doi]])
+  suppressMessages(load_database(doi = "10.5281/zenodo.1"))
+  suppressMessages(load_database(doi = "10.5281/zenodo.4"))
+
+  long_ago <- Sys.time() - 400 * 86400
+  Sys.setFileTime(file.path(cache, c("MYtraits.rds", "OTHERtraits.rds")), long_ago)
+  # Release 1 is used again; release 4 is not
+  suppressMessages(load_database(doi = "10.5281/zenodo.1", update = FALSE))
+  cached <- list_cached_databases()
+  expect_gt(cached$last_used[cached$file == "MYtraits.rds"], Sys.time() - 3600)
+
+  expect_message(clear_database_cache(older_than = 365, ask = FALSE), "Deleted 1 database.*OTHERtraits.rds")
+  expect_identical(list_cached_databases()$file, "MYtraits.rds")
+  expect_message(clear_database_cache(older_than = 365, ask = FALSE), "No databases to delete")
+  expect_error(clear_database_cache(older_than = "a"), "number of days")
+})
+
+test_that("Offline, a saved record and database still load", {
+  src <- tempfile("releases")
+  cache <- tempfile("cache")
+  on.exit(unlink(c(src, cache), recursive = TRUE), add = TRUE)
+  withr::local_options(traits.use.cache_dir = cache)
+
+  release <- make_release(src, "1", 3)
+  local_mocked_bindings(resolve_doi_files = function(doi) release)
+  v1 <- suppressMessages(load_database(doi = "10.5281/zenodo.1"))
+
+  local_mocked_bindings(resolve_doi_files = function(doi) stop("no internet"))
+  expect_message(v1_offline <- load_database(doi = "10.5281/zenodo.1"), "Could not update the record.*no internet")
+  expect_equal(v1_offline, v1)
+  # With nothing saved, the error is not hidden
+  expect_error(suppressMessages(load_database(doi = "10.5281/zenodo.2")), "no internet")
 })
 
 test_that("The cache folder follows R_user_dir() unless the option is set", {

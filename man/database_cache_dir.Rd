@@ -13,22 +13,26 @@ list_cached_databases(path = database_cache_dir())
 clear_database_cache(
   files = NULL,
   path = database_cache_dir(),
+  older_than = NULL,
   ask = interactive()
 )
 }
 \arguments{
 \item{path}{folder to list or clear; the cache folder by default.}
 
-\item{files}{names of the \code{.rds} files to delete, as listed by
-\code{list_cached_databases()}. If \code{NULL}, every \code{.rds} and record \code{.json} file
-in \code{path} is deleted.}
+\item{files}{names of the database \code{.rds} files to delete, as listed by
+\code{list_cached_databases()}.}
+
+\item{older_than}{delete the databases not used (loaded from the cache) for
+this many days. In a folder given as \code{path}, this is days since the file
+was downloaded.}
 
 \item{ask}{if \code{TRUE}, asks for confirmation before deleting anything.}
 }
 \value{
 \code{database_cache_dir()} returns the folder's path (which may not
 exist yet). \code{list_cached_databases()} returns a tibble with one row per
-\code{.rds} file: \code{file}, \code{size_mb} and \code{modified}. \code{clear_database_cache()}
+database: \code{file}, \code{size_mb} and \code{last_used}. \code{clear_database_cache()}
 invisibly returns the paths of the files it deleted.
 }
 \description{
@@ -37,13 +41,14 @@ in one folder per user, so each release is downloaded once per computer and
 shared by every project and R session that loads it.
 \itemize{
 \item \code{database_cache_dir()} gives the folder.
-\item \code{list_cached_databases()} lists the databases in it, with their size.
-\item \code{clear_database_cache()} deletes some or all of them.
+\item \code{list_cached_databases()} lists the databases in it, with their size and
+when each was last used.
+\item \code{clear_database_cache()} deletes some or all of them, e.g. those not used
+for six months with \code{older_than = 180}.
 }
 
-A release of AusTraits is around 100 MB or more, and new releases are added
-beside old ones rather than replacing them, so delete the ones you no longer
-use.
+A release of AusTraits is around 100 MB or more, and each new release is
+usually kept beside the old ones, so delete the ones you no longer use.
 
 The folder is, in order of preference:
 \enumerate{
@@ -55,18 +60,22 @@ follows each operating system's convention for cache files (and the
 }
 
 To keep a copy of a database with a project instead, give
-\code{\link[=load_database]{load_database()}} a \code{path}; the functions here take the same \code{path}.
+\code{\link[=load_database]{load_database()}} a \code{path}; the functions here take the same \code{path}. They
+only ever touch the files \code{\link[=load_database]{load_database()}} wrote there: the database
+\code{.rds} files named in its record files (\code{10.*.json}, one per doi).
+}
+\details{
+With neither \code{files} nor \code{older_than}, \code{clear_database_cache()}
+deletes every database in \code{path}, with its record file.
 }
 \examples{
 database_cache_dir()
 list_cached_databases()
 
-# Clearing a folder of downloads, here a temporary one
-path <- file.path(tempdir(), "traits_use_example")
-dir.create(path)
-saveRDS(list(), file.path(path, "database-1.0.0.rds"))
-list_cached_databases(path)
-clear_database_cache(path = path, ask = FALSE)
+# Delete the cached databases not used for six months
+\dontrun{
+clear_database_cache(older_than = 180)
+}
 }
 \seealso{
 \code{\link[=load_database]{load_database()}}

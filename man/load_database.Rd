@@ -15,7 +15,10 @@ A Zenodo concept doi will load the latest version of that record.}
 \code{\link[=database_cache_dir]{database_cache_dir()}}. Give a folder such as \code{"data/austraits"} to keep a
 copy with a project instead, or \code{tempdir()} for one session.}
 
-\item{update}{if TRUE, the record's metadata .json will be re-downloaded}
+\item{update}{if TRUE, the record's metadata .json will be re-downloaded;
+if that fails (e.g. offline), the saved copy is used. With \code{FALSE}, a
+concept doi loads the version last fetched into \code{path}, which for the
+cache folder may have been by another project.}
 }
 \value{
 a large list containing traits.build data tables

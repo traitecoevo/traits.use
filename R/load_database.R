@@ -17,7 +17,10 @@
 #'   (the default), the folder shared by all your projects, given by
 #'   [database_cache_dir()]. Give a folder such as `"data/austraits"` to keep a
 #'   copy with a project instead, or `tempdir()` for one session.
-#' @param update if TRUE, the record's metadata .json will be re-downloaded
+#' @param update if TRUE, the record's metadata .json will be re-downloaded;
+#'   if that fails (e.g. offline), the saved copy is used. With `FALSE`, a
+#'   concept doi loads the version last fetched into `path`, which for the
+#'   cache folder may have been by another project.
 #'
 #' @return a large list containing traits.build data tables
 #' @export
@@ -98,7 +101,12 @@ load_database <- function(doi = NULL, path = NULL, update = TRUE){
   # MYtraits.rds), so only reuse a cached file that matches the record's md5
   if(file.exists(file_nm) && ! file_matches_md5(file_nm, md5)){
     message("'", file_nm, "' does not match doi '", doi, "', downloading again")
-    file.remove(file_nm)
+    # A file another R session has open cannot be removed on Windows; going on
+    # would load the wrong release
+    if(! file.remove(file_nm)){
+      rlang::abort(paste0("Could not remove '", file_nm, "' to download doi '", doi,
+                          "'. Is it open in another R session?"))
+    }
   }
 
   #Check if doi is downloaded, if not download
@@ -110,13 +118,13 @@ load_database <- function(doi = NULL, path = NULL, update = TRUE){
       rlang::abort(paste0("Downloaded '", file_nm, "' does not match the md5 checksum for doi '", doi, "'"))
     }
 
-    # Old releases stay in the cache until deleted, so say how big it is
+    # Old releases stay in the cache until deleted, so say what is there
     if(use_cache){
-      cached <- list_cached_databases(path)
-      message("The cache in '", path, "' now holds ", nrow(cached), " database(s), ",
-              round(sum(cached$size_mb), 1), " MB. ",
-              "See list_cached_databases() and clear_database_cache() to manage it.")
+      record_cache_size(path, file_nm)
     }
+  } else if(use_cache){
+    # Mark it used, so clear_database_cache(older_than) keeps it
+    Sys.setFileTime(file_nm, Sys.time())
   }
 
   # Loading the .rds
@@ -150,14 +158,41 @@ load_record_json <- function(doi, path, update){
 
   # Does the .json exist?
   if(! file.exists(file_json) | update == TRUE){
-    # Retrieve the record
-    res <- resolve_doi_files(doi)
+    # Retrieve the record, falling back to the saved one when offline
+    res <- tryCatch(resolve_doi_files(doi), error = function(e) {
+      if(! file.exists(file_json)) stop(e)
+      message("Could not update the record for doi '", doi, "' (", conditionMessage(e),
+              "); using the copy saved in '", path, "'")
+      NULL
+    })
     # Save it
-    jsonlite::write_json(res, file_json)
+    if(! is.null(res)) jsonlite::write_json(res, file_json)
   }
 
   # Load the json
   jsonlite::fromJSON(file_json)
+}
+
+#' Say what the cache holds after a download into it
+#'
+#' @param path the cache folder
+#' @param file_nm the database just downloaded
+#' @noRd
+#' @keywords internal
+
+record_cache_size <- function(path, file_nm){
+  cached <- list_cached_databases(path)
+  others <- cached[cached$file != basename(file_nm), ]
+
+  msg <- paste0("The cache in '", path, "' now holds ", nrow(cached), " database(s), ",
+                round(sum(cached$size_mb), 1), " MB.")
+  if(nrow(others) > 0){
+    days <- floor(as.numeric(difftime(Sys.time(), others$last_used, units = "days")))
+    msg <- paste0(msg, " Also there: ",
+                  paste0(others$file, " (", others$size_mb, " MB, last used ", days, " days ago)", collapse = ", "),
+                  ". Delete releases you no longer use with clear_database_cache().")
+  }
+  message(msg)
 }
 
 #' Find the files associated with a doi

@@ -5,12 +5,13 @@
 #' shared by every project and R session that loads it.
 #'
 #' - `database_cache_dir()` gives the folder.
-#' - `list_cached_databases()` lists the databases in it, with their size.
-#' - `clear_database_cache()` deletes some or all of them.
+#' - `list_cached_databases()` lists the databases in it, with their size and
+#'   when each was last used.
+#' - `clear_database_cache()` deletes some or all of them, e.g. those not used
+#'   for six months with `older_than = 180`.
 #'
-#' A release of AusTraits is around 100 MB or more, and new releases are added
-#' beside old ones rather than replacing them, so delete the ones you no longer
-#' use.
+#' A release of AusTraits is around 100 MB or more, and each new release is
+#' usually kept beside the old ones, so delete the ones you no longer use.
 #'
 #' The folder is, in order of preference:
 #'
@@ -21,17 +22,24 @@
 #'    `R_USER_CACHE_DIR` environment variable, if set).
 #'
 #' To keep a copy of a database with a project instead, give
-#' [load_database()] a `path`; the functions here take the same `path`.
+#' [load_database()] a `path`; the functions here take the same `path`. They
+#' only ever touch the files [load_database()] wrote there: the database
+#' `.rds` files named in its record files (`10.*.json`, one per doi).
 #'
 #' @param path folder to list or clear; the cache folder by default.
-#' @param files names of the `.rds` files to delete, as listed by
-#'   `list_cached_databases()`. If `NULL`, every `.rds` and record `.json` file
-#'   in `path` is deleted.
+#' @param files names of the database `.rds` files to delete, as listed by
+#'   `list_cached_databases()`.
+#' @param older_than delete the databases not used (loaded from the cache) for
+#'   this many days. In a folder given as `path`, this is days since the file
+#'   was downloaded.
 #' @param ask if `TRUE`, asks for confirmation before deleting anything.
+#'
+#' @details With neither `files` nor `older_than`, `clear_database_cache()`
+#'   deletes every database in `path`, with its record file.
 #'
 #' @return `database_cache_dir()` returns the folder's path (which may not
 #'   exist yet). `list_cached_databases()` returns a tibble with one row per
-#'   `.rds` file: `file`, `size_mb` and `modified`. `clear_database_cache()`
+#'   database: `file`, `size_mb` and `last_used`. `clear_database_cache()`
 #'   invisibly returns the paths of the files it deleted.
 #'
 #' @seealso [load_database()]
@@ -41,12 +49,10 @@
 #' database_cache_dir()
 #' list_cached_databases()
 #'
-#' # Clearing a folder of downloads, here a temporary one
-#' path <- file.path(tempdir(), "traits_use_example")
-#' dir.create(path)
-#' saveRDS(list(), file.path(path, "database-1.0.0.rds"))
-#' list_cached_databases(path)
-#' clear_database_cache(path = path, ask = FALSE)
+#' # Delete the cached databases not used for six months
+#' \dontrun{
+#' clear_database_cache(older_than = 180)
+#' }
 
 database_cache_dir <- function() {
   path <- getOption("traits.use.cache_dir")
@@ -66,63 +72,118 @@ database_cache_dir <- function() {
 #' @export
 
 list_cached_databases <- function(path = database_cache_dir()) {
-  files <- list.files(path, pattern = "\\.rds$", full.names = TRUE, ignore.case = TRUE)
-  info <- file.info(files)
+  files <- unique(cached_records(path)$file)
+  files <- files[file.exists(file.path(path, files))]
+  info <- file.info(file.path(path, files))
 
   dplyr::tibble(
-    file = basename(files),
+    file = files,
     size_mb = round(info$size / 1e6, 1),
-    modified = info$mtime
+    last_used = info$mtime
   )
 }
 
 #' @rdname database_cache_dir
 #' @export
 
-clear_database_cache <- function(files = NULL, path = database_cache_dir(), ask = interactive()) {
+clear_database_cache <- function(files = NULL, path = database_cache_dir(),
+                                 older_than = NULL, ask = interactive()) {
+  if (!is.null(files) && !is.null(older_than)) {
+    rlang::abort("Give `files` or `older_than`, not both.")
+  }
+
   if (!dir.exists(path)) {
     message("Nothing to delete: '", path, "' does not exist")
     return(invisible(character()))
   }
 
-  if (is.null(files)) {
-    # Only the files load_database() writes, so nothing else in a project
-    # folder given as `path` is touched
-    to_delete <- list.files(path, pattern = "\\.(rds|json)$", full.names = TRUE, ignore.case = TRUE)
-  } else {
-    unknown <- setdiff(files, list_cached_databases(path)$file)
+  cached <- list_cached_databases(path)
+
+  if (!is.null(files)) {
+    files <- unique(files)
+    unknown <- setdiff(files, cached$file)
     if (length(unknown) > 0) {
       rlang::abort(c(
         paste0("Not a database in '", path, "': ", paste0("'", unknown, "'", collapse = ", ")),
-        "i" = "See `list_cached_databases()` for the files there."
+        "i" = "See `list_cached_databases()` for the databases there."
       ))
     }
-    to_delete <- file.path(path, files)
+  } else if (!is.null(older_than)) {
+    if (!is.numeric(older_than) || length(older_than) != 1 || is.na(older_than) || older_than < 0) {
+      rlang::abort("`older_than` must be a number of days.")
+    }
+    files <- cached$file[cached$last_used < Sys.time() - older_than * 86400]
+  } else {
+    files <- cached$file
   }
 
-  if (length(to_delete) == 0) {
-    message("Nothing to delete in '", path, "'")
+  # Record files left naming no database are deleted with the databases
+  records <- cached_records(path)
+  remaining <- setdiff(cached$file, files)
+  orphans <- setdiff(records$json, records$json[records$file %in% remaining])
+  to_delete <- c(file.path(path, files), file.path(path, orphans))
+
+  if (length(files) == 0) {
+    message("No databases to delete in '", path, "'")
+    if (length(orphans) > 0) unlink(file.path(path, orphans))
     return(invisible(character()))
   }
 
-  size_mb <- round(sum(file.info(to_delete)$size) / 1e6, 1)
+  size_mb <- round(sum(cached$size_mb[cached$file %in% files]), 1)
+  summary <- paste0(length(files), " database(s) (", size_mb, " MB) from '", path, "': ",
+                    paste(files, collapse = ", "))
 
-  if (isTRUE(ask)) {
-    ok <- utils::askYesNo(paste0("Delete ", length(to_delete), " file(s) (", size_mb,
-                                 " MB) from '", path, "'?"), default = FALSE)
-    if (!isTRUE(ok)) {
-      message("Nothing deleted")
-      return(invisible(character()))
-    }
+  if (isTRUE(ask) && !isTRUE(ask_yes_no(paste0("Delete ", summary, "?")))) {
+    message("Nothing deleted")
+    return(invisible(character()))
   }
 
   unlink(to_delete)
-  message("Deleted ", length(to_delete), " file(s) (", size_mb, " MB) from '", path, "'")
+  message("Deleted ", summary)
 
-  # Leave no empty folder behind
-  if (length(list.files(path, all.files = TRUE, no.. = TRUE)) == 0) {
+  # Remove the cache folder once empty, but never a folder given as `path`
+  if (same_folder(path, database_cache_dir()) &&
+      length(list.files(path, all.files = TRUE, no.. = TRUE)) == 0) {
     unlink(path, recursive = TRUE)
   }
 
   invisible(to_delete)
+}
+
+#' The record files load_database() wrote in a folder, and the files they name
+#'
+#' @return data frame with columns `json` (record file name) and `file` (the
+#'   name of an `.rds` file the record lists, existing or not)
+#' @noRd
+#' @keywords internal
+
+cached_records <- function(path) {
+  # Named by load_record_json() from the doi, which starts "10."
+  jsons <- list.files(path, pattern = "^10\\.[^/\\\\]*\\.json$")
+
+  rows <- lapply(jsons, function(json) {
+    record <- tryCatch(jsonlite::fromJSON(file.path(path, json)), error = function(e) NULL)
+    keys <- basename(as.character(record$files$key))
+    keys <- keys[grepl("\\.rds$", keys, ignore.case = TRUE)]
+    data.frame(json = rep(json, length(keys)), file = keys)
+  })
+
+  do.call(rbind, c(list(data.frame(json = character(), file = character())), rows))
+}
+
+#' Do two paths name the same folder?
+#' @noRd
+#' @keywords internal
+
+same_folder <- function(a, b) {
+  identical(normalizePath(a, winslash = "/", mustWork = FALSE),
+            normalizePath(b, winslash = "/", mustWork = FALSE))
+}
+
+#' utils::askYesNo(), wrapped so tests can stand in for the user
+#' @noRd
+#' @keywords internal
+
+ask_yes_no <- function(msg) {
+  utils::askYesNo(msg, default = FALSE)
 }
