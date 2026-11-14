@@ -34,8 +34,6 @@ The output a traits.build formatted database with all tables subset
 based on the specified table, column (variable) and column value.
 }
 \examples{
-\dontrun{
-extract_data(database = traits.build_database, table = "traits", 
-col = "trait_name", col_value = "leaf_area")
-}
+extract_data(database = austraits_lite, table = "traits",
+  col = "trait_name", col_value = "leaf_area")
 }

@@ -15,6 +15,11 @@
 #' @return Compiled database as a single large list
 #' @seealso [traits_build_sources] for looking up `sources` by key
 #' @importFrom rlang .data
+#' @examples
+#' a <- extract_dataset(austraits_lite, "Falster_2003")
+#' b <- extract_dataset(austraits_lite, "Falster_2005_1")
+#' both <- bind_databases(a, b)
+#' unique(both$traits$dataset_id)
 #' @export
 bind_databases <- function(..., databases = list(...)) {
   

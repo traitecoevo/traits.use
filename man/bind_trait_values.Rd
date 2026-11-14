@@ -17,12 +17,11 @@ This function condenses data for studies that have multiple observations for a g
 This function concatenates multiple values into a single cell
 }
 \examples{
-\dontrun{
-traits <- austraits$traits \%>\% 
-dplyr::filter(dataset_id == "ABRS_1981")
+traits <- austraits_lite$traits \%>\%
+  dplyr::filter(dataset_id == "Falster_2005_1")
 traits
 traits_bind <- bind_trait_values(traits)
-}
+traits_bind
 }
 \author{
 Daniel Falster - daniel.falster@unsw.edu.au

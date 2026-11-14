@@ -29,7 +29,11 @@ Description: Load, explore and wrangle data from relational trait databases
     or datasets, combine several databases, look up references, and
     visualise the distribution of the data.
 License: MIT + file LICENSE
+Copyright: See file COPYRIGHTS: the bundled dataset austraits_lite is a
+    CC BY 4.0 subset of AusTraits 5.0.0, held by its contributors.
 Encoding: UTF-8
+LazyData: true
+LazyDataCompression: xz
 Language: en-GB
 Roxygen: list(markdown = TRUE)
 Depends: 

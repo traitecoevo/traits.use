@@ -25,6 +25,12 @@ class \code{\link{traits_build_sources}}, so a reference can be
 looked up by key with \code{$} as well as \code{[[} and \code{[}, e.g.
 \code{database$sources$Falster_2005}.
 }
+\examples{
+a <- extract_dataset(austraits_lite, "Falster_2003")
+b <- extract_dataset(austraits_lite, "Falster_2005_1")
+both <- bind_databases(a, b)
+unique(both$traits$dataset_id)
+}
 \seealso{
 \link{traits_build_sources} for looking up \code{sources} by key
 }

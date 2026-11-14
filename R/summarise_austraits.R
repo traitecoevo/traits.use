@@ -7,10 +7,8 @@
 #' @return dataframe of unique levels of variable with counts and percentage
 #' @export
 #' @examples
-#' \dontrun{
-#' summarise_database(database = austraits, "trait_name")
-#' summarise_database(database = austraits, "family")
-#' }
+#' summarise_database(database = austraits_lite, "trait_name")
+#' summarise_database(database = austraits_lite, "family")
 
 
 summarise_database <- function(database, var){

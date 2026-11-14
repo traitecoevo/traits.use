@@ -30,7 +30,6 @@ Note to AusTraits users:
 }
 }
 \examples{
-\dontrun{
-(database \%>\% join_methods)$traits
-}
+(austraits_lite \%>\% extract_dataset("Falster_2003") \%>\% join_methods())$traits \%>\%
+  dplyr::select(trait_name, value, methods)
 }

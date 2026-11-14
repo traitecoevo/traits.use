@@ -1,4 +1,8 @@
-
+# The example database (data/austraits_lite.rda), under its old internal
+# name. Its sources are made a plain BibEntry again, as in the .rds of a
+# release, so the tests also cover databases not yet given the class.
+austraits_5.0.0_lite <- traits.use::austraits_lite
+class(austraits_5.0.0_lite$sources) <- setdiff(class(austraits_5.0.0_lite$sources), "traits_build_sources")
 
 test_database_structure <- function(database, taxa = NA, dataset_id = NA, n_row = NA) {
   

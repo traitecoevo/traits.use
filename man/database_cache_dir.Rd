@@ -47,8 +47,9 @@ when each was last used.
 for six months with \code{older_than = 180}.
 }
 
-A release of AusTraits is around 100 MB or more, and each new release is
-usually kept beside the old ones, so delete the ones you no longer use.
+A release of AusTraits is about 20 MB (its flattened table several times
+that), and each new release is usually kept beside the old ones, so delete
+the ones you no longer use.
 
 The folder is, in order of preference:
 \enumerate{
@@ -72,10 +73,8 @@ deletes every database in \code{path}, with its record file.
 database_cache_dir()
 list_cached_databases()
 
-# Delete the cached databases not used for six months
-\dontrun{
-clear_database_cache(older_than = 180)
-}
+# Delete the cached databases not used for six months, with
+# clear_database_cache(older_than = 180)
 }
 \seealso{
 \code{\link[=load_database]{load_database()}}

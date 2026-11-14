@@ -20,9 +20,7 @@ convert_df_to_list <- function(df) {
 #' @param my_list A list with single entries
 #' @return A tibble with two columns
 #' @export
-#' @examples \dontrun{
-#' convert_list_to_df1(as.list(dplyr::starwars)[2])
-#' }
+#' @examples convert_list_to_df1(as.list(dplyr::starwars)[2])
 convert_list_to_df1 <- function(my_list) {
 
   for (f in names(my_list)) {
@@ -124,7 +122,9 @@ get_traits_table <- function(database){
 #' @noRd
 
 clean_NA <- function(x) {
-  ifelse(x == "NA", NA_character_, x)
+  # Not ifelse(), which returns a logical vector when every element is NA
+  x[x %in% "NA"] <- NA_character_
+  x
 }
 
 #' Print version of AusTraits object

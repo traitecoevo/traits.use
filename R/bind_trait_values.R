@@ -7,12 +7,11 @@
 #' @return tibble that is condensed down where multiple observations in value, value_type and replicates are collapsed down and separated by '--' 
 #'
 #' @examples 
-#' \dontrun{
-#' traits <- austraits$traits %>% 
-#' dplyr::filter(dataset_id == "ABRS_1981")
+#' traits <- austraits_lite$traits %>%
+#'   dplyr::filter(dataset_id == "Falster_2005_1")
 #' traits
 #' traits_bind <- bind_trait_values(traits)
-#' }
+#' traits_bind
 #' @author Daniel Falster - daniel.falster@unsw.edu.au
 #' @export
 

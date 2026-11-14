@@ -36,13 +36,16 @@ computer. Use \code{\link[=list_cached_databases]{list_cached_databases()}} and 
 and delete what is there.
 }
 \examples{
-\dontrun{
-# Downloaded the first time, then loaded from the cache
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
+# Downloads AusTraits (about 20 MB, several hundred MB once loaded) the
+# first time, then loads it from the cache. To try the package without
+# downloading anything, see ?austraits_lite.
 austraits <- load_database(doi = "10.5281/zenodo.11188867")
 
-# Keeping a copy with a project instead
-austraits <- load_database(doi = "10.5281/zenodo.11188867", path = "data/austraits")
-}
+# Keeping a copy in a folder of your choice instead, here a temporary one
+austraits <- load_database(doi = "10.5281/zenodo.11188867",
+  path = file.path(tempdir(), "austraits"))
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 \code{\link[=database_cache_dir]{database_cache_dir()}}; \code{austraits::load_austraits()}, which loads

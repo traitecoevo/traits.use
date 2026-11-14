@@ -59,6 +59,10 @@ library(traits.use)
 # `path` to keep a copy with a project instead
 database <- load_database("10.5281/zenodo.11188867")
 
+# Or try the package without downloading anything, on the small subset of
+# AusTraits that comes with it
+database <- austraits_lite
+
 # Pick out the traits you want, then add site coordinates to each value
 wood_density <- database |>
   extract_trait("wood_density") |>

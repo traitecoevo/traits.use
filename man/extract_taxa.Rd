@@ -42,10 +42,8 @@ Note to AusTraits users:
 }
 }
 \examples{
-\dontrun{
-extract_taxa(database = austraits, family = "Proteaceae")
-extract_taxa(database = austraits, genus = "Acacia")
-}
+extract_taxa(database = austraits_lite, family = "Proteaceae")
+extract_taxa(database = austraits_lite, genus = "Acacia")
 }
 \author{
 Fonti Kar - f.kar@unsw.edu.au

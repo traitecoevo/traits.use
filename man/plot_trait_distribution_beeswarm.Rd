@@ -38,8 +38,9 @@ distribution many times faster. \code{plot_trait_distribution_beeswarm()} now
 draws and returns the jitter plot, with a deprecation warning.
 }
 \examples{
-\dontrun{
-austraits \%>\% plot_trait_distribution_jitter("wood_density", "dataset_id", "Westoby_2014")
-}
+\dontshow{if (rlang::is_installed(c("ggplot2", "forcats", "scales"))) withAutoprint(\{ # examplesIf}
+# Use plot_trait_distribution_jitter() instead
+austraits_lite \%>\% plot_trait_distribution_jitter("wood_density", "dataset_id", "Westoby_2014")
+\dontshow{\}) # examplesIf}
 }
 \keyword{internal}

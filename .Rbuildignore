@@ -6,10 +6,10 @@
 ^doc$
 ^Meta$
 ^_pkgdown\.yml$
-^data$
 ^docs$
 ^pkgdown$
 ^ignore$
+^data/austraits$
 ^austraits$
 ^codecov\.yml$
 ^inst/cheatsheet/.*\.ppt$

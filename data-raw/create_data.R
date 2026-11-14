@@ -32,7 +32,10 @@ datasets <- c("Falster_2003", "Falster_2005_1", "Falster_2005_2",
               "Wright_2019", "Westoby_2014", "Vesk_2019", "Leigh_2003", "Prior_2003",
               "Prior_2016", "Choat_2006", "Choat_2012", "ABRS_1981", "Cernusak_2006", "Yang_2023")
 
-austraits_5.0.0_lite <- austraits_5.0.0 %>% extract_dataset(dataset_id = c(dataset_id, datasets))
+# Exported as `austraits_lite`, the database used in the examples and tests
+# (the tests call it austraits_5.0.0_lite, see tests/testthat/helper.R)
+austraits_lite <- austraits_5.0.0 %>% extract_dataset(dataset_id = c(dataset_id, datasets))
 
 ## The map of Australia (`australia_map_raster`) moved to the austraits package
-usethis::use_data(austraits_3.0.2_lite, austraits_4.2.0_lite, austraits_5.0.0_lite, internal = TRUE, overwrite = TRUE)
+usethis::use_data(austraits_lite, compress = "xz", overwrite = TRUE)
+usethis::use_data(austraits_3.0.2_lite, austraits_4.2.0_lite, internal = TRUE, overwrite = TRUE)
