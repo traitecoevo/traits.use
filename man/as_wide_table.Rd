@@ -17,7 +17,7 @@ some cols renamed for alignment with other resources
 Create a single wide table from a traits.build data object
 }
 \examples{
-\dontrun{
-austraits \%>\% as_wide_table()
-}
+austraits_lite \%>\%
+  extract_dataset("Falster_2003") \%>\%
+  as_wide_table()
 }

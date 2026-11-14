@@ -18,9 +18,7 @@
 #' -  For AusTraits versions <= 4.2.0 (up to Sept 2023 release) see [https://github.com/traitecoevo/austraits](https://github.com/traitecoevo/austraits)  for how to install old versions of the package or download a newer version of the database.
 #'
 #' @examples 
-#' \dontrun{
-#'extract_trait(database = austraits, trait_names = "wood_density", taxon_names = "Acacia celsa")
-#' }
+#' extract_trait(database = austraits_lite, trait_names = "wood_density", taxon_names = "Acacia celsa")
 #' @author Daniel Falster - daniel.falster@unsw.edu.au
 #' @export
 

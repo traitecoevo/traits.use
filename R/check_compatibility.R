@@ -7,10 +7,6 @@
 #' @return logical (T/F) output and messaging for incompatible versions
 #' @keywords internal
 #'
-#' @examples
-#' \dontrun{
-#' check_compatibility(database)
-#' }
 #' @author Elizabeth Wenk - e.wenk@unsw.edu.au
 
 check_compatibility <- function(database, single_table_allowed = FALSE) {

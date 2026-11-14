@@ -19,10 +19,8 @@
 #' -  For AusTraits versions <= 4.2.0 (up to Sept 2023 release) see [https://github.com/traitecoevo/austraits](https://github.com/traitecoevo/austraits) for how to install old versions of the package or download a newer version of the database.
 #'
 #' @examples 
-#' \dontrun{
-#'extract_taxa(database = austraits, family = "Proteaceae")
-#'extract_taxa(database = austraits, genus = "Acacia")
-#' }
+#' extract_taxa(database = austraits_lite, family = "Proteaceae")
+#' extract_taxa(database = austraits_lite, genus = "Acacia")
 #' @author Fonti Kar - f.kar@unsw.edu.au
 #' @export
 

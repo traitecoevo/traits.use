@@ -16,9 +16,7 @@
 #' -  For AusTraits versions <= 4.2.0 (up to Sept 2023 release) see [https://github.com/traitecoevo/austraits](https://github.com/traitecoevo/austraits)  for how to install old versions of the package or download a newer version of the database.
 #'
 #' @examples
-#' \dontrun{
-#' (database %>% join_location_coordinates)$traits
-#' }
+#' (austraits_lite %>% extract_dataset("Falster_2003") %>% join_location_coordinates())$traits
 #' 
 #' @export
 join_location_coordinates <- function(database) {
@@ -77,10 +75,8 @@ join_location_coordinates <- function(database) {
 #' @export
 #' 
 #' @examples
-#' \dontrun{
-#' #Append taxonomic details
-#' (database %>% join_taxa)$traits
-#' }
+#' # Append taxonomic details
+#' (austraits_lite %>% extract_dataset("Falster_2003") %>% join_taxa())$traits
 join_taxa <- function(database, 
                       vars =  c("family", "genus", "taxon_rank", "establishment_means")) {
 
@@ -124,10 +120,8 @@ join_taxa <- function(database,
 #' @export
 #' 
 #' @examples
-#' \dontrun{
-#' #Append taxonomic update details
-#' (database %>% join_taxonomic_updates)$traits
-#' }
+#' # Append taxonomic update details
+#' (austraits_lite %>% extract_dataset("Falster_2003") %>% join_taxonomic_updates())$traits
 join_taxonomic_updates <- function(database, vars =  c("aligned_name")) {
 
   # Check compatibility
@@ -173,9 +167,17 @@ join_taxonomic_updates <- function(database, vars =  c("aligned_name")) {
 #' @export
 #' 
 #' @examples
-#' \dontrun{
+#' database <- extract_dataset(austraits_lite, "Falster_2003")
+#'
+#' # austraits_lite predates the identifiers table, so add a small one
+#' database$identifiers <- dplyr::tibble(
+#'   dataset_id = "Falster_2003",
+#'   observation_id = unique(database$traits$observation_id)[1:2],
+#'   identifier_type = "collector_number",
+#'   identifier_value = c("DF 101", "DF 102"),
+#'   institution_code = NA_character_
+#' )
 #' (database %>% join_identifiers(format = "single_column_pretty", vars = "all"))$traits
-#' }
 join_identifiers <- function(database,
                                      format = "single_column_pretty",
                                      vars =  "all") {
@@ -183,6 +185,13 @@ join_identifiers <- function(database,
   # Check compatibility
   if(!check_compatibility(database)){
     function_not_supported(database)
+  }
+
+  # Databases built before traits.build added the identifiers table (e.g.
+  # AusTraits 5.0.0) have none to join
+  if (is.null(database$identifiers)) {
+    message("This database has no identifiers table, so no identifiers were added")
+    return(database)
   }
 
   # If all identifier types to be added, create `vars` vector that is unique list 
@@ -274,9 +283,7 @@ join_identifiers <- function(database,
 #' @export
 #' 
 #' @examples
-#' \dontrun{
-#' (database %>% join_methods)$traits
-#' }
+#' (austraits_lite %>% extract_dataset("Falster_2003") %>% join_methods())$traits
 join_methods <- function(database, vars =  c("methods")) {
 
   # Check compatibility
@@ -326,9 +333,8 @@ join_methods <- function(database, vars =  c("methods")) {
 #' @export
 #'
 #' @examples
-#' \dontrun{
-#' (database %>% join_sources(vars = c("dataset_id_citation", "source_id_citation")))$traits
-#' }
+#' (austraits_lite %>% extract_dataset("Falster_2003") %>%
+#'   join_sources(vars = c("dataset_id_citation", "source_id_citation")))$traits
 join_sources <- function(database, vars = "all") {
 
   # Check compatibility
@@ -394,10 +400,9 @@ join_sources <- function(database, vars = "all") {
 #' @export
 #' 
 #' @examples
-#' \dontrun{
-#' (database %>% join_contributors(format = "single_column_pretty", 
-#' vars = c("last_name", "first_name", "ORCID")))$traits
-#' }
+#' (austraits_lite %>% extract_dataset("Falster_2003") %>%
+#'   join_contributors(format = "single_column_pretty",
+#'     vars = c("last_name", "first_name", "ORCID")))$traits
 join_contributors <- function(database,
                               format = "single_column_pretty",
                               vars =  "all") {
@@ -489,9 +494,8 @@ join_contributors <- function(database,
 #' @export
 #' 
 #' @examples
-#' \dontrun{
-#' (database %>% join_location_properties(format = "single_column_pretty", vars = "all"))$traits
-#' }
+#' (austraits_lite %>% extract_dataset("Falster_2003") %>%
+#'   join_location_properties(format = "single_column_pretty", vars = "all"))$traits
 join_location_properties <- function(database,
                                      format = "single_column_pretty",
                                      vars =  "all") {
@@ -596,10 +600,8 @@ join_location_properties <- function(database,
 #' @export
 #' 
 #' @examples
-#' \dontrun{
-#' (database %>% join_context_properties(
-#' format = "many_columns", vars = "all", include_description = TRUE))$traits
-#' }
+#' (austraits_lite %>% extract_dataset("Crous_2013") %>%
+#'   join_context_properties(format = "many_columns", vars = "all", include_description = TRUE))$traits
 join_context_properties <- function(database,
                                     format = "single_column_pretty",
                                     vars =  "all",

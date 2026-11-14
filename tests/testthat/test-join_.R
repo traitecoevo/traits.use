@@ -95,3 +95,11 @@ test_that("`flatten_database` takes references from `join_sources`, once", {
   expect_false(any(c("source_primary_citation", "source_secondary_key") %in% names(flat)))
   expect_false(any(grepl("\\.(x|y)$", names(flat))))
 })
+
+test_that("join_identifiers() leaves a database without an identifiers table unchanged", {
+  # AusTraits 5.0.0 predates the identifiers table
+  database <- extract_dataset(austraits_5.0.0_lite, "Falster_2003")
+  expect_null(database$identifiers)
+  expect_message(joined <- join_identifiers(database), "no identifiers table")
+  expect_identical(joined, database)
+})

@@ -16,10 +16,8 @@
 #' @export
 #'
 #' @examples 
-#' \dontrun{
-#' extract_data(database = traits.build_database, table = "traits", 
-#' col = "trait_name", col_value = "leaf_area")
-#' }
+#' extract_data(database = austraits_lite, table = "traits",
+#'   col = "trait_name", col_value = "leaf_area")
 extract_data <- function(database, table = NA, col, col_value, partial_matches_allowed = TRUE) {
   
   # Check missingness

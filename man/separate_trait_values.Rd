@@ -19,13 +19,11 @@ This function reverts the action of bind_trait_values.
 This function separates values that were concatenated so that studies that have multiple observations for a given trait will have separate row for each observation.
 }
 \examples{
-\dontrun{
-trait_data <- austraits$traits \%>\% 
-dplyr::filter(dataset_id == "Falster_2005_1")
+trait_data <- austraits_lite$traits \%>\%
+  dplyr::filter(dataset_id == "Falster_2005_1")
 trait_data
 traits_bind <- bind_trait_values(trait_data)
-separate_trait_values(traits_bind)
-}
+separate_trait_values(traits_bind, austraits_lite$definitions)
 }
 \author{
 Daniel Falster - daniel.falster@unsw.edu.au

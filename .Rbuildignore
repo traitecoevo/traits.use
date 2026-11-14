@@ -6,7 +6,6 @@
 ^doc$
 ^Meta$
 ^_pkgdown\.yml$
-^data$
 ^docs$
 ^pkgdown$
 ^ignore$

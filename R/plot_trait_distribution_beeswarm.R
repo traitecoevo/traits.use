@@ -12,10 +12,9 @@
 #' @keywords internal
 #' @export
 #'
-#' @examples
-#' \dontrun{
-#' austraits %>% plot_trait_distribution_jitter("wood_density", "dataset_id", "Westoby_2014")
-#' }
+#' @examplesIf rlang::is_installed(c("ggplot2", "forcats", "scales"))
+#' # Use plot_trait_distribution_jitter() instead
+#' austraits_lite %>% plot_trait_distribution_jitter("wood_density", "dataset_id", "Westoby_2014")
 plot_trait_distribution_beeswarm <- function(database,
                                              trait_name,
                                              y_axis_category,

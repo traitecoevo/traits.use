@@ -7,13 +7,11 @@
 #' @param definitions The austraits definitions data frame
 #' @return trait tibble
 #' @examples 
-#' \dontrun{
-#' trait_data <- austraits$traits %>% 
-#' dplyr::filter(dataset_id == "Falster_2005_1")
+#' trait_data <- austraits_lite$traits %>%
+#'   dplyr::filter(dataset_id == "Falster_2005_1")
 #' trait_data
 #' traits_bind <- bind_trait_values(trait_data)
-#' separate_trait_values(traits_bind)
-#' }
+#' separate_trait_values(traits_bind, austraits_lite$definitions)
 #' @author Daniel Falster - daniel.falster@unsw.edu.au
 #' @export
 
