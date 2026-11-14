@@ -105,5 +105,7 @@ test_that("join_identifiers() works on a database without an identifiers table",
   expect_identical(setdiff(names(joined$traits), names(database$traits)), "identifier_types")
   expect_true(all(is.na(joined$traits$identifier_types)))
   expect_identical(joined$traits[names(database$traits)], database$traits)
+  # The database is not given an identifiers table
+  expect_identical(names(joined), names(database))
   expect_error(join_identifiers(database, format = "nonsense"))
 })

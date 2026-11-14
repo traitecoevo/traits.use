@@ -192,10 +192,12 @@ join_identifiers <- function(database,
   }
 
   # Databases built before traits.build added the identifiers table (e.g.
-  # AusTraits 5.0.0) have none: join an empty one, so the result has the same
-  # columns as for a database whose identifiers table is empty
-  if (is.null(database$identifiers)) {
-    database$identifiers <- dplyr::tibble(
+  # AusTraits 5.0.0) have none: join an empty one, so the traits table gets
+  # the same columns as for an empty identifiers table. The database itself
+  # is returned without one.
+  identifiers_table <- database$identifiers
+  if (is.null(identifiers_table)) {
+    identifiers_table <- dplyr::tibble(
       dataset_id = character(), observation_id = character(),
       identifier_type = character(), identifier_value = character(),
       institution_code = character()
@@ -206,14 +208,14 @@ join_identifiers <- function(database,
   # of identifier types in the database
   if (vars[1] == "all") {
 
-    vars_tmp <- database$identifiers %>%
+    vars_tmp <- identifiers_table %>%
       dplyr::distinct(identifier_type)
 
     vars <- vars_tmp$identifier_type
   }
 
   identifiers <- 
-    database$identifiers %>% 
+    identifiers_table %>% 
     dplyr::filter(identifier_type %in% vars)
 
   # variables to join_ by depends on if location_name already in traits table

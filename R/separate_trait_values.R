@@ -77,5 +77,5 @@ separate_trait_values <- function(trait_data, definitions = NULL) {
   # join it all back together, clean up and sort as in original
   dplyr::bind_rows(out_1, out_2) %>% 
     clean() %>% 
-    dplyr::arrange(observation_id, trait_name, value_type)
+    dplyr::arrange(observation_id, trait_name, value_type, method_id, method_context_id, repeat_measurements_id)
 }

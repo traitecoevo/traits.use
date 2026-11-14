@@ -20,7 +20,11 @@ Authors@R:
       person(given = "Dony",
              family = "Indiarto",
              role = "aut",
-             comment = c(ORCID = "0000-0001-9546-8201")))
+             comment = c(ORCID = "0000-0001-9546-8201")),
+      person("Trait Ecology and Evolution", role = "cph",
+             comment = "copyright holder of the code, see LICENSE"),
+      person("AusTraits contributors", role = "cph",
+             comment = "data in austraits_lite, see COPYRIGHTS"))
 Description: Load, explore and wrangle data from relational trait databases
     built with 'traits.build' <https://github.com/traitecoevo/traits.build>,
     such as AusTraits, the Australian plant trait database (Falster et al.

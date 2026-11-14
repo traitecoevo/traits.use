@@ -28,5 +28,11 @@ Authors:
   \item Dony Indiarto (\href{https://orcid.org/0000-0001-9546-8201}{ORCID})
 }
 
+Other contributors:
+\itemize{
+  \item Trait Ecology and Evolution (copyright holder of the code, see LICENSE) [copyright holder]
+  \item AusTraits contributors (data in austraits_lite, see COPYRIGHTS) [copyright holder]
+}
+
 }
 \keyword{internal}

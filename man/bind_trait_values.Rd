@@ -18,7 +18,7 @@ This function concatenates multiple values into a single cell
 }
 \examples{
 traits <- austraits_lite$traits \%>\%
-  dplyr::filter(dataset_id == "Falster_2005_1")
+  dplyr::filter(dataset_id == "Apgaua_2017")
 traits
 traits_bind <- bind_trait_values(traits)
 traits_bind
