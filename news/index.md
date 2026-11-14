@@ -1,6 +1,6 @@
 # Changelog
 
-## traits.use 0.1.0
+## traits.use 0.1.1
 
 - First release as `traits.use`, a generic package for loading and
   wrangling any traits.build database. The code and history come from
@@ -62,11 +62,13 @@
   categorical plot sizes points by the number of taxa with a record of
   each value, where the portal’s version used a fractional total that
   under-counts taxa whose records disagree, while its legend said
-  “species count”; the jitter plot gives `raw` values their own shape
-  rather than “Unknown”, draws highlighted groups in pink, which stands
-  out from the alternating blue and orange, and names them in the
-  bottom-right corner. Its legend lists only the value types present,
-  rather than every type with blank keys for those missing.
+  “species count”; the jitter plot draws highlighted groups in pink,
+  which stands out from the alternating blue and orange, and names them
+  in the bottom-right corner (in static plots; `plotly::ggplotly()`
+  drops the label). Beyond what the report had, the jitter plot also
+  gives `raw` values their own shape, an open circle, rather than filing
+  them under “Unknown”, and its legend lists only the value types
+  present, rather than every type with blank keys for those missing.
 - [`plot_trait_distribution_beeswarm()`](https://traitecoevo.github.io/traits.use/reference/plot_trait_distribution_beeswarm.md)
   is deprecated: it draws the jitter plot, with a warning. ggbeeswarm
   and gridExtra are no longer needed.
