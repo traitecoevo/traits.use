@@ -1,10 +1,11 @@
 # Load any traits.build database into R console
 
 Loads a traits.build formatted database, given its doi. The doi is
-resolved to its repository, the relational database `.rds` file is
-downloaded (if there is no copy already, or if the copy does not match
-the record's md5 checksum) and then loaded. Zenodo and Figshare records
-are supported, as are dois that resolve directly to an `.rds` file.
+resolved to its repository, the relational database `.rds` file (or with
+`flattened = TRUE`, the flattened one) is downloaded (if there is no
+copy already, or if the copy does not match the record's md5 checksum)
+and then loaded. Zenodo and Figshare records are supported, as are dois
+that resolve directly to an `.rds` file.
 
 By default the download is kept in a folder shared by all your projects
 (see
@@ -18,7 +19,7 @@ to see and delete what is there.
 ## Usage
 
 ``` r
-load_database(doi = NULL, path = NULL, update = TRUE)
+load_database(doi = NULL, path = NULL, update = TRUE, flattened = FALSE)
 ```
 
 ## Arguments
@@ -45,9 +46,24 @@ load_database(doi = NULL, path = NULL, update = TRUE)
   doi loads the version last fetched into `path`, which for the cache
   folder may have been by another project.
 
+- flattened:
+
+  if `TRUE`, load the flattened version of the database instead: one
+  table with the other tables joined to the traits table, made with
+  [`flatten_database()`](https://traitecoevo.github.io/traits.use/reference/flatten_database.md)
+  when the release was built. Releases of AusTraits from 7.0.0 include
+  it. Its reference columns follow the
+  [`flatten_database()`](https://traitecoevo.github.io/traits.use/reference/flatten_database.md)
+  of that time, so may differ from what
+  [`flatten_database()`](https://traitecoevo.github.io/traits.use/reference/flatten_database.md)
+  makes now (e.g. AusTraits 7.0.0 has `source_primary_citation`, not
+  `dataset_id_citation`). It is several times larger than the relational
+  database (AusTraits 7.0.0: a 77 MB download, about 1 GB once loaded).
+
 ## Value
 
-a large list containing traits.build data tables
+a large list containing traits.build data tables, or with
+`flattened = TRUE`, a single table (tibble)
 
 ## See also
 

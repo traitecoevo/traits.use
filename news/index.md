@@ -114,6 +114,16 @@
   ([\#22](https://github.com/traitecoevo/traits.use/issues/22)); give
   `path` to keep a copy with a project instead. Nothing is written to
   the working directory unasked.
+- `load_database(flattened = TRUE)` loads the flattened version of a
+  database, one table with the others joined to the traits table, which
+  releases of AusTraits include from 7.0.0
+  ([\#9](https://github.com/traitecoevo/traits.use/issues/9)). It is
+  cached like the relational database, so
+  [`list_cached_databases()`](https://traitecoevo.github.io/traits.use/reference/database_cache_dir.md)
+  and
+  [`clear_database_cache()`](https://traitecoevo.github.io/traits.use/reference/database_cache_dir.md)
+  now include a release’s flattened `.rds` (also one downloaded by hand
+  into a folder given as `path`).
 - New functions
   [`database_cache_dir()`](https://traitecoevo.github.io/traits.use/reference/database_cache_dir.md),
   [`list_cached_databases()`](https://traitecoevo.github.io/traits.use/reference/database_cache_dir.md)

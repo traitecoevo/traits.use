@@ -32,8 +32,8 @@ To keep a copy of a database with a project instead, give
 a `path`; the functions here take the same `path`. They only ever touch
 the files
 [`load_database()`](https://traitecoevo.github.io/traits.use/reference/load_database.md)
-wrote there: the database `.rds` files named in its record files
-(`10.*.json`, one per doi).
+wrote there: the database `.rds` files (relational or flattened) named
+in its record files (`10.*.json`, one per doi).
 
 ## Usage
 
