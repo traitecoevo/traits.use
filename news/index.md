@@ -55,7 +55,18 @@
   [`plot_trait_distribution()`](https://traitecoevo.github.io/traits.use/reference/plot_trait_distribution.md)
   picks between them from the trait’s type. They return a ggplot object,
   match the trait name exactly, leave out bins and ranges, and keep
-  negative values within the x-axis limits.
+  negative values within the x-axis limits. They also carry the changes
+  traits.build’s dataset report had made to its copies, so the report
+  can use these
+  ([\#21](https://github.com/traitecoevo/traits.use/issues/21)): the
+  categorical plot sizes points by the number of taxa with a record of
+  each value, where the portal’s version used a fractional total that
+  under-counts taxa whose records disagree, while its legend said
+  “species count”; the jitter plot gives `raw` values their own shape
+  rather than “Unknown”, draws highlighted groups in pink, which stands
+  out from the alternating blue and orange, and names them in the
+  bottom-right corner. Its legend lists only the value types present,
+  rather than every type with blank keys for those missing.
 - [`plot_trait_distribution_beeswarm()`](https://traitecoevo.github.io/traits.use/reference/plot_trait_distribution_beeswarm.md)
   is deprecated: it draws the jitter plot, with a warning. ggbeeswarm
   and gridExtra are no longer needed.

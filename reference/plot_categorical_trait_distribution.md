@@ -4,9 +4,11 @@ For the families with the most taxa scored for a categorical trait,
 plots the proportion of each family's taxa with each value of the trait.
 Each taxon counts once: within a dataset, a taxon's distinct values
 share its weight equally (a value cell such as `"simple compound"`
-counts as both values), and its datasets are then combined. Values are
-ordered from most to least common in the families shown. Ties between
-families at the `family_count` cut-off are broken alphabetically.
+counts as both values), and its datasets are then combined. Point colour
+shows that proportion, and point size the number of the family's taxa
+with any record of the value. Values are ordered from most to least
+common in the families shown. Ties between families at the
+`family_count` cut-off are broken alphabetically.
 
 ## Usage
 

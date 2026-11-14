@@ -40,7 +40,7 @@ plot_trait_distribution_beeswarm(
 
 - highlight:
 
-  One or more groups to highlight in a different colour
+  One or more groups to highlight, e.g. a `dataset_id`
 
 - hide_ids:
 
