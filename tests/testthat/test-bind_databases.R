@@ -68,7 +68,8 @@ test_that("`extract_data` keeps the references the extracted observations cite",
 test_that("bind_databases() orders sources and definitions the same in any locale", {
   # A locale whose collation differs from C, e.g. "bark_B_..." sorts before
   # "bark_C_..." in C but after "bark_ash_..." elsewhere
-  withr::local_locale(c(LC_COLLATE = "en_US.UTF-8"))
+  # Warns, rather than fails, where the locale is missing; the skip follows
+  suppressWarnings(withr::local_locale(c(LC_COLLATE = "en_US.UTF-8")))
   skip_if_not(Sys.getlocale("LC_COLLATE") == "en_US.UTF-8", "en_US.UTF-8 locale not available")
   skip_if(identical(sort(c("bark_B", "bark_ash")), sort(c("bark_B", "bark_ash"), method = "radix")),
           "this locale collates like C")
