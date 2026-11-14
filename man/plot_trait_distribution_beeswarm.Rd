@@ -13,24 +13,33 @@ plot_trait_distribution_beeswarm(
 )
 }
 \arguments{
-\item{database}{traits.build database (list object)}
+\item{database}{traits.build database (list object), or its traits table
+(which must then have a \code{family} column, e.g. from \code{\link[=join_taxa]{join_taxa()}})}
 
-\item{trait_name}{Name of trait to plot}
+\item{trait_name}{Name of the trait to plot (matched exactly)}
 
-\item{y_axis_category}{One of \code{dataset_id}, \code{family}}
+\item{y_axis_category}{Column to group values by, e.g. \code{"dataset_id"} or
+\code{"family"}. \code{family} and \code{genus} are added from the taxa table when
+\code{database} is a whole database.}
 
-\item{highlight}{Specify a group to highlight}
+\item{highlight}{One or more groups to highlight in a different colour}
 
-\item{hide_ids}{Logical for whether to add a label on y_axis?}
+\item{hide_ids}{Hide the group labels on the y-axis?}
+}
+\value{
+The plot from \code{\link[=plot_trait_distribution_jitter]{plot_trait_distribution_jitter()}}, invisibly, after
+drawing it
 }
 \description{
-Plots distribution of trait values by a  grouping variable using ggbeeswarm package
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
+
+Use \code{\link[=plot_trait_distribution_jitter]{plot_trait_distribution_jitter()}} instead, which draws the same
+distribution many times faster. \code{plot_trait_distribution_beeswarm()} now
+draws and returns the jitter plot, with a deprecation warning.
 }
 \examples{
 \dontrun{
-austraits \%>\% plot_trait_distribution_beeswarm("wood_density", "dataset_id", "Westoby_2014")
+austraits \%>\% plot_trait_distribution_jitter("wood_density", "dataset_id", "Westoby_2014")
 }
 }
-\author{
-Daniel Falster - daniel.falster@unsw.edu.au
-}
+\keyword{internal}
