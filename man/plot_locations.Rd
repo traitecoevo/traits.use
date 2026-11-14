@@ -16,7 +16,8 @@ plot_locations(database, feature = "trait_name", ..., basemap = NULL)
 \item{basemap}{\code{NULL} (the default) draws every location without a map.
 Or a data frame of map cells to draw the locations over, with numeric
 columns \code{x} (longitude) and \code{y} (latitude), one row per land cell, as used
-by \code{\link[ggplot2:geom_raster]{ggplot2::geom_raster()}}; other columns are ignored. Locations beyond
+by \code{\link[ggplot2:geom_raster]{ggplot2::geom_raster()}}; other columns, and rows missing \code{x} or \code{y}, are
+ignored. Locations beyond
 the map (plus half a degree) are left out, with a message saying how many
 records that affects; if no location lies on the map, it stops with an
 error. The \code{austraits} package passes a map of Australia here.}
@@ -37,8 +38,9 @@ data \%>\% plot_locations("trait_name")
 data <- austraits \%>\% extract_trait(trait_names = c("plant_height")) \%>\% join_location_coordinates()
 data$traits \%>\% plot_locations("trait_name")
 
-#Over a map: a data frame of land cells with columns x and y
-land <- expand.grid(x = seq(140, 154, by = 0.1), y = seq(-38, -28, by = 0.1))
+#Over a map: a data frame of land cells with columns x and y, such as
+#`raster::as.data.frame(r, xy = TRUE, na.rm = TRUE)` of a land raster `r`
+land <- raster::as.data.frame(r, xy = TRUE, na.rm = TRUE)
 data$traits \%>\% plot_locations("trait_name", basemap = land)
 }
 }

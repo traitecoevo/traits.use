@@ -15,7 +15,7 @@
   contributors, locations, context/location properties), `lookup_*()`, `trait_pivot_longer/wider()`,
   `summarise_database()`, `bind_databases()`, `flatten_database()`, `as_wide_table()`.
 - **Build/test (standard R-package workflow):** `devtools::load_all()`, `devtools::test()`,
-  `devtools::check()`. The package targets `R >= 4.0.0`; tidyverse-style Imports (dplyr, tidyr,
+  `devtools::check()`. The package targets `R >= 4.1.0` (it uses `|>`); tidyverse-style Imports (dplyr, tidyr,
   purrr, etc.). Lifecycle badge is **experimental** until the first CRAN release.
 - **Default branch:** `master`. Docs/pkgdown site at <https://traitecoevo.github.io/traits.use/>.
 - **CRAN-bound:** `traits.use` must never `Import`/`Depend` on traits.build (not on CRAN, and +57 recursive dependencies). Keep network tests behind `skip_on_cran()` / `skip_if_offline()`.

@@ -41,7 +41,8 @@ test_that("plot_locations draws over a basemap, reporting locations beyond it", 
   shown <- function(p) sort(unique(p$layers[[length(p$layers)]]$data$location_name))
 
   # A coarse stand-in with the extent of the map of Australia the austraits
-  # package passes (x 112.95 to 153.60, y -43.62 to -9.27), plus an ignored column
+  # package passes (x 112.95 to 153.60, y -43.62 to -9.27), in the same shape:
+  # x, y and a value column
   australia <- expand.grid(
     x = seq(112.95, 153.60, length.out = 20),
     y = seq(-43.616667, -9.266667, length.out = 20)
@@ -75,6 +76,16 @@ test_that("plot_locations draws over a basemap, reporting locations beyond it", 
   expect_error(plot_locations(sites, basemap = "malaysia"), "must be NULL or a data frame")
   expect_error(plot_locations(sites, basemap = data.frame(lon = 1, lat = 1)), "must be NULL or a data frame")
   expect_error(plot_locations(sites, basemap = australia[0, ]), "must be NULL or a data frame")
+  expect_error(plot_locations(sites, basemap = data.frame(x = NA_real_, y = NA_real_)), "must be NULL or a data frame")
+
+  # Cells missing a coordinate are ignored, rather than making the extent NA,
+  # and a grouped basemap works too
+  with_na <- rbind(australia, data.frame(x = NA, y = -30, australia = NA))
+  expect_message(p <- plot_locations(sites, basemap = with_na), "2 record\\(s\\) at 2 location\\(s\\)")
+  expect_equal(nrow(p$layers[[1]]$data), nrow(australia))
+  grouped <- dplyr::group_by(australia, australia)
+  expect_no_message(p <- plot_locations(sites[1:4, ], basemap = grouped))
+  expect_named(p$layers[[1]]$data, c("x", "y", "land"))
 
   # No location on the map says to use basemap = NULL, rather than failing
   # inside facet_wrap() on an empty layer

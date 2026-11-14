@@ -6,7 +6,8 @@
 #' @param basemap `NULL` (the default) draws every location without a map.
 #' Or a data frame of map cells to draw the locations over, with numeric
 #' columns `x` (longitude) and `y` (latitude), one row per land cell, as used
-#' by [ggplot2::geom_raster()]; other columns are ignored. Locations beyond
+#' by [ggplot2::geom_raster()]; other columns, and rows missing `x` or `y`, are
+#' ignored. Locations beyond
 #' the map (plus half a degree) are left out, with a message saying how many
 #' records that affects; if no location lies on the map, it stops with an
 #' error. The `austraits` package passes a map of Australia here.
@@ -22,8 +23,9 @@
 #' data <- austraits %>% extract_trait(trait_names = c("plant_height")) %>% join_location_coordinates()
 #' data$traits %>% plot_locations("trait_name")
 #'
-#' #Over a map: a data frame of land cells with columns x and y
-#' land <- expand.grid(x = seq(140, 154, by = 0.1), y = seq(-38, -28, by = 0.1))
+#' #Over a map: a data frame of land cells with columns x and y, such as
+#' #`raster::as.data.frame(r, xy = TRUE, na.rm = TRUE)` of a land raster `r`
+#' land <- raster::as.data.frame(r, xy = TRUE, na.rm = TRUE)
 #' data$traits %>% plot_locations("trait_name", basemap = land)
 #' }
 #' @export
@@ -39,7 +41,8 @@ plot_locations <- function(database, feature="trait_name", ..., basemap = NULL){
   }
   if(!is.null(basemap) &&
      !(is.data.frame(basemap) && all(c("x", "y") %in% names(basemap)) &&
-       is.numeric(basemap$x) && is.numeric(basemap$y) && nrow(basemap) > 0)){
+       is.numeric(basemap$x) && is.numeric(basemap$y) &&
+       any(!is.na(basemap$x) & !is.na(basemap$y)))){
     cli::cli_abort("{.arg basemap} must be NULL or a data frame with numeric columns {.field x} (longitude) and {.field y} (latitude)")
   }
   
@@ -85,7 +88,9 @@ plot_locations2 <- function(database, feature, basemap = NULL, ...){
 
   if(!is.null(basemap)){
     map_cells <- basemap %>%
+      dplyr::ungroup() %>%
       dplyr::select("x", "y") %>%
+      dplyr::filter(!is.na(x), !is.na(y)) %>%
       dplyr::mutate(land = factor(1))
 
     # Leave out locations beyond the map (plus a margin), saying so, rather

@@ -2,6 +2,7 @@
 
 - First release as `traits.use`, a generic package for loading and wrangling any traits.build database. The code and history come from the `austraits` package (version 3.1.1 and earlier, listed below), which becomes a thin AusTraits-specific layer over `traits.use` (austraits#188).
 - What is specific to AusTraits stays in the `austraits` package: `load_austraits()`, `get_versions()` and `get_version_latest()` (load AusTraits with `load_database()` and its doi instead), the AusTraits Getting Started vignette, and the map of Australia used by `plot_locations()`.
+- Requires R 4.1.0 or later, as the code uses the native pipe `|>`.
 - `plot_locations()` draws without a map by default. Its `basemap` argument takes a data frame of map cells (columns `x` and `y`) to draw the locations over; `basemap = "australia"` now gives an error pointing to the `austraits` package.
 - `extract_data()` on the contexts table now honours `partial_matches_allowed`: matching is case-insensitive by default, exact with `FALSE` (so brackets are read literally), and several values are combined. `partial_matches_allowed` is now documented in all `extract_*()` functions.
 - Support databases built with traits.build 2.3, where every observation names the reference it was taken from in `source_id` (the `dataset_id` unless it came from another study) and the methods table's reference columns are `dataset_id_type`, `dataset_id_citation`, `secondary_id` and `secondary_citation` (traitecoevo/traits.build#296). Older databases still work.

@@ -31,10 +31,9 @@ Description: Load, explore and wrangle data from relational trait databases
 License: MIT + file LICENSE
 Encoding: UTF-8
 Language: en
-LazyData: true
 Roxygen: list(markdown = TRUE)
 Depends: 
-    R (>= 4.0.0),
+    R (>= 4.1.0),
     RefManageR
 Imports:
     dplyr,
