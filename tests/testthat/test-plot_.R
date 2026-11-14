@@ -104,8 +104,6 @@ test_that("Function throws error", {
 }) 
 
 
-# Tear down code
-unlink("Rplots.pdf")
 test_that("plotting functions say which suggested packages they need", {
   # Calls go through rlang::check_installed(), which stops when one is missing
   needed <- NULL
@@ -116,9 +114,9 @@ test_that("plotting functions say which suggested packages they need", {
     },
     .package = "rlang"
   )
-  expect_error(plot_locations(austraits_5.0.0_lite), "needs ggplot2, ggpointdensity, viridis")
-  expect_error(
-    plot_trait_distribution_beeswarm(austraits_5.0.0_lite, "leaf_mass_per_area", "dataset_id"),
-    "needs ggplot2, ggbeeswarm"
-  )
+  expect_error(plot_locations(austraits_5.0.0_lite), "needs")
+  expect_equal(needed, c("ggplot2", "ggpointdensity", "viridis"))
+  needed <- NULL
+  expect_error(plot_trait_distribution_beeswarm(austraits_5.0.0_lite, "leaf_mass_per_area", "dataset_id"), "needs")
+  expect_equal(needed, c("ggplot2", "ggbeeswarm (>= 0.7.1)", "gridExtra", "scales", "forcats"))
 })

@@ -66,7 +66,7 @@ The [Getting Started tutorial](https://traitecoevo.github.io/austraits/articles/
 
 ## For AusTraits users
 
-AusTraits is built with traits.build, so everything in `traits.use` works on it: load a release with `load_database()` and its DOI. The [`austraits`](https://github.com/traitecoevo/austraits) package adds what is specific to AusTraits: `load_austraits()` loads a release by version number, `plot_locations()` draws a map of Australia, and the Getting Started tutorial uses AusTraits throughout. AusTraits releases on [Zenodo](https://doi.org/10.5281/zenodo.3568417) also include the data as plain-text `.csv` files for users of Python and other tools. You can look up each trait's definition in the [AusTraits Plant Dictionary](https://w3id.org/APD).
+AusTraits is built with traits.build, so everything in `traits.use` works on it: load a release with `load_database()` and its DOI. The [`austraits`](https://github.com/traitecoevo/austraits) package adds what is specific to AusTraits: `load_austraits()` loads a release by version number, `plot_locations()` draws a map of Australia, and the Getting Started tutorial uses AusTraits throughout. AusTraits releases on [Zenodo](https://doi.org/10.5281/zenodo.3568417) also include the data as plain-text `.csv` files for users of Python and other tools. You can look up each trait's definition in the [AusTraits Plant Dictionary](https://w3id.org/APD/).
 
 The current functions support AusTraits 5.0.0 and later. For older releases (4.2 and earlier), install an older version of the `austraits` package:
 

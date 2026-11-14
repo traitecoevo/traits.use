@@ -24,7 +24,7 @@ plot_trait_distribution_beeswarm <- function(database,
                                              hide_ids = FALSE) {
 
   rlang::check_installed(
-    c("ggplot2", "ggbeeswarm", "gridExtra", "scales", "forcats"),
+    c("ggplot2", "ggbeeswarm (>= 0.7.1)", "gridExtra", "scales", "forcats"),
     reason = "to use `plot_trait_distribution_beeswarm()`"
   )
   

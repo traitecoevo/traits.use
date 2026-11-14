@@ -17,4 +17,4 @@ This is a new submission. traits.use loads and wrangles trait databases built wi
 ## Notes for reviewers
 
 - Tests that download databases from Zenodo or Figshare are skipped on CRAN (`skip_on_cran()`, `skip_if_offline()`).
-- `load_database()` downloads a database to a path the user gives. The tests run on CRAN write only to `tempfile()` paths.
+- `load_database()` downloads a database only to the `path` the user gives; `path` has no default. The tests run on CRAN write only to `tempfile()` paths.

@@ -8,7 +8,9 @@
 #'
 #' @param doi character string - doi of the database, e.g. "10.5281/zenodo.11188867".
 #' A Zenodo concept doi will load the latest version of that record.
-#' @param path file path to where the database will be downloaded
+#' @param path folder the database is downloaded to and cached in, e.g.
+#'   `"data/traits.build"` in a project, or `tempdir()` for one session. There
+#'   is no default, so nothing is written unless you say where.
 #' @param update if TRUE, the record's metadata .json will be re-downloaded
 #'
 #' @return a large list containing traits.build data tables
@@ -21,14 +23,14 @@
 #' austraits <- load_database(doi = "10.5281/zenodo.11188867", path = "data/austraits")
 #' }
 
-load_database <- function(doi = NULL, path = "data/traits.build", update = TRUE){
+load_database <- function(doi = NULL, path, update = TRUE){
   # Is doi supplied?
   if(is.null(doi)){
     stop("Please supply a doi!")
   }
 
   # Is path supplied?
-  if(is.null(path)){
+  if(missing(path) || is.null(path)){
     stop("File path must be supplied!")
   }
 
