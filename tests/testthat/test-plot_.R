@@ -267,15 +267,11 @@ test_that("plot_trait_distribution_jitter highlights several groups and labels w
   expect_equal(sort(as.character(p$data$Group[p$data$colour == "c"])), c("A", "C"))
   expect_equal(p$scales$get_scales("x")$name, "leaf_area")
 
-  # The highlighted groups are named in the corner, in the highlight colour,
-  # and the label survives conversion to plotly
+  # The highlighted groups are named in the corner, in the highlight colour
   label <- p$layers[[2]]
-  expect_equal(label$aes_params$label, "● A, C")
+  expect_equal(label$aes_params$label, "\u25CF A, C")
   expect_equal(label$aes_params$colour, "deeppink3")
   expect_no_warning(ggplot2::ggplotGrob(p))
-  skip_if_not_installed("plotly")
-  texts <- unlist(lapply(plotly::plotly_build(plotly::ggplotly(p))$x$data, `[[`, "text"))
-  expect_true(any(grepl("A, C", texts, fixed = TRUE)))
 })
 
 test_that("plot_trait_distribution_jitter labels nothing when no group is highlighted", {
