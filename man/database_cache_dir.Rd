@@ -24,8 +24,8 @@ clear_database_cache(
 \code{list_cached_databases()}.}
 
 \item{older_than}{delete the databases not used (loaded from the cache) for
-this many days. In a folder given as \code{path}, this is days since the file
-was downloaded.}
+this many days. In a folder given as \code{path}, or where the cache cannot be
+written to, this is days since the file was downloaded.}
 
 \item{ask}{if \code{TRUE}, asks for confirmation before deleting anything.}
 }

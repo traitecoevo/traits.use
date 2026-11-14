@@ -30,8 +30,8 @@
 #' @param files names of the database `.rds` files to delete, as listed by
 #'   `list_cached_databases()`.
 #' @param older_than delete the databases not used (loaded from the cache) for
-#'   this many days. In a folder given as `path`, this is days since the file
-#'   was downloaded.
+#'   this many days. In a folder given as `path`, or where the cache cannot be
+#'   written to, this is days since the file was downloaded.
 #' @param ask if `TRUE`, asks for confirmation before deleting anything.
 #'
 #' @details With neither `files` nor `older_than`, `clear_database_cache()`
@@ -98,6 +98,7 @@ clear_database_cache <- function(files = NULL, path = database_cache_dir(),
   }
 
   cached <- list_cached_databases(path)
+  clear_all <- is.null(files) && is.null(older_than)
 
   if (!is.null(files)) {
     files <- unique(files)
@@ -123,15 +124,16 @@ clear_database_cache <- function(files = NULL, path = database_cache_dir(),
   orphans <- setdiff(records$json, records$json[records$file %in% remaining])
   to_delete <- c(file.path(path, files), file.path(path, orphans))
 
-  if (length(files) == 0) {
+  if (length(files) == 0 && !(clear_all && length(orphans) > 0)) {
     message("No databases to delete in '", path, "'")
-    if (length(orphans) > 0) unlink(file.path(path, orphans))
     return(invisible(character()))
   }
 
   size_mb <- round(sum(cached$size_mb[cached$file %in% files]), 1)
-  summary <- paste0(length(files), " database(s) (", size_mb, " MB) from '", path, "': ",
-                    paste(files, collapse = ", "))
+  summary <- paste0(length(files), " database(s) (", size_mb, " MB)",
+                    if (length(orphans) > 0) paste0(" and ", length(orphans), " record file(s)"),
+                    " from '", path, "'",
+                    if (length(files) > 0) paste0(": ", paste(files, collapse = ", ")))
 
   if (isTRUE(ask) && !isTRUE(ask_yes_no(paste0("Delete ", summary, "?")))) {
     message("Nothing deleted")
@@ -141,8 +143,10 @@ clear_database_cache <- function(files = NULL, path = database_cache_dir(),
   unlink(to_delete)
   message("Deleted ", summary)
 
-  # Remove the cache folder once empty, but never a folder given as `path`
-  if (same_folder(path, database_cache_dir()) &&
+  # Remove the default cache folder once empty, but never a folder the user
+  # chose, as `path` or with the option (which could be tempdir())
+  if (is.null(getOption("traits.use.cache_dir")) &&
+      same_folder(path, tools::R_user_dir("traits.use", which = "cache")) &&
       length(list.files(path, all.files = TRUE, no.. = TRUE)) == 0) {
     unlink(path, recursive = TRUE)
   }
@@ -153,7 +157,8 @@ clear_database_cache <- function(files = NULL, path = database_cache_dir(),
 #' The record files load_database() wrote in a folder, and the files they name
 #'
 #' @return data frame with columns `json` (record file name) and `file` (the
-#'   name of an `.rds` file the record lists, existing or not)
+#'   database `.rds` load_database() downloads for that record, existing or
+#'   not; `NA` for a record it refused)
 #' @noRd
 #' @keywords internal
 
@@ -162,10 +167,16 @@ cached_records <- function(path) {
   jsons <- list.files(path, pattern = "^10\\.[^/\\\\]*\\.json$")
 
   rows <- lapply(jsons, function(json) {
-    record <- tryCatch(jsonlite::fromJSON(file.path(path, json)), error = function(e) NULL)
-    keys <- basename(as.character(record$files$key))
-    keys <- keys[grepl("\\.rds$", keys, ignore.case = TRUE)]
-    data.frame(json = rep(json, length(keys)), file = keys)
+    tryCatch({
+      record <- jsonlite::fromJSON(file.path(path, json))
+      # Anything else with this name was not written by load_database()
+      if(!is.list(record) || !is.data.frame(record$files) || is.null(record$files$key)) {
+        return(NULL)
+      }
+      # Only the file load_database() downloads; NA for a record it refused
+      key <- tryCatch(basename(database_file(record$files, json)$key), error = function(e) NA_character_)
+      data.frame(json = json, file = key)
+    }, error = function(e) NULL)
   })
 
   do.call(rbind, c(list(data.frame(json = character(), file = character())), rows))

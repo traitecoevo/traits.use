@@ -212,9 +212,53 @@ test_that("Without a path, databases are kept in the per-user cache and reused",
   expect_identical(list_cached_databases()$file, "OTHERtraits.rds")
 
   expect_message(clear_database_cache(ask = FALSE), "Deleted")
-  expect_false(dir.exists(cache))
+  # A folder chosen with the option (it could be tempdir()) is never removed
+  expect_true(dir.exists(cache))
+  expect_length(list.files(cache), 0)
   expect_identical(nrow(list_cached_databases()), 0L)
+  expect_message(clear_database_cache(ask = FALSE), "No databases to delete")
+})
+
+test_that("The default cache folder is removed once cleared", {
+  src <- tempfile("releases")
+  user_cache <- tempfile("user_cache")
+  on.exit(unlink(c(src, user_cache), recursive = TRUE), add = TRUE)
+  withr::local_options(traits.use.cache_dir = NULL)
+  withr::local_envvar(R_USER_CACHE_DIR = user_cache)
+  expect_identical(database_cache_dir(), tools::R_user_dir("traits.use", which = "cache"))
+  expect_true(startsWith(database_cache_dir(), user_cache))
+
+  release <- make_release(src, "1", 3)
+  local_mocked_bindings(resolve_doi_files = function(doi) release)
+  suppressMessages(load_database(doi = "10.5281/zenodo.1"))
+  expect_true(dir.exists(database_cache_dir()))
+  suppressMessages(clear_database_cache(ask = FALSE))
+  expect_false(dir.exists(database_cache_dir()))
   expect_message(clear_database_cache(ask = FALSE), "does not exist")
+})
+
+test_that("Only the database load_database() downloaded counts, not other files a record lists", {
+  path <- tempfile("project")
+  dir.create(path)
+  on.exit(unlink(path, recursive = TRUE), add = TRUE)
+
+  # A record listing the relational and flattened .rds, both present
+  record <- list(doi = "10.5281/zenodo.7", source = "zenodo", version = "7",
+                 files = data.frame(key = c("db-7.rds", "db-7-flattened.rds", "db-7.zip"),
+                                    url = "file:///nowhere", md5 = NA))
+  jsonlite::write_json(record, file.path(path, "10.5281_zenodo.7.json"))
+  for (f in c("db-7.rds", "db-7-flattened.rds")) saveRDS(1, file.path(path, f))
+  # Files named like a record that load_database() did not write
+  writeLines("[1, 2]", file.path(path, "10.1000_array.json"))
+  writeLines("not json", file.path(path, "10.1000_broken.json"))
+  # A record load_database() refused (no .rds), left from an earlier attempt
+  jsonlite::write_json(list(doi = "10.5281/zenodo.8", source = "zenodo", version = "8",
+                            files = data.frame(key = "data.zip", url = "file:///nowhere", md5 = NA)),
+                       file.path(path, "10.5281_zenodo.8.json"))
+
+  expect_identical(list_cached_databases(path)$file, "db-7.rds")
+  suppressMessages(clear_database_cache(path = path, ask = FALSE))
+  expect_setequal(list.files(path), c("db-7-flattened.rds", "10.1000_array.json", "10.1000_broken.json"))
 })
 
 test_that("A path keeps the database with a project, and clearing it leaves other files", {
@@ -287,6 +331,25 @@ test_that("Offline, a saved record and database still load", {
   expect_equal(v1_offline, v1)
   # With nothing saved, the error is not hidden
   expect_error(suppressMessages(load_database(doi = "10.5281/zenodo.2")), "no internet")
+
+  # doi.org unreachable is a fallback too; a record since restricted is not
+  local_mocked_bindings(resolve_doi_files = function(doi) resolve_doi(doi),
+                        resolve_doi = function(doi) rlang::abort("Could not resolve doi 'x'", class = "traits_use_unreachable"))
+  expect_message(load_database(doi = "10.5281/zenodo.1"), "Could not update the record")
+  local_mocked_bindings(resolve_doi_files = function(doi) rlang::abort("The files for doi 'x' are restricted on Zenodo"))
+  expect_error(suppressMessages(load_database(doi = "10.5281/zenodo.1")), "restricted")
+})
+
+test_that("A stale cached file that cannot be removed stops the load", {
+  src <- tempfile("releases")
+  path <- tempfile("project")
+  on.exit(unlink(c(src, path), recursive = TRUE), add = TRUE)
+  release <- make_release(src, "1", 3)
+  local_mocked_bindings(resolve_doi_files = function(doi) release,
+                        remove_file = function(file) FALSE)
+  dir.create(path)
+  writeLines("an older release", file.path(path, "MYtraits.rds"))
+  expect_error(suppressMessages(load_database(doi = "10.5281/zenodo.1", path = path)), "Could not remove")
 })
 
 test_that("The cache folder follows R_user_dir() unless the option is set", {

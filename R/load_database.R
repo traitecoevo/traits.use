@@ -69,29 +69,8 @@ load_database <- function(doi = NULL, path = NULL, update = TRUE){
     message("doi '", doi, "' is version ", record$version)
   }
 
-  # Setting up the pars
-  files <- record$files
-  is_rds <- grepl("\\.rds$", files$key, ignore.case = TRUE)
-
-  if(! any(is_rds)){
-    rlang::abort(paste0("No .rds file found for doi '", doi,
-                        "'. Is this a traits.build database?"))
-  }
-
-  files <- files[is_rds, ]
-
-  # Ignore flattened database files, even when one is the only .rds
-  files <- files[!stringr::str_detect(files$key, "flattened"), ]
-
-  if(nrow(files) == 0) {
-    rlang::abort(paste0("Only flattened .rds files found for doi '", doi,
-                        "'; load_database() needs the relational database .rds"))
-  }
-
-  if(nrow(files) > 1) {
-    rlang::abort(paste0("More than one .rds file found for doi '", doi, "': ",
-                        paste(files$key, collapse = ", ")))
-  }
+  # The relational database .rds among the record's files
+  files <- database_file(record$files, doi)
 
   url <- files$url
   file_nm <- file.path(path, basename(files$key))
@@ -103,7 +82,7 @@ load_database <- function(doi = NULL, path = NULL, update = TRUE){
     message("'", file_nm, "' does not match doi '", doi, "', downloading again")
     # A file another R session has open cannot be removed on Windows; going on
     # would load the wrong release
-    if(! file.remove(file_nm)){
+    if(! remove_file(file_nm)){
       rlang::abort(paste0("Could not remove '", file_nm, "' to download doi '", doi,
                           "'. Is it open in another R session?"))
     }
@@ -123,7 +102,8 @@ load_database <- function(doi = NULL, path = NULL, update = TRUE){
       record_cache_size(path, file_nm)
     }
   } else if(use_cache){
-    # Mark it used, so clear_database_cache(older_than) keeps it
+    # Mark it used, so clear_database_cache(older_than) keeps it. This can
+    # fail quietly (e.g. a read-only cache), which only affects older_than
     Sys.setFileTime(file_nm, Sys.time())
   }
 
@@ -158,9 +138,11 @@ load_record_json <- function(doi, path, update){
 
   # Does the .json exist?
   if(! file.exists(file_json) | update == TRUE){
-    # Retrieve the record, falling back to the saved one when offline
+    # Retrieve the record, falling back to the saved one when the repository
+    # cannot be reached. Other errors (e.g. a record since restricted) stop.
     res <- tryCatch(resolve_doi_files(doi), error = function(e) {
-      if(! file.exists(file_json)) stop(e)
+      unreachable <- ! inherits(e, "rlang_error") || inherits(e, "traits_use_unreachable")
+      if(! unreachable || ! file.exists(file_json)) stop(e)
       message("Could not update the record for doi '", doi, "' (", conditionMessage(e),
               "); using the copy saved in '", path, "'")
       NULL
@@ -171,6 +153,50 @@ load_record_json <- function(doi, path, update){
 
   # Load the json
   jsonlite::fromJSON(file_json)
+}
+
+#' Pick the relational database .rds from a record's files
+#'
+#' @param files data frame of the record's files (`key`, `url`, `md5`)
+#' @param doi the doi, used in messages
+#' @return the one row of `files` that load_database() downloads; an error if
+#'   there is not exactly one. clear_database_cache() uses this too, so it
+#'   only ever claims the file load_database() wrote.
+#' @noRd
+#' @keywords internal
+
+database_file <- function(files, doi){
+  is_rds <- grepl("\\.rds$", files$key, ignore.case = TRUE)
+
+  if(! any(is_rds)){
+    rlang::abort(paste0("No .rds file found for doi '", doi,
+                        "'. Is this a traits.build database?"))
+  }
+
+  files <- files[is_rds, , drop = FALSE]
+
+  # Ignore flattened database files, even when one is the only .rds
+  files <- files[!stringr::str_detect(files$key, "flattened"), , drop = FALSE]
+
+  if(nrow(files) == 0) {
+    rlang::abort(paste0("Only flattened .rds files found for doi '", doi,
+                        "'; load_database() needs the relational database .rds"))
+  }
+
+  if(nrow(files) > 1) {
+    rlang::abort(paste0("More than one .rds file found for doi '", doi, "': ",
+                        paste(files$key, collapse = ", ")))
+  }
+
+  files
+}
+
+#' file.remove(), wrapped so tests can make it fail
+#' @noRd
+#' @keywords internal
+
+remove_file <- function(file){
+  file.remove(file)
 }
 
 #' Say what the cache holds after a download into it
@@ -302,7 +328,7 @@ resolve_doi <- function(doi){
   )
 
   if(is.null(res) || res$responseCode != 1){
-    rlang::abort(paste0("Could not resolve doi '", doi, "'"))
+    rlang::abort(paste0("Could not resolve doi '", doi, "'"), class = "traits_use_unreachable")
   }
 
   res$values$data$value[res$values$type == "URL"][[1]]
