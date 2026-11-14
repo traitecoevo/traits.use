@@ -114,7 +114,7 @@
 
 ## Quick data visualisations
 
-Plot site or variance distributions
+Plot trait distributions and where the data were collected
 
 - [`plot_categorical_trait_distribution()`](https://traitecoevo.github.io/traits.use/reference/plot_categorical_trait_distribution.md)
   : Plot the distribution of a categorical trait by family

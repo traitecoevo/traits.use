@@ -3,8 +3,8 @@
 `traits.use` is an R package for **loading, exploring and wrangling
 data** from any `traits.build` relational trait database, such as
 AusTraits. It began as the `austraits` package and was split out in 2026
-(traitecoevo/austraits#188, history carried over). `austraits` is
-becoming a thin AusTraits-specific layer over it. The first CRAN release
+(traitecoevo/austraits#188, history carried over). `austraits` (4.0.0)
+is now a thin AusTraits-specific layer over it. The first CRAN release
 (0.1.1, maintainer Elizabeth Wenk) is tracked in \#13.
 
 ## Repo-local guidance
@@ -46,12 +46,17 @@ becoming a thin AusTraits-specific layer over it. The first CRAN release
 
 > Heads-up: `traits.use` (like `austraits` before it) is the
 > *downstream* access/wrangle layer in the data pipeline, but the
-> R-package install graph runs the other way — `traits.build` currently
-> **Imports `austraits`** (moving to `traits.use`, see austraits#188)
-> and re-exports a few conversion helpers from it (`convert_df_to_list`,
-> `convert_list_to_df1`, `convert_list_to_df2`, `bind_databases`,
-> `flatten_database` — all in `NAMESPACE`). Changing those helpers can
-> break `traits.build`; run its tests after touching them.
+> R-package install graph runs the other way — `traits.build` **Depends
+> on `traits.use` (\>= 0.1.1)** and imports a few conversion helpers
+> from it (`convert_df_to_list`, `convert_list_to_df1`,
+> `convert_list_to_df2`, `bind_databases`, `flatten_database`) and
+> re-exports the trait plots
+> ([`plot_trait_distribution()`](https://traitecoevo.github.io/traits.use/reference/plot_trait_distribution.md),
+> [`plot_categorical_trait_distribution()`](https://traitecoevo.github.io/traits.use/reference/plot_categorical_trait_distribution.md),
+> [`plot_trait_distribution_jitter()`](https://traitecoevo.github.io/traits.use/reference/plot_trait_distribution_jitter.md)).
+> Changing any of these can break `traits.build`; run its tests after
+> touching them. `austraits` and `austraits.portal` also `Import`
+> traits.use.
 
 > Heads-up: from Sept 2024 the code works against any `traits.build`
 > database (not just `austraits.build`). `austraits.build` versions **\<

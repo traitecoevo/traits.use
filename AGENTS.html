@@ -35,7 +35,7 @@
 
 <div id="traitsuse--agent--contributor-guide" class="section level1">
 
-<p><code>traits.use</code> is an R package for <strong>loading, exploring and wrangling data</strong> from any <code>traits.build</code> relational trait database, such as AusTraits. It began as the <code>austraits</code> package and was split out in 2026 (traitecoevo/austraits#188, history carried over). <code>austraits</code> is becoming a thin AusTraits-specific layer over it. The first CRAN release (0.1.1, maintainer Elizabeth Wenk) is tracked in #13.</p>
+<p><code>traits.use</code> is an R package for <strong>loading, exploring and wrangling data</strong> from any <code>traits.build</code> relational trait database, such as AusTraits. It began as the <code>austraits</code> package and was split out in 2026 (traitecoevo/austraits#188, history carried over). <code>austraits</code> (4.0.0) is now a thin AusTraits-specific layer over it. The first CRAN release (0.1.1, maintainer Elizabeth Wenk) is tracked in #13.</p>
 <div class="section level2">
 <h2 id="repo-local-guidance">Repo-local guidance<a class="anchor" aria-label="anchor" href="#repo-local-guidance"></a></h2>
 <ul><li>
@@ -53,7 +53,7 @@
 <li>
 <strong>CRAN-bound:</strong> <code>traits.use</code> must never <code>Import</code>/<code>Depend</code> on traits.build (not on CRAN, and +57 recursive dependencies). Keep network tests behind <code>skip_on_cran()</code> / <code>skip_if_offline()</code>.</li>
 </ul><blockquote>
-<p>Heads-up: <code>traits.use</code> (like <code>austraits</code> before it) is the <em>downstream</em> access/wrangle layer in the data pipeline, but the R-package install graph runs the other way — <code>traits.build</code> currently <strong>Imports <code>austraits</code></strong> (moving to <code>traits.use</code>, see austraits#188) and re-exports a few conversion helpers from it (<code>convert_df_to_list</code>, <code>convert_list_to_df1</code>, <code>convert_list_to_df2</code>, <code>bind_databases</code>, <code>flatten_database</code> — all in <code>NAMESPACE</code>). Changing those helpers can break <code>traits.build</code>; run its tests after touching them.</p>
+<p>Heads-up: <code>traits.use</code> (like <code>austraits</code> before it) is the <em>downstream</em> access/wrangle layer in the data pipeline, but the R-package install graph runs the other way — <code>traits.build</code> <strong>Depends on <code>traits.use</code> (&gt;= 0.1.1)</strong> and imports a few conversion helpers from it (<code>convert_df_to_list</code>, <code>convert_list_to_df1</code>, <code>convert_list_to_df2</code>, <code>bind_databases</code>, <code>flatten_database</code>) and re-exports the trait plots (<code><a href="reference/plot_trait_distribution.html">plot_trait_distribution()</a></code>, <code><a href="reference/plot_categorical_trait_distribution.html">plot_categorical_trait_distribution()</a></code>, <code><a href="reference/plot_trait_distribution_jitter.html">plot_trait_distribution_jitter()</a></code>). Changing any of these can break <code>traits.build</code>; run its tests after touching them. <code>austraits</code> and <code>austraits.portal</code> also <code>Import</code> traits.use.</p>
 </blockquote>
 <blockquote>
 <p>Heads-up: from Sept 2024 the code works against any <code>traits.build</code> database (not just <code>austraits.build</code>). <code>austraits.build</code> versions <strong>&lt; 5.0 are unsupported</strong> by the current package — older builds need an older tagged <code>austraits</code> (e.g. <code>traitecoevo/austraits@v2.2.2</code>).</p>
