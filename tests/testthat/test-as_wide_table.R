@@ -12,7 +12,16 @@ test_that("Function is working", {
 expect_error(as_wide_table())
 
 test_that("Most-used columns come first and no column is dropped (#25)", {
-  first <- c("dataset_id", "observation_id", "trait_name", "taxon_name", "value", "unit")
+  first <- c(
+    "dataset_id", "observation_id", "trait_name", "taxon_name", "value", "unit",
+    "entity_type", "population_id", "individual_id", "value_type", "basis_of_value",
+    "replicates", "collection_date", "basis_of_record", "life_stage", "sampling_strategy",
+    "treatment_context_id", "temporal_context_id", "latitude (deg)", "longitude (deg)",
+    "location", "plot_context_id", "context", "methods", "method_id", "method_context_id",
+    "original_name", "dataset_description", "dataset_id_citation", "source_id_citation",
+    "secondary_citation", "taxonomic_status", "taxon_distribution", "taxon_rank", "genus",
+    "family"
+  )
   for (db in list(austraits_5.0.0_lite, austraits_lite)) {
     out <- as_wide_table(db)
     expect_identical(names(out)[seq_along(first)], first)
