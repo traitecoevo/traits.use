@@ -1,6 +1,6 @@
 
 ## code to prepare an example dataset, that go public
-## austraits::load_austraits() is in the austraits package (moved out of traits.use 0.1.0)
+## austraits::load_austraits() is in the austraits package (moved out of traits.use 0.1.1)
 
 devtools::load_all()
 path = "ignore/data/austraits"
