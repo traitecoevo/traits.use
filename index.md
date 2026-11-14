@@ -34,7 +34,10 @@ With `traits.use` you can:
   ([`bind_databases()`](https://traitecoevo.github.io/traits.use/reference/bind_databases.md));
 - look up traits, references and properties
   ([`lookup_trait()`](https://traitecoevo.github.io/traits.use/reference/lookup_trait.md),
-  `database$sources$Falster_2005`), summarise what it contains
+  `database$sources$Falster_2005`), list the references to cite for the
+  data you use, as text or BibTeX
+  ([`get_references()`](https://traitecoevo.github.io/traits.use/reference/get_references.md)),
+  summarise what it contains
   ([`summarise_database()`](https://traitecoevo.github.io/traits.use/reference/summarise_database.md)),
   and plot trait distributions and locations.
 

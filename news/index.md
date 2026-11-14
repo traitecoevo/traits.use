@@ -104,6 +104,25 @@
   adds each observation’s references to the traits table:
   `dataset_id_citation`, `source_id_citation` (formatted from
   `sources[[source_id]]`), `secondary_id` and `secondary_citation`.
+- New function
+  [`get_references()`](https://traitecoevo.github.io/traits.use/reference/get_references.md)
+  lists the references a database, or an `extract_*()` result, cites, as
+  a tibble of `key`, formatted `citation` and `type` (`dataset`,
+  `source` or `secondary`); with `file`, it also writes them to a BibTeX
+  file ([\#8](https://github.com/traitecoevo/traits.use/issues/8)).
+  These are the references
+  [`extract_data()`](https://traitecoevo.github.io/traits.use/reference/extract_data.md)
+  keeps in `sources`. A cited key with no reference in `sources` is
+  listed with an `NA` citation and a warning, rather than dropped.
+- Fix bug in the citations
+  [`join_sources()`](https://traitecoevo.github.io/traits.use/reference/join_sources.md),
+  [`flatten_database()`](https://traitecoevo.github.io/traits.use/reference/flatten_database.md)
+  and
+  [`as_wide_table()`](https://traitecoevo.github.io/traits.use/reference/as_wide_table.md)
+  format from `sources`: outside Australian time zones, they gave the
+  year before for every reference (e.g. Falster_2003 as 2002). The
+  references’ dates are stored as midnight in Sydney, the previous day
+  in UTC; they are now read from each reference’s own fields.
 - [`flatten_database()`](https://traitecoevo.github.io/traits.use/reference/flatten_database.md)
   takes its references from
   [`join_sources()`](https://traitecoevo.github.io/traits.use/reference/join_sources.md),

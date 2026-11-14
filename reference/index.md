@@ -16,6 +16,9 @@
 - [`get_compiled_by_traits.build()`](https://traitecoevo.github.io/traits.use/reference/get_compiled_by_traits.build.md)
   : Retrieve compiled by information from metadata table
 
+- [`get_references()`](https://traitecoevo.github.io/traits.use/reference/get_references.md)
+  : List the references a database cites
+
 - [`get_traits_table()`](https://traitecoevo.github.io/traits.use/reference/get_traits_table.md)
   : Retrieve traits table if user passes traits.build object.
 
