@@ -16,14 +16,16 @@ plot_categorical_trait_distribution(database, trait_name, family_count = 50)
 scored for the trait}
 }
 \value{
-A ggplot object
+A ggplot object, or a blank plot saying there are no values to plot
 }
 \description{
 For the families with the most taxa scored for a categorical
 trait, plots the proportion of each family's taxa with each value of the
-trait. A taxon's observations are weighted so each taxon counts once, and
-an observation with several values (e.g. \code{"simple compound"}) splits its
-weight between them. Values are ordered from most to least common.
+trait. Each taxon counts once: within a dataset, a taxon's distinct values
+share its weight equally (a value cell such as \code{"simple compound"} counts
+as both values), and its datasets are then combined. Values are ordered
+from most to least common in the families shown. Ties between families at
+the \code{family_count} cut-off are broken alphabetically.
 }
 \examples{
 \dontrun{

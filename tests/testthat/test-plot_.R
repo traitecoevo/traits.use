@@ -173,11 +173,13 @@ test_that("plot_trait_distribution_jitter keeps every value within the limits", 
   p <- plot_trait_distribution_jitter(t, "leaf_area", "family")
   limits <- p$scales$get_scales("x")$limits
   expect_true(limits[1] < -5 && limits[2] > 10)
-  expect_no_warning(ggplot2::ggplot_build(p))
+  # ggplot2 reports points outside the limits when the plot is drawn
+  expect_no_warning(ggplot2::ggplotGrob(p))
+  expect_no_warning(ggplot2::ggplotGrob(plot_trait_distribution_jitter(trait_table(c(-6, -1)), "leaf_area", "family")))
 
   # A single value, or all values zero, still plot
-  expect_no_warning(ggplot2::ggplot_build(plot_trait_distribution_jitter(trait_table(0), "leaf_area", "family")))
-  expect_no_warning(ggplot2::ggplot_build(plot_trait_distribution_jitter(trait_table(3), "leaf_area", "family")))
+  expect_no_warning(ggplot2::ggplotGrob(plot_trait_distribution_jitter(trait_table(0), "leaf_area", "family")))
+  expect_no_warning(ggplot2::ggplotGrob(plot_trait_distribution_jitter(trait_table(3), "leaf_area", "family")))
 })
 
 test_that("plot_categorical_trait_distribution plots proportions by family", {
@@ -207,8 +209,8 @@ test_that("plot_categorical_trait_distribution plots proportions by family", {
 
   # A whole database gets family from its taxa table
   p <- plot_categorical_trait_distribution(austraits_5.0.0_lite, "leaf_compoundness", family_count = 10)
-  expect_lte(length(unique(p$data$family)), 10)
-  expect_no_warning(ggplot2::ggplot_build(p))
+  expect_equal(length(unique(p$data$family)), 10)
+  expect_no_warning(ggplot2::ggplotGrob(p))
 
   expect_error(plot_categorical_trait_distribution(dplyr::select(t, -family), "leaf_compoundness"), "family")
   expect_error(plot_categorical_trait_distribution(t, c("a", "b")), "single trait name")
@@ -227,4 +229,35 @@ test_that("plot_trait_distribution picks the plot from the trait's type", {
   expect_true("counts_per_value" %in% names(plot_trait_distribution(t, "leaf_compoundness")$data))
   p <- plot_trait_distribution(trait_table(1:3), "leaf_area", y_axis_category = "dataset_id")
   expect_equal(levels(p$data$Group), "Test_2025")
+})
+
+test_that("trait plots give a blank plot when there is nothing to plot", {
+  label <- function(p) p$layers[[1]]$aes_params$label
+  t <- trait_table(1:3)
+
+  # A trait not in the data, an empty table, or NULL (as the portal passes)
+  expect_match(label(plot_trait_distribution_jitter(t, "leaf_width", "family")), "No numeric values of leaf_width")
+  expect_match(label(plot_categorical_trait_distribution(t[0, ], "leaf_area")), "No values of leaf_area")
+  expect_match(label(plot_trait_distribution(NULL, "leaf_area")), "No values of leaf_area")
+  expect_match(label(plot_trait_distribution(austraits_5.0.0_lite, "not_a_trait")), "No values of not_a_trait")
+
+  # A plain data.frame works like a tibble
+  p <- plot_trait_distribution_jitter(as.data.frame(t), "leaf_area", "family")
+  expect_equal(sort(p$data$value), 1:3)
+})
+
+test_that("plot_trait_distribution ignores arguments the chosen plot does not take", {
+  d <- austraits_5.0.0_lite
+  args <- list(y_axis_category = "dataset_id", hide_ids = TRUE, family_count = 5)
+  p <- do.call(plot_trait_distribution, c(list(d, "leaf_compoundness"), args))
+  expect_lte(length(unique(p$data$family)), 5)
+  p <- do.call(plot_trait_distribution, c(list(d, "plant_height"), args))
+  expect_equal(p$labels$y, "By dataset_id")
+})
+
+test_that("plot_trait_distribution_jitter highlights several groups and labels without units", {
+  t <- trait_table(1:4, family = c("A", "B", "C", "D"), unit = NA_character_)
+  p <- plot_trait_distribution_jitter(t, "leaf_area", "family", highlight = c("A", "C"))
+  expect_equal(sort(as.character(p$data$Group[p$data$colour == "c"])), c("A", "C"))
+  expect_equal(p$scales$get_scales("x")$name, "leaf_area")
 })

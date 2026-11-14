@@ -12,13 +12,16 @@ plot_trait_distribution(database, trait_name, ...)
 
 \item{trait_name}{Name of the trait to plot (matched exactly)}
 
-\item{...}{Further arguments: \code{y_axis_category} (default \code{"family"}),
-\code{highlight} and \code{hide_ids} for a numeric trait, passed to
+\item{...}{Further named arguments: \code{y_axis_category} (default
+\code{"family"}), \code{highlight} and \code{hide_ids} for a numeric trait, passed to
 \code{\link[=plot_trait_distribution_jitter]{plot_trait_distribution_jitter()}}; \code{family_count} for a categorical
-trait, passed to \code{\link[=plot_categorical_trait_distribution]{plot_categorical_trait_distribution()}}.}
+trait, passed to \code{\link[=plot_categorical_trait_distribution]{plot_categorical_trait_distribution()}}. Arguments the
+chosen plot does not take are ignored, so one set of arguments can be
+used for traits of both types.}
 }
 \value{
-A ggplot object
+A ggplot object. With no values to plot (an empty or \code{NULL}
+input, or a trait not in it), a blank plot saying so.
 }
 \description{
 Plots the values of one trait, choosing the plot from the

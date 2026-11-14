@@ -22,7 +22,7 @@ plot_trait_distribution_beeswarm(
 \code{"family"}. \code{family} and \code{genus} are added from the taxa table when
 \code{database} is a whole database.}
 
-\item{highlight}{A group to highlight in a different colour}
+\item{highlight}{One or more groups to highlight in a different colour}
 
 \item{hide_ids}{Hide the group labels on the y-axis?}
 }

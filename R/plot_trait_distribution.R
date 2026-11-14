@@ -6,12 +6,15 @@
 #' @param database traits.build database (list object), or its traits table
 #'   (which must then have a `family` column, e.g. from [join_taxa()])
 #' @param trait_name Name of the trait to plot (matched exactly)
-#' @param ... Further arguments: `y_axis_category` (default `"family"`),
-#'   `highlight` and `hide_ids` for a numeric trait, passed to
+#' @param ... Further named arguments: `y_axis_category` (default
+#'   `"family"`), `highlight` and `hide_ids` for a numeric trait, passed to
 #'   [plot_trait_distribution_jitter()]; `family_count` for a categorical
-#'   trait, passed to [plot_categorical_trait_distribution()].
+#'   trait, passed to [plot_categorical_trait_distribution()]. Arguments the
+#'   chosen plot does not take are ignored, so one set of arguments can be
+#'   used for traits of both types.
 #'
-#' @return A ggplot object
+#' @return A ggplot object. With no values to plot (an empty or `NULL`
+#'   input, or a trait not in it), a blank plot saying so.
 #' @export
 #'
 #' @examples
@@ -20,7 +23,12 @@
 #' austraits %>% plot_trait_distribution("leaf_compoundness")
 #' }
 plot_trait_distribution <- function(database, trait_name, ...) {
+  rlang::check_installed("ggplot2", reason = "to use `plot_trait_distribution()`")
+
   data <- trait_plot_data(database, trait_name)
+  if (is.null(data) || nrow(data) == 0) {
+    return(no_data_plot(paste0("No values of ", trait_name, " to plot")))
+  }
 
   # The trait's type from its definition; for a traits table, categorical
   # traits are the ones without units
@@ -29,30 +37,39 @@ plot_trait_distribution <- function(database, trait_name, ...) {
     type <- purrr::pluck(database, "definitions", trait_name, "type", .default = NA)
   }
   if (is.na(type)) {
-    type <- if (nrow(data) > 0 && all(is.na(data$unit))) "categorical" else "numeric"
+    type <- if (all(is.na(data$unit))) "categorical" else "numeric"
   }
 
   if (identical(type, "categorical")) {
-    plot_categorical_trait_distribution(data, trait_name, ...)
+    plot_fn <- plot_categorical_trait_distribution
+    args <- list()
   } else {
-    args <- list(...)
-    if (is.null(args$y_axis_category)) args$y_axis_category <- "family"
-    do.call(plot_trait_distribution_jitter, c(list(data, trait_name), args))
+    plot_fn <- plot_trait_distribution_jitter
+    args <- list(y_axis_category = "family")
   }
+
+  # Keep the named arguments the chosen plot takes
+  dots <- list(...)
+  dots <- dots[intersect(names(dots), setdiff(names(formals(plot_fn)), c("database", "trait_name")))]
+  args[names(dots)] <- dots
+
+  do.call(plot_fn, c(list(data, trait_name), args))
 }
 
 #' @title Plot the distribution of a categorical trait by family
 #' @description For the families with the most taxa scored for a categorical
 #'   trait, plots the proportion of each family's taxa with each value of the
-#'   trait. A taxon's observations are weighted so each taxon counts once, and
-#'   an observation with several values (e.g. `"simple compound"`) splits its
-#'   weight between them. Values are ordered from most to least common.
+#'   trait. Each taxon counts once: within a dataset, a taxon's distinct values
+#'   share its weight equally (a value cell such as `"simple compound"` counts
+#'   as both values), and its datasets are then combined. Values are ordered
+#'   from most to least common in the families shown. Ties between families at
+#'   the `family_count` cut-off are broken alphabetically.
 #'
 #' @inheritParams plot_trait_distribution
 #' @param family_count Number of families to show: those with the most taxa
 #'   scored for the trait
 #'
-#' @return A ggplot object
+#' @return A ggplot object, or a blank plot saying there are no values to plot
 #' @export
 #'
 #' @examples
@@ -64,11 +81,11 @@ plot_categorical_trait_distribution <- function(database, trait_name, family_cou
 
   data <- trait_plot_data(database, trait_name)
 
+  if (is.null(data) || nrow(data) == 0) {
+    return(no_data_plot(paste0("No values of ", trait_name, " to plot")))
+  }
   if (!"family" %in% names(data)) {
     cli::cli_abort("The traits table needs a {.field family} column: pass the whole database, or use {.fn join_taxa} first.")
-  }
-  if (nrow(data) == 0) {
-    return(no_data_plot(paste0("No values of ", trait_name, " to plot")))
   }
 
   # Proportion of each taxon's observations with each value
@@ -154,8 +171,10 @@ plot_categorical_trait_distribution <- function(database, trait_name, family_cou
 #' @description Plots the values of a numeric trait as points, one row per
 #'   group (e.g. dataset or family), with groups ordered by their mean value.
 #'   The shape of each point shows whether it is a minimum, mean or maximum.
-#'   The x-axis is on a log scale when the values span more than a factor of
-#'   20. Values recorded as a bin or range are left out.
+#'   The x-axis is on a log scale when the values are all positive and the
+#'   largest is more than about 13 times the smallest (so the axis, padded by
+#'   20% each side, spans more than a factor of 20). Values recorded as a bin
+#'   or range are left out.
 #'
 #'   Replaces [plot_trait_distribution_beeswarm()], drawing many times faster.
 #'
@@ -163,10 +182,11 @@ plot_categorical_trait_distribution <- function(database, trait_name, family_cou
 #' @param y_axis_category Column to group values by, e.g. `"dataset_id"` or
 #'   `"family"`. `family` and `genus` are added from the taxa table when
 #'   `database` is a whole database.
-#' @param highlight A group to highlight in a different colour
+#' @param highlight One or more groups to highlight in a different colour
 #' @param hide_ids Hide the group labels on the y-axis?
 #'
-#' @return A ggplot object. Each point also carries a `text` aesthetic
+#' @return A ggplot object, or a blank plot saying there are no numeric values
+#'   to plot. Each point also carries a `text` aesthetic
 #'   (`"dataset_id | taxon_name"`), which `plotly::ggplotly()` shows as a tooltip.
 #' @export
 #'
@@ -182,14 +202,19 @@ plot_trait_distribution_jitter <- function(database,
                                            hide_ids = FALSE) {
   rlang::check_installed(c("ggplot2", "forcats", "scales"), reason = "to use `plot_trait_distribution_jitter()`")
 
-  data <- trait_plot_data(database, trait_name) %>%
+  data <- trait_plot_data(database, trait_name)
+  if (is.null(data) || nrow(data) == 0) {
+    return(no_data_plot(paste0("No numeric values of ", trait_name, " to plot")))
+  }
+  if (!y_axis_category %in% names(data)) {
+    cli::cli_abort("Incorrect grouping variable! Grouping variable must be a variable in or joined to the traits table. Family and genus are supported if your input is a complete traits.build database.")
+  }
+
+  data <- data %>%
     dplyr::filter(!value_type %in% c("bin", "range")) %>%
     dplyr::mutate(value = suppressWarnings(as.numeric(value))) %>%
     dplyr::filter(!is.na(value))
 
-  if (!y_axis_category %in% names(data)) {
-    cli::cli_abort("Incorrect grouping variable! Grouping variable must be a variable in or joined to the traits table. Family and genus are supported if your input is a complete traits.build database.")
-  }
   if (nrow(data) == 0) {
     return(no_data_plot(paste0("No numeric values of ", trait_name, " to plot")))
   }
@@ -220,7 +245,7 @@ plot_trait_distribution_jitter <- function(database,
   # Alternate the colours of neighbouring groups
   data$colour <- ifelse(data$Group %in% levels(data$Group)[seq(1, n_group, by = 2)], "a", "b")
 
-  if (!is.na(highlight) && highlight %in% data$Group) {
+  if (!all(is.na(highlight)) && any(highlight %in% data$Group)) {
     data <- dplyr::mutate(data, colour = ifelse(Group %in% highlight, "c", colour))
   }
 
@@ -261,7 +286,7 @@ plot_trait_distribution_jitter <- function(database,
     p <- p + ggplot2::theme(axis.text.y = ggplot2::element_blank())
   }
 
-  x_label <- paste0(trait_name, " (", data$unit[1], ")")
+  x_label <- if (is.na(data$unit[1])) trait_name else paste0(trait_name, " (", data$unit[1], ")")
   range <- vals$maximum / vals$minimum
 
   # Log scale when the values are all positive and span a wide range
@@ -282,16 +307,30 @@ plot_trait_distribution_jitter <- function(database,
   p
 }
 
-#' The values of one trait, with family and genus joined, for plotting
+#' The values of one trait, with family and genus joined, for plotting.
+#' NULL for a NULL input; no rows when the trait has no values.
 #' @noRd
 trait_plot_data <- function(database, trait_name) {
   if (!is.character(trait_name) || length(trait_name) != 1 || is.na(trait_name)) {
     cli::cli_abort("{.arg trait_name} must be a single trait name")
   }
+  if (is.null(database)) {
+    return(NULL)
+  }
+  # extract_trait() needs a traits table to be a tibble
+  if (is.data.frame(database) && !tibble::is_tibble(database)) {
+    database <- tibble::as_tibble(database)
+  }
 
   status <- check_compatibility(database, single_table_allowed = TRUE)
   if (!status) {
     function_not_supported(database)
+  }
+
+  # extract_trait() stops when the trait has no values
+  traits <- get_traits_table(database)
+  if (nrow(traits) == 0 || !trait_name %in% traits$trait_name) {
+    return(traits[0, ])
   }
 
   database_trait <- extract_trait(database, trait_name, partial_matches_allowed = FALSE)
