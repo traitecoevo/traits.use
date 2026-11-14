@@ -69,6 +69,15 @@
   studies observations were taken from, which it used to drop; it no
   longer fails on a database without `source_secondary_key`.
 - [`bind_databases()`](https://traitecoevo.github.io/traits.use/reference/bind_databases.md)
+  orders `sources` and `definitions` in the C locale, as
+  [`dplyr::arrange()`](https://dplyr.tidyverse.org/reference/arrange.html)
+  does, so a database built on any machine comes out in the same order
+  ([\#6](https://github.com/traitecoevo/traits.use/issues/6)). Before,
+  the order followed the session’s collation, e.g. `bark_B_per_dry_mass`
+  before or after `bark_ash_per_dry_mass`.
+  [`summarise_database()`](https://traitecoevo.github.io/traits.use/reference/summarise_database.md)
+  sorts the same way.
+- [`bind_databases()`](https://traitecoevo.github.io/traits.use/reference/bind_databases.md)
   warns when one citation key names different references in different
   datasets (titles or years differ), since `sources` keeps only one
   entry per key and the other is lost.
