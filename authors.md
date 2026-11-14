@@ -2,17 +2,15 @@
 
 ## Authors
 
-- **Elizabeth Wenk**. Author, maintainer.
+- **Elizabeth Wenk**. Author, maintainer, copyright holder.
   [](https://orcid.org/0000-0001-5640-5910)
 
-- **Fonti Kar**. Author. [](https://orcid.org/0000-0002-2760-3974)
+- **Fonti Kar**. Author, copyright holder.
+  [](https://orcid.org/0000-0002-2760-3974)
 
 - **Daniel Falster**. Author. [](https://orcid.org/0000-0002-9814-092X)
 
 - **Dony Indiarto**. Author. [](https://orcid.org/0000-0001-9546-8201)
-
-- **Trait Ecology and Evolution**. Copyright holder.  
-  copyright holder of the code, see LICENSE
 
 - **AusTraits contributors**. Copyright holder.  
   AusTraits data in austraits_lite and the test data, see COPYRIGHTS
