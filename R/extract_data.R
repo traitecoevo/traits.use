@@ -239,17 +239,13 @@ extract_data <- function(database, table = NA, col, col_value, partial_matches_a
     ret <- ret[!names(ret) %in% c("entity_context_id", "method_context_id", "plot_context_id", "temporal_context_id", "treatment_context_id")]
     
     # Trim sources to the references the extracted observations cite: each dataset's
-    # own (keyed by its `dataset_id`), the source each observation was taken from
-    # (`source_id`), and each dataset's secondary references. The methods
-    # columns of databases built before traits.build 2.3 are read too
-    split_keys <- function(x) if (is.null(x)) character() else unlist(strsplit(x, "; "))
+    # own, the source each observation was taken from (`source_id`), and each
+    # dataset's secondary references, as get_references() lists them. Each
+    # `dataset_id` is kept too, as before traits.build 2.3 a dataset's own
+    # reference could be keyed by another name
     keys <- c(
-      ret$traits$dataset_id, ret$traits$source_id,
-      ret$excluded_data$dataset_id, ret$excluded_data$source_id,
-      split_keys(ret$methods[["secondary_id"]]),
-      ret$methods[["source_primary_key"]],
-      split_keys(ret$methods[["source_secondary_key"]]),
-      split_keys(ret$methods[["source_original_dataset_key"]])
+      ret$traits$dataset_id, ret$excluded_data$dataset_id,
+      cited_references(ret, names(database[["sources"]]))$key
     )
     # By position: given a character vector, `[` on a BibEntry searches rather
     # than indexes
