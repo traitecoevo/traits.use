@@ -10,7 +10,7 @@
 #' @param table Table within a traits.build database
 #' @param col Column name within the specified table.
 #' @param col_value Value (of column, from with a table) that is used to subset database. This can be a single value or a vector. It includes partial string matches. 
-#' @param partial_matches_allowed logical. If `TRUE` (the default), each value is matched as a case-insensitive regular expression, so `"Acacia"` also matches `"Acacia celsa"`; a value that matches exactly is always kept, even if it contains characters with special meaning in regular expressions, such as brackets. If `FALSE`, only exact matches are kept.
+#' @param partial_matches_allowed logical. If `TRUE` (the default), each value is matched as a case-insensitive regular expression, so `"Acacia"` also matches `"Acacia celsa"`; a value that is itself in the column, such as a taxon name with brackets, is matched as plain text instead, so it finds itself and the values containing it; a value that is not a valid regular expression is also matched as plain text. If `FALSE`, only exact matches are kept.
 #' @importFrom rlang :=
 #' @return subset traits.build database
 #' @export
@@ -298,12 +298,13 @@ extract_data <- function(database, table = NA, col, col_value, partial_matches_a
 #'
 #' @param x vector to search
 #' @param col_value values to look for
-#' @param partial_matches_allowed if `TRUE`, each value is also matched as a
-#'   case-insensitive regular expression. An exact match is always kept, so a
-#'   value containing characters with special meaning in regular expressions,
-#'   such as the brackets in "Abrotanella sp. [White_2020]", still finds itself
-#'   (#10); a value that is not a valid regular expression is matched as fixed
-#'   text instead.
+#' @param partial_matches_allowed if `TRUE`, each value also matches the
+#'   elements containing it, ignoring case. A value that is itself an element
+#'   of `x`, such as a taxon name with brackets ("Abrotanella sp.
+#'   [White_2020]"), is searched for as plain text, so it finds itself and the
+#'   names containing it, not what its brackets would match as a regular
+#'   expression (#10). Any other value is a regular expression; one that is not
+#'   valid is searched for as plain text, with a message.
 #' @return integer indices of the matching elements, without repeats
 #' @noRd
 #' @keywords internal
@@ -314,12 +315,16 @@ match_values <- function(x, col_value, partial_matches_allowed = TRUE) {
     if (!isTRUE(partial_matches_allowed)) {
       return(exact)
     }
-    partial <- tryCatch(
+    if (length(exact) > 0) {
+      return(stringr::str_which(x, stringr::fixed(value, ignore_case = TRUE)))
+    }
+    tryCatch(
       stringr::str_which(x, stringr::regex(value, ignore_case = TRUE)),
-      error = function(e) stringr::str_which(x, stringr::fixed(value, ignore_case = TRUE))
+      error = function(e) {
+        message("'", value, "' is not a valid regular expression, so it is matched as plain text")
+        stringr::str_which(x, stringr::fixed(value, ignore_case = TRUE))
+      }
     )
-    # Regular-expression matches first, keeping the order of earlier versions
-    union(partial, exact)
   })
   purrr::reduce(rows, union, .init = integer())
 }

@@ -18,7 +18,7 @@ extract_trait(
 
 \item{taxon_names}{optional argument, specifying taxa for which data will be extracted}
 
-\item{partial_matches_allowed}{logical. If \code{TRUE} (the default), each value is matched as a case-insensitive regular expression, so \code{"Acacia"} also matches \code{"Acacia celsa"}; a value that matches exactly is always kept, even if it contains characters with special meaning in regular expressions, such as brackets. If \code{FALSE}, only exact matches are kept.}
+\item{partial_matches_allowed}{logical. If \code{TRUE} (the default), each value is matched as a case-insensitive regular expression, so \code{"Acacia"} also matches \code{"Acacia celsa"}; a value that is itself in the column, such as a taxon name with brackets, is matched as plain text instead, so it finds itself and the values containing it; a value that is not a valid regular expression is also matched as plain text. If \code{FALSE}, only exact matches are kept.}
 }
 \value{
 List of tibbles containing all traits.build data and metadata for the specified trait(s).

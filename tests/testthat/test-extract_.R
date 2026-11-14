@@ -297,7 +297,17 @@ test_that("Values with regular-expression characters match themselves (#10)", {
   expect_equal(nrow(extract_data(db$traits, "traits", "taxon_name", name)), n)
 
   # Not a valid regular expression on its own: matched as text
-  expect_equal(nrow(extract_taxa(db, taxon_name = "celsa (A.R.Bean")$traits), n)
+  expect_message(out <- extract_taxa(db, taxon_name = "celsa (A.R.Bean"), "not a valid regular expression")
+  expect_equal(nrow(out$traits), n)
+
+  # Brackets that would be a character class as a regular expression don't
+  # pull in other taxa: "[a -z]" would match any letter
+  other <- "Acacia sp. [Clarke_2015]"
+  bracketed <- "Acacia sp. [a -z]"
+  db$traits$taxon_name[db$traits$taxon_name == "Acacia floribunda"] <- other
+  db$traits$taxon_name[db$traits$taxon_name == "Acacia myrtifolia"] <- bracketed
+  out <- extract_taxa(db, taxon_name = bracketed)$traits
+  expect_identical(unique(out$taxon_name), bracketed)
 
   # Partial matching is unchanged
   expect_equal(nrow(extract_taxa(db, taxon_name = "acacia CELSA")$traits), n)
@@ -306,6 +316,8 @@ test_that("Values with regular-expression characters match themselves (#10)", {
 test_that("match_values() keeps the order of earlier versions", {
   x <- c("Acacia b", "acacia a", "Acacia", "Banksia", "Acacia")
   expect_identical(match_values(x, "Acacia"), c(1L, 2L, 3L, 5L))
+  # A value not in x is a regular expression
+  expect_identical(match_values(x, "^acacia [ab]$"), c(1L, 2L))
   expect_identical(match_values(x, c("Banksia", "Acacia")), c(4L, 1L, 2L, 3L, 5L))
   expect_identical(match_values(x, "Acacia", FALSE), c(3L, 5L))
   expect_identical(match_values(x, "nothing"), integer())
