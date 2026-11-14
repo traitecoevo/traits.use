@@ -303,8 +303,9 @@ plot_trait_distribution_jitter <- function(database,
       ggplot2::annotate(
         "text",
         x = Inf, y = -Inf, hjust = 1.05, vjust = -0.75,
-        # U+2022, not U+25CF: the pdf() device cannot encode a black circle
-        label = paste("\u2022", paste(highlighted, collapse = ", ")),
+        # ASCII only: the pdf() device of some R builds cannot encode a
+        # bullet (U+2022) or a circle (U+25CF), and R CMD check draws there
+        label = paste(highlighted, collapse = ", "),
         colour = highlight_colour, size = 4
       )
   }

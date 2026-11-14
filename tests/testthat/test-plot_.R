@@ -5,8 +5,9 @@ test_that("Function doesn't throw error", {
   
   expect_s3_class(austraits_5.0.0_lite %>% plot_trait_distribution_jitter("leaf_mass_per_area", "dataset_id", "Bloomfield_2018"), "ggplot")
 
-  # The highlight label must draw on the pdf() device R CMD check uses for
-  # examples: U+25CF failed there ("conversion failure ... in 'mbcsToSbcs'")
+  # The highlight label must draw on the pdf() device R CMD check uses: a
+  # non-ASCII marker gave "conversion failure ... in 'mbcsToSbcs'" (U+25CF on
+  # one R build, U+2022 on another)
   p <- austraits_5.0.0_lite %>% plot_trait_distribution_jitter("leaf_mass_per_area", "dataset_id", "Bloomfield_2018")
   pdf_file <- withr::local_tempfile(fileext = ".pdf")
   grDevices::pdf(pdf_file)
@@ -271,7 +272,7 @@ test_that("plot_trait_distribution_jitter highlights several groups and labels w
 
   # The highlighted groups are named in the corner, in the highlight colour
   label <- p$layers[[2]]
-  expect_equal(label$aes_params$label, "\u2022 A, C")
+  expect_equal(label$aes_params$label, "A, C")
   expect_equal(label$aes_params$colour, "deeppink3")
   expect_no_warning(ggplot2::ggplotGrob(p))
 })
