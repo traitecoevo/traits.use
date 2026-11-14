@@ -13,6 +13,9 @@ test_that("Function doesn't throw error", {
   grDevices::pdf(pdf_file)
   withr::defer(grDevices::dev.off())
   expect_no_warning(print(p))
+  # ...and stays ASCII, which the line above catches only on affected R builds
+  label <- Filter(function(l) inherits(l$geom, "GeomText"), p$layers)[[1]]$aes_params$label
+  expect_true(all(utf8ToInt(label) < 128))
   
   # this function is currently really slow, blocking effective testing
   expect_invisible((austraits_5.0.0_lite %>% extract_trait("wood_density") %>% join_location_coordinates())$trait %>% plot_locations())
