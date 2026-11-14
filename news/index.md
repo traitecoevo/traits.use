@@ -15,6 +15,8 @@
   map of Australia used by
   [`plot_locations()`](https://traitecoevo.github.io/traits.use/reference/plot_locations.md).
 - Requires R 4.1.0 or later, as the code uses the native pipe `|>`.
+- The plotting functions say which suggested packages they need (ggplot2
+  and others) when one is not installed, rather than failing partway.
 - [`plot_locations()`](https://traitecoevo.github.io/traits.use/reference/plot_locations.md)
   draws without a map by default. Its `basemap` argument takes a data
   frame of map cells (columns `x` and `y`) to draw the locations over;
@@ -70,7 +72,8 @@
   output are unchanged.
 - Added new function `load_database` which loads any traits.build
   database from its doi (Zenodo, Figshare or a doi resolving directly to
-  an .rds file)
+  an .rds file). Its `path` has no default, so nothing is written to the
+  working directory unless you say where.
 - Fix bug in `load_database` downloads: when the temporary folder was on
   a different drive to `path`, the file was saved under its temporary
   name and could not be loaded. The user’s `timeout` option is now also

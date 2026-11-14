@@ -10,7 +10,7 @@ Figshare records are supported, as are dois that resolve directly to an
 ## Usage
 
 ``` r
-load_database(doi = NULL, path = "data/traits.build", update = TRUE)
+load_database(doi = NULL, path, update = TRUE)
 ```
 
 ## Arguments
@@ -23,7 +23,10 @@ load_database(doi = NULL, path = "data/traits.build", update = TRUE)
 
 - path:
 
-  file path to where the database will be downloaded
+  folder the database is downloaded to and cached in, e.g.
+  `"data/traits.build"` in a project, or
+  [`tempdir()`](https://rdrr.io/r/base/tempfile.html) for one session.
+  There is no default, so nothing is written unless you say where.
 
 - update:
 

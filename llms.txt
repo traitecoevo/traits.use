@@ -90,7 +90,7 @@ AusTraits throughout. AusTraits releases on
 [Zenodo](https://doi.org/10.5281/zenodo.3568417) also include the data
 as plain-text `.csv` files for users of Python and other tools. You can
 look up each trait’s definition in the [AusTraits Plant
-Dictionary](https://w3id.org/APD).
+Dictionary](https://w3id.org/APD/).
 
 The current functions support AusTraits 5.0.0 and later. For older
 releases (4.2 and earlier), install an older version of the `austraits`

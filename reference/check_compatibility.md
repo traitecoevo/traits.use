@@ -23,7 +23,7 @@ check_compatibility(database, single_table_allowed = FALSE)
 
 ## Value
 
-logical (T/F) output and messaging for uncompatible versions
+logical (T/F) output and messaging for incompatible versions
 
 ## Author
 
