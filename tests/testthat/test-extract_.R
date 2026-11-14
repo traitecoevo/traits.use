@@ -282,3 +282,31 @@ test_that("extract_data() on contexts honours partial_matches_allowed", {
       n_rows("dry (July-October)", partial_matches_allowed = FALSE)
   )
 })
+
+test_that("Values with regular-expression characters match themselves (#10)", {
+  db <- austraits_5.0.0_lite
+  # A taxon name with brackets, as in "Abrotanella sp. [White_2020]" or
+  # "(Dockrillia pugioniformis x Dockrillia striolata) x Dockrillia pugioniformis"
+  name <- "Acacia celsa (A.R.Bean 1234)"
+  db$traits$taxon_name[db$traits$taxon_name == "Acacia celsa"] <- name
+  n <- sum(db$traits$taxon_name == name)
+  expect_gt(n, 0)
+
+  expect_equal(nrow(extract_taxa(db, taxon_name = name)$traits), n)
+  expect_equal(nrow(extract_taxa(db, taxon_name = name, partial_matches_allowed = FALSE)$traits), n)
+  expect_equal(nrow(extract_data(db$traits, "traits", "taxon_name", name)), n)
+
+  # Not a valid regular expression on its own: matched as text
+  expect_equal(nrow(extract_taxa(db, taxon_name = "celsa (A.R.Bean")$traits), n)
+
+  # Partial matching is unchanged
+  expect_equal(nrow(extract_taxa(db, taxon_name = "acacia CELSA")$traits), n)
+})
+
+test_that("match_values() keeps the order of earlier versions", {
+  x <- c("Acacia b", "acacia a", "Acacia", "Banksia", "Acacia")
+  expect_identical(match_values(x, "Acacia"), c(1L, 2L, 3L, 5L))
+  expect_identical(match_values(x, c("Banksia", "Acacia")), c(4L, 1L, 2L, 3L, 5L))
+  expect_identical(match_values(x, "Acacia", FALSE), c(3L, 5L))
+  expect_identical(match_values(x, "nothing"), integer())
+})

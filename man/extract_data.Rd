@@ -21,7 +21,7 @@ extract_data(
 
 \item{col_value}{Value (of column, from with a table) that is used to subset database. This can be a single value or a vector. It includes partial string matches.}
 
-\item{partial_matches_allowed}{logical. If \code{TRUE} (the default), each value is matched as a case-insensitive regular expression, so \code{"Acacia"} also matches \code{"Acacia celsa"}; characters with special meaning in regular expressions, such as brackets, then need escaping. If \code{FALSE}, only exact matches are kept.}
+\item{partial_matches_allowed}{logical. If \code{TRUE} (the default), each value is matched as a case-insensitive regular expression, so \code{"Acacia"} also matches \code{"Acacia celsa"}; a value that matches exactly is always kept, even if it contains characters with special meaning in regular expressions, such as brackets. If \code{FALSE}, only exact matches are kept.}
 }
 \value{
 subset traits.build database

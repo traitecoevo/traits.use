@@ -10,7 +10,7 @@
 #' @param table Table within a traits.build database
 #' @param col Column name within the specified table.
 #' @param col_value Value (of column, from with a table) that is used to subset database. This can be a single value or a vector. It includes partial string matches. 
-#' @param partial_matches_allowed logical. If `TRUE` (the default), each value is matched as a case-insensitive regular expression, so `"Acacia"` also matches `"Acacia celsa"`; characters with special meaning in regular expressions, such as brackets, then need escaping. If `FALSE`, only exact matches are kept.
+#' @param partial_matches_allowed logical. If `TRUE` (the default), each value is matched as a case-insensitive regular expression, so `"Acacia"` also matches `"Acacia celsa"`; a value that matches exactly is always kept, even if it contains characters with special meaning in regular expressions, such as brackets. If `FALSE`, only exact matches are kept.
 #' @importFrom rlang :=
 #' @return subset traits.build database
 #' @export
@@ -41,18 +41,7 @@ extract_data <- function(database, table = NA, col, col_value, partial_matches_a
     
     check_col_exists_in_table(database, table, col)
     
-    if (partial_matches_allowed == TRUE) {
-      indicies_tmp <- purrr::map(col_value, ~{
-        stringr::str_which(database[[col]], 
-                          pattern = stringr::regex(.x, ignore_case = TRUE))
-      })
-    } else {
-      indicies_tmp <- purrr::map(col_value, ~{
-        which(database[[col]] == .x)
-      })
-    }
-    
-    found_indicies <- purrr::reduce(indicies_tmp, union)
+    found_indicies <- match_values(database[[col]], col_value, partial_matches_allowed)
     
     # Trim traits, based on the columns identified
     ret <- database %>%
@@ -163,19 +152,8 @@ extract_data <- function(database, table = NA, col, col_value, partial_matches_a
   
       # Match the same way as the context tables are searched below, so
       # partial_matches_allowed applies and several values are OR-ed
-      if (partial_matches_allowed == TRUE) {
-        context_rows <- purrr::map(col_value, ~{
-          stringr::str_which(database$contexts[[col]],
-                             pattern = stringr::regex(.x, ignore_case = TRUE))
-        })
-      } else {
-        context_rows <- purrr::map(col_value, ~{
-          which(database$contexts[[col]] == .x)
-        })
-      }
-
       table_tmp <- database$contexts %>%
-        dplyr::slice(purrr::reduce(context_rows, union, .init = integer())) %>%
+        dplyr::slice(match_values(database$contexts[[col]], col_value, partial_matches_allowed)) %>%
         dplyr::distinct(link_id)
       
       table <- as.vector(table_tmp[[1]])
@@ -193,18 +171,7 @@ extract_data <- function(database, table = NA, col, col_value, partial_matches_a
         # chose columns to select, ensuring "value" isn't among the columns, since it has a different meaning for each table
         columns_to_select <- intersect(setdiff(names(database$traits), "value"), names(database[[table[[i]]]]))
         
-        if (partial_matches_allowed == TRUE) {
-          indicies_tmp <- purrr::map(col_value, ~{
-            stringr::str_which(database[[table[[i]]]][[col]], 
-                               pattern = stringr::regex(.x, ignore_case = TRUE))
-          })
-        } else {
-          indicies_tmp <- purrr::map(col_value, ~{
-            which(database[[table[[i]]]][[col]] == .x)
-          })
-        }
-        
-        found_indicies <- purrr::reduce(indicies_tmp, union)
+        found_indicies <- match_values(database[[table[[i]]]][[col]], col_value, partial_matches_allowed)
     
         # Trim traits, based on the columns identified as being common between the traits table and target table
         cc_traits <- database[[table[[i]]]] %>%
@@ -325,3 +292,34 @@ extract_data <- function(database, table = NA, col, col_value, partial_matches_a
 
 
 
+
+
+#' Find the elements of `x` matching any of `col_value`
+#'
+#' @param x vector to search
+#' @param col_value values to look for
+#' @param partial_matches_allowed if `TRUE`, each value is also matched as a
+#'   case-insensitive regular expression. An exact match is always kept, so a
+#'   value containing characters with special meaning in regular expressions,
+#'   such as the brackets in "Abrotanella sp. [White_2020]", still finds itself
+#'   (#10); a value that is not a valid regular expression is matched as fixed
+#'   text instead.
+#' @return integer indices of the matching elements, without repeats
+#' @noRd
+#' @keywords internal
+
+match_values <- function(x, col_value, partial_matches_allowed = TRUE) {
+  rows <- purrr::map(col_value, function(value) {
+    exact <- which(x == value)
+    if (!isTRUE(partial_matches_allowed)) {
+      return(exact)
+    }
+    partial <- tryCatch(
+      stringr::str_which(x, stringr::regex(value, ignore_case = TRUE)),
+      error = function(e) stringr::str_which(x, stringr::fixed(value, ignore_case = TRUE))
+    )
+    # Regular-expression matches first, keeping the order of earlier versions
+    union(partial, exact)
+  })
+  purrr::reduce(rows, union, .init = integer())
+}
