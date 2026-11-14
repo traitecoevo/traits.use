@@ -33,8 +33,10 @@ With `traits.use` you can:
   `flatten_database()`), or combine several databases
   (`bind_databases()`);
 - look up traits, references and properties (`lookup_trait()`,
-  `database$sources$Falster_2005`), summarise what it contains
-  (`summarise_database()`), and plot trait distributions and locations.
+  `database$sources$Falster_2005`), list the references to cite for the
+  data you use, as text or BibTeX (`get_references()`), summarise what it
+  contains (`summarise_database()`), and plot trait distributions and
+  locations.
 
 ## Installation
 

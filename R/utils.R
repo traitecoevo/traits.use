@@ -190,7 +190,7 @@ format_citation <- function(bib) {
   oldquotes <- options(useFancyQuotes = FALSE)
   on.exit(options(oldquotes), add = TRUE)
 
-  out <- format_bib(bib, .sort = FALSE)
+  out <- format_bib(refresh_dates(bib), .sort = FALSE)
   out <- gsub("[] ", "", out, fixed = TRUE)
   out <- gsub("\\n", " ", out)
   out <- gsub("  ", " ", out)
@@ -199,6 +199,31 @@ format_citation <- function(bib) {
   out <- gsub("(pp?\\. \\d+)[\u2013\u2014](\\d+)", "\\1-\\2", out)
   if (tolower(bib$bibtype) == "article") out <- gsub("In:", " ", out)
   out
+}
+
+#' Recompute the dates of references in this session's time zone
+#'
+#' RefManageR keeps each entry's date, read from its `date` or `year` field,
+#' as a time (attribute `dateobj`), and formats the year from that. The time
+#' is midnight in the time zone where the database was built (Sydney for
+#' AusTraits), which a session in a time zone to the west reads as the day
+#' before, so a year on its own (1 January) is formatted as the year before.
+#' Recomputing the time from the fields, as RefManageR does when it creates
+#' an entry, gives the year in the fields whatever the time zone.
+#'
+#' @param bib A BibEntry object
+#' @return `bib`, with each entry's `dateobj` recomputed
+#' @noRd
+#' @keywords internal
+refresh_dates <- function(bib) {
+  process_dates <- utils::getFromNamespace("ProcessDates", "RefManageR")
+  attrs <- attributes(bib)
+  entries <- lapply(unclass(bib), function(entry) {
+    attr(entry, "dateobj") <- process_dates(entry)
+    entry
+  })
+  attributes(entries) <- attrs
+  entries
 }
 
 #' Pipe operator

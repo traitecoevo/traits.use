@@ -33,7 +33,7 @@ With `traits.use` you can:
 - filter it to particular traits, taxa or datasets (`extract_trait()`, `extract_taxa()`, `extract_dataset()`, `extract_data()`), keeping every table consistent;
 - join information from the database's other tables onto the trait values (`join_location_coordinates()`, `join_taxa()`, `join_methods()`, `join_context_properties()` and more);
 - reshape and flatten it (`trait_pivot_wider()`, `as_wide_table()`, `flatten_database()`), or combine several databases (`bind_databases()`);
-- look up traits, references and properties (`lookup_trait()`, `database$sources$Falster_2005`), summarise what it contains (`summarise_database()`), and plot trait distributions and locations.
+- look up traits, references and properties (`lookup_trait()`, `database$sources$Falster_2005`), list the references to cite for the data you use, as text or BibTeX (`get_references()`), summarise what it contains (`summarise_database()`), and plot trait distributions and locations.
 
 ## Installation
 
