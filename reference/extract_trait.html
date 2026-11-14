@@ -65,7 +65,7 @@
 
 
 <dt id="arg-partial-matches-allowed">partial_matches_allowed<a class="anchor" aria-label="anchor" href="#arg-partial-matches-allowed"></a></dt>
-<dd><p>logical. If <code>TRUE</code> (the default), each value is matched as a case-insensitive regular expression, so <code>"Acacia"</code> also matches <code>"Acacia celsa"</code>; characters with special meaning in regular expressions, such as brackets, then need escaping. If <code>FALSE</code>, only exact matches are kept.</p></dd>
+<dd><p>logical. If <code>TRUE</code> (the default), each value is matched as a case-insensitive regular expression, so <code>"Acacia"</code> also matches <code>"Acacia celsa"</code>; a value that is itself in the column, such as a taxon name with brackets, is matched as plain text instead, so it finds itself and the values containing it; a value that is not a valid regular expression is also matched as plain text. If <code>FALSE</code>, only exact matches are kept.</p></dd>
 
 </dl></div>
     <div class="section level2">

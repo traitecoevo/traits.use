@@ -32,8 +32,10 @@ extract_trait(
 
   logical. If `TRUE` (the default), each value is matched as a
   case-insensitive regular expression, so `"Acacia"` also matches
-  `"Acacia celsa"`; characters with special meaning in regular
-  expressions, such as brackets, then need escaping. If `FALSE`, only
+  `"Acacia celsa"`; a value that is itself in the column, such as a
+  taxon name with brackets, is matched as plain text instead, so it
+  finds itself and the values containing it; a value that is not a valid
+  regular expression is also matched as plain text. If `FALSE`, only
   exact matches are kept.
 
 ## Value

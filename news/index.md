@@ -38,6 +38,16 @@
   frame of map cells (columns `x` and `y`) to draw the locations over;
   `basemap = "australia"` now gives an error pointing to the `austraits`
   package.
+- In the `extract_*()` functions, a value that is itself in the column,
+  such as a taxon name with brackets, is matched as plain text
+  ([\#10](https://github.com/traitecoevo/traits.use/issues/10)). Before,
+  the 3,918 taxon names in AusTraits 5.0.0 with brackets, such as
+  `"Abrotanella sp. [White_2020]"`, were read as regular expressions:
+  they could not find themselves, and 836 of them matched other taxa
+  instead (`[...]` is a character class). They now find themselves and
+  the names containing them. A value that is not a valid regular
+  expression is matched as plain text, with a message, rather than
+  giving an error.
 - [`extract_data()`](https://traitecoevo.github.io/traits.use/reference/extract_data.md)
   on the contexts table now honours `partial_matches_allowed`: matching
   is case-insensitive by default, exact with `FALSE` (so brackets are
