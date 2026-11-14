@@ -2,9 +2,6 @@
 
 ## Accessing and exploring the database
 
-- [`load_austraits()`](https://traitecoevo.github.io/traits.use/reference/load_austraits.md)
-  : Load AusTraits database into R console
-
 - [`load_database()`](https://traitecoevo.github.io/traits.use/reference/load_database.md)
   : Load any traits.build database into R console
 
@@ -13,12 +10,6 @@
 
 - [`get_traits_table()`](https://traitecoevo.github.io/traits.use/reference/get_traits_table.md)
   : Retrieve traits table if user passes traits.build object.
-
-- [`get_version_latest()`](https://traitecoevo.github.io/traits.use/reference/get_version_latest.md)
-  : Retrieve the latest version of AusTraits
-
-- [`get_versions()`](https://traitecoevo.github.io/traits.use/reference/get_versions.md)
-  : Print out AusTraits versions
 
 - [`summarise_database()`](https://traitecoevo.github.io/traits.use/reference/summarise_database.md)
   : Summarise counts for a particular variable of interest

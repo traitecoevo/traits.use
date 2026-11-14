@@ -1,8 +1,6 @@
 # Load any traits.build database into R console
 
-Works like
-[`load_austraits()`](https://traitecoevo.github.io/traits.use/reference/load_austraits.md),
-but accepts the doi of any traits.build formatted database. The doi is
+Loads a traits.build formatted database, given its doi. The doi is
 resolved to its repository, the relational database `.rds` file is
 downloaded to `path` (if not already there, or if the copy there does
 not match the record's md5 checksum) and then loaded. Zenodo and
@@ -37,7 +35,8 @@ a large list containing traits.build data tables
 
 ## See also
 
-load_austraits
+[`austraits::load_austraits()`](https://traitecoevo.github.io/austraits/reference/load_austraits.html),
+which loads a release of AusTraits by version number
 
 ## Examples
 

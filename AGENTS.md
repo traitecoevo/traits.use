@@ -10,19 +10,18 @@ becoming a thin AusTraits-specific layer over it. The first CRAN release
 ## Repo-local guidance
 
 - **Code:** `R/` (functions), `tests/` (testthat), `man/` (generated
-  docs), `NAMESPACE`, `vignettes/`. `data/`, `data-raw/`, and `inst/`
-  hold packaged/raw assets (incl. the cheatsheet).
+  docs), `NAMESPACE`, `data-raw/` and `inst/` hold raw assets (incl. the
+  cheatsheet); `R/sysdata.rda` holds the test fixtures.
 - **Access entry point:**
-  [`load_austraits()`](https://traitecoevo.github.io/traits.use/reference/load_austraits.md)
-  (`R/load_austraits.R`) downloads/loads a released AusTraits build
-  (`.rds`);
-  [`get_versions()`](https://traitecoevo.github.io/traits.use/reference/get_versions.md)
-  /
-  [`get_version_latest()`](https://traitecoevo.github.io/traits.use/reference/get_version_latest.md)
-  resolve versions.
   [`load_database()`](https://traitecoevo.github.io/traits.use/reference/load_database.md)
   (`R/load_database.R`) loads any traits.build database from its doi
   (Zenodo, Figshare, or a doi resolving directly to an `.rds`).
+- **AusTraits-specific code lives in `austraits`, not here** (decided
+  2026-11-14, \#13): `load_austraits()`, `get_versions()` /
+  `get_version_latest()`, the AusTraits vignette and the map of
+  Australia.
+  [`plot_locations()`](https://traitecoevo.github.io/traits.use/reference/plot_locations.md)
+  takes a `basemap` data frame so `austraits` can pass its map.
 - **Wrangle/extract:** `extract_*()` (data/dataset/taxa/trait),
   `join_*()` (taxa, methods, contributors, locations, context/location
   properties), `lookup_*()`, `trait_pivot_longer/wider()`,
@@ -32,8 +31,9 @@ becoming a thin AusTraits-specific layer over it. The first CRAN release
   [`as_wide_table()`](https://traitecoevo.github.io/traits.use/reference/as_wide_table.md).
 - **Build/test (standard R-package workflow):** `devtools::load_all()`,
   `devtools::test()`, `devtools::check()`. The package targets
-  `R >= 4.0.0`; tidyverse-style Imports (dplyr, tidyr, purrr, etc.).
-  Lifecycle badge is **experimental** until the first CRAN release.
+  `R >= 4.1.0` (it uses `|>`); tidyverse-style Imports (dplyr, tidyr,
+  purrr, etc.). Lifecycle badge is **experimental** until the first CRAN
+  release.
 - **Default branch:** `master`. Docs/pkgdown site at
   <https://traitecoevo.github.io/traits.use/>.
 - **CRAN-bound:** `traits.use` must never `Import`/`Depend` on
@@ -62,7 +62,7 @@ becoming a thin AusTraits-specific layer over it. The first CRAN release
 [`traitecoevo`](https://github.com/traitecoevo) org) — here, the
 user-facing access/wrangle API (R package) for traits.build-format
 databases, including AusTraits; loads the released `.rds` via
-[`load_austraits()`](https://traitecoevo.github.io/traits.use/reference/load_austraits.md).
+[`load_database()`](https://traitecoevo.github.io/traits.use/reference/load_database.md).
 Family-wide concerns are documented centrally in
 **[austraits-meta](https://github.com/traitecoevo/austraits-meta)** —
 don’t restate them here, read them there:

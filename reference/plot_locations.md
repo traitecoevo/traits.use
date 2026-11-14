@@ -5,7 +5,7 @@ Plot location where trait data was collected from
 ## Usage
 
 ``` r
-plot_locations(database, feature = "trait_name", ..., basemap = "australia")
+plot_locations(database, feature = "trait_name", ..., basemap = NULL)
 ```
 
 ## Arguments
@@ -27,11 +27,15 @@ plot_locations(database, feature = "trait_name", ..., basemap = "australia")
 
 - basemap:
 
-  `"australia"` (the default) draws the locations over a map of
-  Australia, and leaves out any location beyond the map, with a message
+  `NULL` (the default) draws every location without a map. Or a data
+  frame of map cells to draw the locations over, with numeric columns
+  `x` (longitude) and `y` (latitude), one row per land cell, as used by
+  [`ggplot2::geom_raster()`](https://ggplot2.tidyverse.org/reference/geom_tile.html);
+  other columns, and rows missing `x` or `y`, are ignored. Locations
+  beyond the map (plus half a degree) are left out, with a message
   saying how many records that affects; if no location lies on the map,
-  it stops with an error. `NULL` draws every location without a map, for
-  databases from outside Australia.
+  it stops with an error. The `austraits` package passes a map of
+  Australia here.
 
 ## Value
 
@@ -53,7 +57,9 @@ data %>% plot_locations("trait_name")
 data <- austraits %>% extract_trait(trait_names = c("plant_height")) %>% join_location_coordinates()
 data$traits %>% plot_locations("trait_name")
 
-#Every location, without the map of Australia
-data$traits %>% plot_locations("trait_name", basemap = NULL)
+#Over a map: a data frame of land cells with columns x and y, such as
+#`raster::as.data.frame(r, xy = TRUE, na.rm = TRUE)` of a land raster `r`
+land <- raster::as.data.frame(r, xy = TRUE, na.rm = TRUE)
+data$traits %>% plot_locations("trait_name", basemap = land)
 } # }
 ```

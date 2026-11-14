@@ -7,6 +7,19 @@
   the `austraits` package (version 3.1.1 and earlier, listed below),
   which becomes a thin AusTraits-specific layer over `traits.use`
   (austraits#188).
+- What is specific to AusTraits stays in the `austraits` package:
+  `load_austraits()`, `get_versions()` and `get_version_latest()` (load
+  AusTraits with
+  [`load_database()`](https://traitecoevo.github.io/traits.use/reference/load_database.md)
+  and its doi instead), the AusTraits Getting Started vignette, and the
+  map of Australia used by
+  [`plot_locations()`](https://traitecoevo.github.io/traits.use/reference/plot_locations.md).
+- Requires R 4.1.0 or later, as the code uses the native pipe `|>`.
+- [`plot_locations()`](https://traitecoevo.github.io/traits.use/reference/plot_locations.md)
+  draws without a map by default. Its `basemap` argument takes a data
+  frame of map cells (columns `x` and `y`) to draw the locations over;
+  `basemap = "australia"` now gives an error pointing to the `austraits`
+  package.
 - [`extract_data()`](https://traitecoevo.github.io/traits.use/reference/extract_data.md)
   on the contexts table now honours `partial_matches_allowed`: matching
   is case-insensitive by default, exact with `FALSE` (so brackets are
@@ -46,7 +59,7 @@
   `database$sources[["Falster_2005"]]` does. Before, `$` on a `BibEntry`
   only did field access, so a key returned a list of `NULL`s.
   [`bind_databases()`](https://traitecoevo.github.io/traits.use/reference/bind_databases.md),
-  [`load_austraits()`](https://traitecoevo.github.io/traits.use/reference/load_austraits.md)
+  [`load_database()`](https://traitecoevo.github.io/traits.use/reference/load_database.md)
   and
   [`extract_data()`](https://traitecoevo.github.io/traits.use/reference/extract_data.md)
   give `sources` the class `traits_build_sources` (see
@@ -58,14 +71,12 @@
 - Added new function `load_database` which loads any traits.build
   database from its doi (Zenodo, Figshare or a doi resolving directly to
   an .rds file)
-- Fix bug in `load_austraits` and `load_database` downloads: when the
-  temporary folder was on a different drive to `path`, the file was
-  saved under its temporary name and could not be loaded. The user’s
-  `timeout` option is now also restored after a download.
+- Fix bug in `load_database` downloads: when the temporary folder was on
+  a different drive to `path`, the file was saved under its temporary
+  name and could not be loaded. The user’s `timeout` option is now also
+  restored after a download.
 - Fix bug in `plot_locations` that silently left out locations east of
   153°E (Brisbane, the Gold Coast, Byron Bay) and north of 9.5°S (Torres
   Strait), about 2% of AusTraits 5.0.0 records with coordinates.
-  Locations beyond the map of Australia are now reported in a message.
-  The new argument `basemap = NULL` draws every location without the
-  map, for databases from outside Australia. `...` is now passed on to
-  `geom_pointdensity()`, and `feature = NA` works.
+  Locations beyond the map are now reported in a message. `...` is now
+  passed on to `geom_pointdensity()`, and `feature = NA` works.

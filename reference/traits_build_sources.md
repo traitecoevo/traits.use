@@ -98,7 +98,7 @@ return a plain `BibEntry`, and so does
 [`merge()`](https://rdrr.io/r/base/merge.html) when it adds entries.
 
 [`bind_databases()`](https://traitecoevo.github.io/traits.use/reference/bind_databases.md),
-[`load_austraits()`](https://traitecoevo.github.io/traits.use/reference/load_austraits.md)
+[`load_database()`](https://traitecoevo.github.io/traits.use/reference/load_database.md)
 and
 [`extract_data()`](https://traitecoevo.github.io/traits.use/reference/extract_data.md)
 (and so the other `extract_*()` functions) add the class to the
@@ -109,7 +109,7 @@ session where traits.use is not loaded.
 ## See also
 
 [`bind_databases()`](https://traitecoevo.github.io/traits.use/reference/bind_databases.md),
-[`load_austraits()`](https://traitecoevo.github.io/traits.use/reference/load_austraits.md),
+[`load_database()`](https://traitecoevo.github.io/traits.use/reference/load_database.md),
 [`RefManageR::BibEntry()`](https://docs.ropensci.org/RefManageR/reference/BibEntry.html)
 
 ## Examples
@@ -140,7 +140,7 @@ database$sources$Falster_2005
 #> NULL
 #> 
 
-# bind_databases(), load_austraits() and extract_data() add the class
+# bind_databases(), load_database() and extract_data() add the class
 class(database$sources) <- c("traits_build_sources", class(database$sources))
 database$sources$Falster_2005
 #> [1] D. S. Falster and M. Westoby. “Alternative height strategies among

@@ -3,8 +3,6 @@
 <url><loc>https://traitecoevo.github.io/traits.use/AGENTS.html</loc></url>
 <url><loc>https://traitecoevo.github.io/traits.use/LICENSE-text.html</loc></url>
 <url><loc>https://traitecoevo.github.io/traits.use/LICENSE.html</loc></url>
-<url><loc>https://traitecoevo.github.io/traits.use/articles/austraits.html</loc></url>
-<url><loc>https://traitecoevo.github.io/traits.use/articles/index.html</loc></url>
 <url><loc>https://traitecoevo.github.io/traits.use/authors.html</loc></url>
 <url><loc>https://traitecoevo.github.io/traits.use/index.html</loc></url>
 <url><loc>https://traitecoevo.github.io/traits.use/news/index.html</loc></url>
@@ -23,8 +21,6 @@
 <url><loc>https://traitecoevo.github.io/traits.use/reference/flatten_database.html</loc></url>
 <url><loc>https://traitecoevo.github.io/traits.use/reference/get_compiled_by_traits.build.html</loc></url>
 <url><loc>https://traitecoevo.github.io/traits.use/reference/get_traits_table.html</loc></url>
-<url><loc>https://traitecoevo.github.io/traits.use/reference/get_version_latest.html</loc></url>
-<url><loc>https://traitecoevo.github.io/traits.use/reference/get_versions.html</loc></url>
 <url><loc>https://traitecoevo.github.io/traits.use/reference/index.html</loc></url>
 <url><loc>https://traitecoevo.github.io/traits.use/reference/join_context_properties.html</loc></url>
 <url><loc>https://traitecoevo.github.io/traits.use/reference/join_contributors.html</loc></url>
@@ -35,7 +31,6 @@
 <url><loc>https://traitecoevo.github.io/traits.use/reference/join_sources.html</loc></url>
 <url><loc>https://traitecoevo.github.io/traits.use/reference/join_taxa.html</loc></url>
 <url><loc>https://traitecoevo.github.io/traits.use/reference/join_taxonomic_updates.html</loc></url>
-<url><loc>https://traitecoevo.github.io/traits.use/reference/load_austraits.html</loc></url>
 <url><loc>https://traitecoevo.github.io/traits.use/reference/load_database.html</loc></url>
 <url><loc>https://traitecoevo.github.io/traits.use/reference/lookup_context_property.html</loc></url>
 <url><loc>https://traitecoevo.github.io/traits.use/reference/lookup_location_property.html</loc></url>

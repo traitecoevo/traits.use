@@ -36,7 +36,6 @@ Use names(database$sources) to list the keys.'></head><body>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../index.html"><span class="fa fas fa-home fa-lg"></span></a></li>
-<li class="nav-item"><a class="nav-link" href="../articles/austraits.html">Get Started</a></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">News</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -139,7 +138,7 @@ it), as do the RefManageR methods built on <code>[</code>, such as <code><a href
 <code><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique()</a></code> and <code><a href="https://rdrr.io/r/utils/head.html" class="external-link">head()</a></code>. <code>$&lt;-</code> keeps the class too. RefManageR's other
 replacement functions (<code>[&lt;-</code>, <code>[[&lt;-</code>, <code>names&lt;-</code>) return a plain
 <code>BibEntry</code>, and so does <code><a href="https://rdrr.io/r/base/merge.html" class="external-link">merge()</a></code> when it adds entries.</p>
-<p><code><a href="bind_databases.html">bind_databases()</a></code>, <code><a href="load_austraits.html">load_austraits()</a></code> and <code><a href="extract_data.html">extract_data()</a></code> (and so the
+<p><code><a href="bind_databases.html">bind_databases()</a></code>, <code><a href="load_database.html">load_database()</a></code> and <code><a href="extract_data.html">extract_data()</a></code> (and so the
 other <code>extract_*()</code> functions) add the class to the <code>sources</code> they return,
 including for databases built before the class existed. An object carrying
 the class behaves as a plain <code>BibEntry</code> in a session where traits.use is not
@@ -147,7 +146,7 @@ loaded.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="bind_databases.html">bind_databases()</a></code>, <code><a href="load_austraits.html">load_austraits()</a></code>, <code><a href="https://docs.ropensci.org/RefManageR/reference/BibEntry.html" class="external-link">RefManageR::BibEntry()</a></code></p></div>
+    <div class="dont-index"><p><code><a href="bind_databases.html">bind_databases()</a></code>, <code><a href="load_database.html">load_database()</a></code>, <code><a href="https://docs.ropensci.org/RefManageR/reference/BibEntry.html" class="external-link">RefManageR::BibEntry()</a></code></p></div>
     </div>
 
     <div class="section level2">
@@ -177,7 +176,7 @@ loaded.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># bind_databases(), load_austraits() and extract_data() add the class</span></span></span>
+<span class="r-in"><span><span class="co"># bind_databases(), load_database() and extract_data() add the class</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">database</span><span class="op">$</span><span class="va">sources</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"traits_build_sources"</span>, <span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">database</span><span class="op">$</span><span class="va">sources</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">database</span><span class="op">$</span><span class="va">sources</span><span class="op">$</span><span class="va">Falster_2005</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] D. S. Falster and M. Westoby. “Alternative height strategies among</span>
