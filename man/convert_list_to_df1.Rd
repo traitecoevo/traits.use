@@ -17,7 +17,5 @@ Convert a list with a single level of entries to a dataframe,
 useful when converting a yaml into a dataframe.
 }
 \examples{
-\dontrun{
 convert_list_to_df1(as.list(dplyr::starwars)[2])
-}
 }

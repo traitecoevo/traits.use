@@ -39,9 +39,7 @@ Note to AusTraits users:
 }
 }
 \examples{
-\dontrun{
-extract_trait(database = austraits, trait_names = "wood_density", taxon_names = "Acacia celsa")
-}
+extract_trait(database = austraits_lite, trait_names = "wood_density", taxon_names = "Acacia celsa")
 }
 \author{
 Daniel Falster - daniel.falster@unsw.edu.au

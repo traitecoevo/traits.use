@@ -32,8 +32,7 @@ Note to AusTraits users:
 }
 }
 \examples{
-\dontrun{
-(database \%>\% join_contributors(format = "single_column_pretty", 
-vars = c("last_name", "first_name", "ORCID")))$traits
-}
+(austraits_lite \%>\% extract_dataset("Falster_2003") \%>\%
+  join_contributors(format = "single_column_pretty",
+    vars = c("last_name", "first_name", "ORCID")))$traits
 }

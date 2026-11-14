@@ -33,8 +33,6 @@ Note to AusTraits users:
 }
 }
 \examples{
-\dontrun{
-#Append taxonomic details
-(database \%>\% join_taxa)$traits
-}
+# Append taxonomic details
+(austraits_lite \%>\% extract_dataset("Falster_2003") \%>\% join_taxa())$traits
 }

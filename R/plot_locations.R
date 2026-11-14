@@ -13,21 +13,22 @@
 #' error. The `austraits` package passes a map of Australia here.
 #' @author Dony Indiarto - d.indiarto@student.unsw.edu.au
 #' @return ggplot of sites
-#' @examples
-#' \dontrun{
-#' #All traits from a given study
-#' data <- austraits %>% extract_dataset(dataset_id = "Falster_2003") %>% join_location_coordinates()
+#' @examplesIf rlang::is_installed(c("ggplot2", "ggpointdensity", "viridis"))
+#' # All traits from a given study
+#' data <- austraits_lite %>%
+#'   extract_dataset(dataset_id = "Falster_2003") %>%
+#'   join_location_coordinates()
 #' data %>% plot_locations("trait_name")
 #'
-#' #Single trait
-#' data <- austraits %>% extract_trait(trait_names = c("plant_height")) %>% join_location_coordinates()
+#' # Single trait
+#' data <- austraits_lite %>%
+#'   extract_trait(trait_names = "plant_height") %>%
+#'   join_location_coordinates()
 #' data$traits %>% plot_locations("trait_name")
 #'
-#' #Over a map: a data frame of land cells with columns x and y, such as
-#' #`raster::as.data.frame(r, xy = TRUE, na.rm = TRUE)` of a land raster `r`
-#' land <- raster::as.data.frame(r, xy = TRUE, na.rm = TRUE)
-#' data$traits %>% plot_locations("trait_name", basemap = land)
-#' }
+#' # Over a map: pass `basemap`, a data frame of land cells with columns x and
+#' # y, such as `raster::as.data.frame(r, xy = TRUE, na.rm = TRUE)` of a land
+#' # raster `r`. `austraits::plot_locations()` draws a map of Australia.
 #' @export
 
 

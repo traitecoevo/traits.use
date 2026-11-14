@@ -18,7 +18,5 @@ vector containing location properties that contains search term
 Look up location properties that contain a specific search term.
 }
 \examples{
-\dontrun{
-austraits \%>\% lookup_location_property("soil")
-}
+austraits_lite \%>\% lookup_location_property("soil")
 }

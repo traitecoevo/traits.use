@@ -7,9 +7,9 @@
 #' @export
 #'
 #' @examples
-#' \dontrun{
-#' austraits %>% as_wide_table()
-#' }
+#' austraits_lite %>%
+#'   extract_dataset("Falster_2003") %>%
+#'   as_wide_table()
 #' @importFrom stats family
 #' @importFrom utils methods
 
@@ -38,6 +38,11 @@ as_wide_table <- function(database){
   database %>% 
     join_contexts_old(collapse_context = TRUE) -> database
 
+  # A database without contexts gets no context column, so add an empty one
+  if (!"context" %in% names(database$traits)) {
+    database$traits$context <- NA_character_
+  }
+
   # Getting rid of the columns that will soon be deleted in the next austraits release and renaming the description column
   database$methods <-
     database$methods %>%
@@ -49,12 +54,26 @@ as_wide_table <- function(database){
   database <- database %>% join_sources(vars = "source_id_citation")
   
   # collapse into one column
-  database$locations <- 
+  locations <- 
     database$locations %>% 
     dplyr::filter(value!="unknown") %>% 
-    dplyr::rename("property" = "location_property") %>%
-    split(., .$dataset_id) %>%
-    purrr::map_dfr(process_table3)
+    dplyr::rename("property" = "location_property")
+
+  # A database may have no known location properties (e.g. a flora), or no
+  # coordinates, so add any of these columns that are missing as empty
+  database$locations <-
+    if (nrow(locations) > 0) {
+      locations %>% split(., .$dataset_id) %>% purrr::map_dfr(process_table3)
+    } else {
+      dplyr::tibble(dataset_id = character(), location_id = character())
+    }
+  for (col in c("latitude (deg)", "longitude (deg)", "location")) {
+    if (!col %in% names(database$locations)) {
+      database$locations[[col]] <- rep(NA_character_, nrow(database$locations))
+    }
+  }
+  database$locations <- database$locations %>%
+    dplyr::relocate("dataset_id", "location_id", "latitude (deg)", "longitude (deg)", "location")
 
   # rename taxonomic_dataset field to reflect the APC/APNI name matching process better
   database$taxa <- 

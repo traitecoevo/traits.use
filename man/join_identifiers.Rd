@@ -32,7 +32,15 @@ Note to AusTraits users:
 }
 }
 \examples{
-\dontrun{
+database <- extract_dataset(austraits_lite, "Falster_2003")
+
+# austraits_lite predates the identifiers table, so add a small one
+database$identifiers <- dplyr::tibble(
+  dataset_id = "Falster_2003",
+  observation_id = unique(database$traits$observation_id)[1:2],
+  identifier_type = "collector_number",
+  identifier_value = c("DF 101", "DF 102"),
+  institution_code = NA_character_
+)
 (database \%>\% join_identifiers(format = "single_column_pretty", vars = "all"))$traits
-}
 }

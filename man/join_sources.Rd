@@ -33,7 +33,6 @@ Learn more at:
 \url{https://github.com/traitecoevo/traits.build-book}
 }
 \examples{
-\dontrun{
-(database \%>\% join_sources(vars = c("dataset_id_citation", "source_id_citation")))$traits
-}
+(austraits_lite \%>\% extract_dataset("Falster_2003") \%>\%
+  join_sources(vars = c("dataset_id_citation", "source_id_citation")))$traits
 }

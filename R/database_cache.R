@@ -49,10 +49,11 @@
 #' database_cache_dir()
 #' list_cached_databases()
 #'
-#' # Delete the cached databases not used for six months
-#' \dontrun{
-#' clear_database_cache(older_than = 180)
-#' }
+#' # Delete the cached databases not used for six months, with
+#' # clear_database_cache(older_than = 180)
+#'
+#' # Clearing a folder of downloads, here an empty temporary one
+#' clear_database_cache(path = tempfile(), ask = FALSE)
 
 database_cache_dir <- function() {
   path <- getOption("traits.use.cache_dir")

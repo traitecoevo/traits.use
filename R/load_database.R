@@ -28,6 +28,8 @@
 #'   a release of AusTraits by version number
 #'
 #' @examples
+#' # Not run: downloads AusTraits (over 100 MB) the first time. See
+#' # ?austraits_lite for a small database to try the package with.
 #' \dontrun{
 #' # Downloaded the first time, then loaded from the cache
 #' austraits <- load_database(doi = "10.5281/zenodo.11188867")

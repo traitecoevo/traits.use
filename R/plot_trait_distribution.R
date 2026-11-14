@@ -17,11 +17,9 @@
 #'   input, or a trait not in it), a blank plot saying so.
 #' @export
 #'
-#' @examples
-#' \dontrun{
-#' austraits %>% plot_trait_distribution("wood_density")
-#' austraits %>% plot_trait_distribution("leaf_compoundness")
-#' }
+#' @examplesIf rlang::is_installed(c("ggplot2", "forcats", "scales"))
+#' austraits_lite %>% plot_trait_distribution("wood_density")
+#' austraits_lite %>% plot_trait_distribution("leaf_compoundness")
 plot_trait_distribution <- function(database, trait_name, ...) {
   rlang::check_installed("ggplot2", reason = "to use `plot_trait_distribution()`")
 
@@ -72,10 +70,8 @@ plot_trait_distribution <- function(database, trait_name, ...) {
 #' @return A ggplot object, or a blank plot saying there are no values to plot
 #' @export
 #'
-#' @examples
-#' \dontrun{
-#' austraits %>% plot_categorical_trait_distribution("leaf_compoundness", family_count = 20)
-#' }
+#' @examplesIf rlang::is_installed("ggplot2")
+#' austraits_lite %>% plot_categorical_trait_distribution("leaf_compoundness", family_count = 20)
 plot_categorical_trait_distribution <- function(database, trait_name, family_count = 50) {
   rlang::check_installed("ggplot2", reason = "to use `plot_categorical_trait_distribution()`")
 
@@ -190,10 +186,8 @@ plot_categorical_trait_distribution <- function(database, trait_name, family_cou
 #'   (`"dataset_id | taxon_name"`), which `plotly::ggplotly()` shows as a tooltip.
 #' @export
 #'
-#' @examples
-#' \dontrun{
-#' austraits %>% plot_trait_distribution_jitter("wood_density", "dataset_id", "Westoby_2014")
-#' }
+#' @examplesIf rlang::is_installed(c("ggplot2", "forcats", "scales"))
+#' austraits_lite %>% plot_trait_distribution_jitter("wood_density", "dataset_id", "Westoby_2014")
 #' @author Daniel Falster - daniel.falster@unsw.edu.au
 plot_trait_distribution_jitter <- function(database,
                                            trait_name,

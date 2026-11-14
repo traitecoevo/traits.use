@@ -36,7 +36,6 @@ Note to AusTraits users:
 }
 }
 \examples{
-\dontrun{
-(database \%>\% join_location_properties(format = "single_column_pretty", vars = "all"))$traits
-}
+(austraits_lite \%>\% extract_dataset("Falster_2003") \%>\%
+  join_location_properties(format = "single_column_pretty", vars = "all"))$traits
 }

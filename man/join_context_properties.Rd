@@ -39,8 +39,6 @@ Note to AusTraits users:
 }
 }
 \examples{
-\dontrun{
-(database \%>\% join_context_properties(
-format = "many_columns", vars = "all", include_description = TRUE))$traits
-}
+(austraits_lite \%>\% extract_dataset("Crous_2013") \%>\%
+  join_context_properties(format = "many_columns", vars = "all", include_description = TRUE))$traits
 }
