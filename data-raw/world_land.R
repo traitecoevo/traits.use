@@ -9,7 +9,7 @@
 ## Stored as a raw matrix of 3600 rows (latitude, north to south, from 90 to
 ## -90) by 900 bytes, each byte packing 8 cells of a row (longitude, west to
 ## east, from -180 to 180) with packBits(): 76 kB on disk, rather than the
-## many MB of a data frame of land cells. world_map_cells() unpacks only the
+## many MB of a data frame of land cells. world_map_raster() unpacks only the
 ## rows it needs.
 
 res <- 0.05
