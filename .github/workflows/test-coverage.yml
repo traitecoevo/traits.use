@@ -50,12 +50,12 @@ jobs:
           covr::to_cobertura(cov)
         shell: Rscript {0}
 
-      # The org-wide CODECOV_TOKEN is a global upload token: Codecov
-      # accepts it through this action but not through covr::codecov()
-      # ("Could not find a repository associated with upload token")
-      - uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
+      # Upload with the org-wide CODECOV_TOKEN. Codecov's legacy endpoint,
+      # used by covr::codecov(), rejects that token ("Could not find a
+      # repository associated with upload token"); this action accepts it.
+      - uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
         with:
-          fail_ci_if_error: ${{ github.event_name != 'pull_request' || secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: ${{ github.event_name != 'pull_request' || secrets.CODECOV_TOKEN != '' }}
           files: ./cobertura.xml
           plugins: noop
           disable_search: true
