@@ -17,6 +17,15 @@ logical (T/F) output and messaging for incompatible versions
 \description{
 Function to check whether the data object has been compiled by the traits.build workflow and
 therefore has a data structure that is appropriate for use with traits.use functions.
+
+A database built by traits.build 2.3 or later records the version of the
+traits.build data model its tables follow, in \code{metadata$data_model_version}
+(see \code{\link[=get_data_model_version]{get_data_model_version()}}). It is compatible if that version's major
+number is one this version of traits.use reads
+(\code{\link[=supported_data_model_majors]{supported_data_model_majors()}}). A database without that field is
+compatible if \code{metadata$related_identifiers} says it was compiled by
+traits.build, which is how releases built before the field existed, such as
+AusTraits 7.0.0 and earlier, are recognised.
 }
 \author{
 Elizabeth Wenk - e.wenk@unsw.edu.au
