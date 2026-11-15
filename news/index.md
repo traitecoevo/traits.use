@@ -15,6 +15,18 @@
   map of Australia used by
   [`plot_locations()`](https://traitecoevo.github.io/traits.use/reference/plot_locations.md).
 - Requires R 4.1.0 or later, as the code uses the native pipe `|>`.
+- A database is recognised by the version of the traits.build data model
+  (<https://w3id.org/traits.build>) its tables follow, which
+  traits.build 2.3 and later records in `metadata$data_model_version`,
+  rather than by the address of traits.build’s GitHub repository in
+  `metadata$related_identifiers`
+  ([\#40](https://github.com/traitecoevo/traits.use/issues/40)). This
+  version of traits.use reads data model 1.x. A database recording a
+  newer major version is refused with a message to update traits.use,
+  where before it would have been told its data were too old;
+  [`print()`](https://rdrr.io/r/base/print.html) shows the version.
+  Databases built before the field existed, such as AusTraits 7.0.0 and
+  earlier, are recognised by the address as before.
 - New dataset `austraits_lite`: 24 datasets from AusTraits 7.0.0 (CC BY
   4.0), a small traits.build database to try the package on without
   downloading anything. The examples now use it and run; those of
