@@ -41,6 +41,34 @@ test_that("Number of columns has not changed", {
 }
 )
 
+test_that("Binding names datasets holding exact copies of their own rows (#36)", {
+  a <- austraits_5.0.0_lite %>% extract_dataset("Apgaua_2017")
+  b <- austraits_5.0.0_lite %>% extract_dataset("Choat_2006")
+
+  # Overlap between databases is expected, e.g. a union of two extracts
+  expect_no_warning(both <- bind_databases(a, a))
+  expect_equal(nrow(both$traits), nrow(a$traits))
+  expect_no_warning(bind_databases(fire, season))
+
+  # A copy within one database is a configuration error: dropped, and named
+  copied <- a
+  copied$traits <- dplyr::bind_rows(a$traits, a$traits[1:3, ])
+  expect_warning(
+    bound <- bind_databases(copied, b),
+    "Dropped 3 rows of `traits` that exactly copy another row of the same dataset: Apgaua_2017 \\(3\\)"
+  )
+  expect_equal(nrow(bound$traits), nrow(a$traits) + nrow(b$traits))
+  # Named however the database is passed; the copies within each database
+  # count, not the overlap between them
+  expect_warning(bind_databases(databases = list(b, copied)), "Apgaua_2017 \\(3\\)")
+  expect_warning(bind_databases(copied, copied), "Apgaua_2017 \\(6\\)")
+
+  # The fixture has no excluded data, so make some
+  copied <- b
+  copied$excluded_data <- dplyr::mutate(b$traits[c(1, 1, 2), ], error = "Missing value")
+  expect_warning(bind_databases(copied), "Dropped 1 row of `excluded_data`.*Choat_2006 \\(1\\)")
+})
+
 test_that("Binding warns when one key names different references", {
   a <- austraits_5.0.0_lite %>% extract_dataset("Apgaua_2017")
   b <- austraits_5.0.0_lite %>% extract_dataset("Choat_2006")
