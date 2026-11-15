@@ -134,6 +134,34 @@ test_that("plot_locations draws over the world map by default, cropped to the lo
   at_sea$`longitude (deg)` <- -140
   p <- plot_locations(at_sea)
   expect_false(any(p$layers[[1]]$geom_params$raster == "cadetblue4"))
+
+  # The map is drawn the right way round: around a site on Perth's coast, sea
+  # to the west and land to the east; on the Nullarbor's coast, land to the
+  # north and sea to the south
+  drawn <- function(lon, lat) {
+    site <- sites[1, ]
+    site$`longitude (deg)` <- lon
+    site$`latitude (deg)` <- lat
+    plot_locations(site)$layers[[1]]$geom_params$raster == "cadetblue4"
+  }
+  perth <- drawn(115.725, -31.775)
+  expect_true(all(!perth[, 1]))
+  expect_true(all(perth[, ncol(perth)]))
+  nullarbor <- drawn(129.525, -31.625)
+  expect_true(all(nullarbor[1, ]))
+  expect_true(all(!nullarbor[nrow(nullarbor), ]))
+
+  # Coordinates beyond the world, such as latitude and longitude swapped or
+  # longitudes from 0 to 360, are left out with a message, as for a basemap
+  swapped <- sites
+  swapped$`latitude (deg)` <- sites$`longitude (deg)`
+  swapped$`longitude (deg)` <- sites$`latitude (deg)`
+  expect_error(plot_locations(swapped), "None of the 4 record\\(s\\) lie on the map")
+  expect_no_error(plot_locations(swapped, basemap = NULL))
+  beyond <- sites
+  beyond$`longitude (deg)`[1] <- 360 - 115.86
+  expect_message(p <- plot_locations(beyond), "1 record\\(s\\) at 1 location\\(s\\) lie beyond the map")
+  expect_equal(shown(p), sort(sites$location_name[-1]))
 })
 
 test_that("the world map lines up with known land and sea", {
@@ -153,6 +181,22 @@ test_that("the world map lines up with known land and sea", {
   expect_false(land_at(0, 0))
   expect_false(land_at(100.5, 3.5))
   expect_false(land_at(-150, 0))
+
+  # Neighbouring cells on straight coasts, land then sea, facing each way, so
+  # that a map shifted by a cell fails. Each was checked against the coastline
+  # of the maps package, as were the two cells beyond each, inland and out
+  coast <- tibble::tribble(
+    ~coast,                 ~land_lon, ~land_lat, ~sea_lon, ~sea_lat,
+    "Perth, west",           115.725,  -31.775,   115.675,  -31.775,
+    "Sydney, east",          151.275,  -33.925,   151.325,  -33.925,
+    "Kenya, east",            39.975,   -3.375,    40.025,   -3.375,
+    "Nullarbor, south",      129.525,  -31.625,   129.525,  -31.675,
+    "Libya, north",           20.025,   32.075,    20.025,   32.125
+  )
+  for(i in seq_len(nrow(coast))) {
+    expect_true(land_at(coast$land_lon[i], coast$land_lat[i]), label = coast$coast[i])
+    expect_false(land_at(coast$sea_lon[i], coast$sea_lat[i]), label = coast$coast[i])
+  }
 
   # The whole world is shown coarser, at most 600 cells a side, edge to edge
   m <- world_map_raster(c(-180, 180), c(-90, 90))

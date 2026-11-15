@@ -100,6 +100,9 @@ plot_locations2 <- function(database, feature, basemap = "world", ...){
   window <- NULL
 
   if(identical(basemap, "world")){
+    # Coordinates beyond the world, such as latitude and longitude swapped or
+    # longitudes from 0 to 360, can't be placed on it
+    sites <- keep_on_map(sites, c(-180, 180), c(-90, 90))
     window <- map_window(sites$`longitude (deg)`, sites$`latitude (deg)`)
     land <- world_map_raster(window$x, window$y)
     # Drawn as an image, rather than one tile per land cell
@@ -118,27 +121,9 @@ plot_locations2 <- function(database, feature, basemap = "world", ...){
     # Leave out locations beyond the map (plus a margin), saying so, rather
     # than letting a handful of distant locations shrink the map
     margin <- 0.5
-    inside <-
-      dplyr::between(sites$`longitude (deg)`, min(map_cells$x) - margin, max(map_cells$x) + margin) &
-      dplyr::between(sites$`latitude (deg)`, min(map_cells$y) - margin, max(map_cells$y) + margin)
-
-    if(!any(inside)){
-      cli::cli_abort(paste0(
-        "None of the ", nrow(sites), " record(s) lie on the map. ",
-        "Use `basemap = NULL` to show every location."
-      ))
-    }
-
-    if(any(!inside)){
-      outside <- sites[!inside, ]
-      n_locations <- nrow(dplyr::distinct(outside, `latitude (deg)`, `longitude (deg)`))
-      cli::cli_alert_info(paste0(
-        sum(!inside), " record(s) at ", n_locations,
-        " location(s) lie beyond the map and are not shown. ",
-        "Use `basemap = NULL` to show every location."
-      ))
-      sites <- sites[inside, ]
-    }
+    sites <- keep_on_map(sites,
+                         range(map_cells$x) + c(-1, 1) * margin,
+                         range(map_cells$y) + c(-1, 1) * margin)
 
     site_map <- site_map +
       ggplot2::geom_raster(data = map_cells, ggplot2::aes(x = x, y = y, fill = land), show.legend = FALSE)
@@ -178,6 +163,38 @@ plot_locations2 <- function(database, feature, basemap = "world", ...){
   suppressWarnings(print(site_map))
 }
 
+
+#' Leave out the locations beyond a map, saying how many records that affects
+#'
+#' Stops with an error if no location lies on the map.
+#' @param sites the locations, with columns `longitude (deg)` and
+#'   `latitude (deg)`
+#' @param xlim,ylim the extent of the map
+#' @noRd
+keep_on_map <- function(sites, xlim, ylim){
+  inside <-
+    dplyr::between(sites$`longitude (deg)`, xlim[1], xlim[2]) &
+    dplyr::between(sites$`latitude (deg)`, ylim[1], ylim[2])
+
+  if(!any(inside)){
+    cli::cli_abort(paste0(
+      "None of the ", nrow(sites), " record(s) lie on the map. ",
+      "Use `basemap = NULL` to show every location."
+    ))
+  }
+
+  if(any(!inside)){
+    outside <- sites[!inside, ]
+    n_locations <- nrow(dplyr::distinct(outside, `latitude (deg)`, `longitude (deg)`))
+    cli::cli_alert_info(paste0(
+      sum(!inside), " record(s) at ", n_locations,
+      " location(s) lie beyond the map and are not shown. ",
+      "Use `basemap = NULL` to show every location."
+    ))
+    sites <- sites[inside, ]
+  }
+  sites
+}
 
 #' The window of the world map around a set of locations
 #'
@@ -224,17 +241,21 @@ world_map_raster <- function(xlim, ylim, max_cells = 600){
   rows <- seq(max(1, floor((90 - ylim[2]) / res) + 1), min(n_rows, ceiling((90 - ylim[1]) / res)))
   cols <- seq(max(1, floor((xlim[1] + 180) / res) + 1), min(n_cols, ceiling((xlim[2] + 180) / res)))
 
+  # A wide window keeps every `step`-th cell: the middle one of each block of
+  # `step` cells, which the image then draws over the whole block
   step <- max(1, ceiling(max(length(rows), length(cols)) / max_cells))
-  rows <- rows[seq(1, length(rows), by = step)]
-  cols <- cols[seq(1, length(cols), by = step)]
+  first_row <- rows[seq(1, length(rows), by = step)]
+  first_col <- cols[seq(1, length(cols), by = step)]
+  rows <- pmin(first_row + step %/% 2, n_rows)
+  cols <- pmin(first_col + step %/% 2, n_cols)
 
   # Each row of `bits` packs a row of the map, 8 cells a byte
   is_land <- matrix(as.logical(rawToBits(t(map$bits[rows, , drop = FALSE]))),
                     nrow = length(rows), byrow = TRUE)[, cols, drop = FALSE]
 
   # Each cell kept stands for `step` cells of the map, along each side
-  west <- -180 + (cols[1] - 1) * res
-  north <- 90 - (rows[1] - 1) * res
+  west <- -180 + (first_col[1] - 1) * res
+  north <- 90 - (first_row[1] - 1) * res
   list(
     is_land = is_land,
     x = c(west, west + length(cols) * step * res),
