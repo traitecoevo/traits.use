@@ -12,7 +12,9 @@ get_data_model_version(database)
 \value{
 The version as a string, such as \code{"1.4.0"}, or \code{NA} for a database
 built before traits.build recorded it (traits.build 2.2 and earlier), and
-for a flat table without a stamp.
+for a flat table without a stamp. A field that is there but is not one
+string is returned as text, e.g. \code{"NA"} or \code{""}, which
+\code{\link[=data_model_supported]{data_model_supported()}} rejects.
 }
 \description{
 The one place the version is read, for both the compatibility check and the

@@ -96,7 +96,9 @@ supported_data_model_majors <- function() {
 #'
 #' @return The version as a string, such as `"1.4.0"`, or `NA` for a database
 #'   built before traits.build recorded it (traits.build 2.2 and earlier), and
-#'   for a flat table without a stamp.
+#'   for a flat table without a stamp. A field that is there but is not one
+#'   string is returned as text, e.g. `"NA"` or `""`, which
+#'   [data_model_supported()] rejects.
 #' @keywords internal
 get_data_model_version <- function(database) {
   if (is.data.frame(database)) {
@@ -126,7 +128,8 @@ data_model_supported <- function(version) {
   if (!data_model_version_valid(version)) {
     return(FALSE)
   }
-  as.integer(sub("\\..*$", "", version)) %in% supported_data_model_majors()
+  # as.numeric, not as.integer: a major past the integer range is just unsupported
+  as.numeric(sub("\\..*$", "", version)) %in% supported_data_model_majors()
 }
 
 
