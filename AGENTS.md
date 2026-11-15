@@ -25,6 +25,8 @@ is now a thin AusTraits-specific layer over it. The first CRAN release
   `get_version_latest()`, the AusTraits vignette and the map of
   Australia.
   [`plot_locations()`](https://traitecoevo.github.io/traits.use/reference/plot_locations.md)
+  draws over a world map cropped to the locations by default
+  (`inst/extdata/world_land.rds`, from `data-raw/world_land.R`), and
   takes a `basemap` data frame so `austraits` can pass its map.
 - **Wrangle/extract:** `extract_*()` (data/dataset/taxa/trait),
   `join_*()` (taxa, methods, contributors, locations, context/location

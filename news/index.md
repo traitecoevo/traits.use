@@ -100,8 +100,13 @@
 - The plotting functions say which suggested packages they need (ggplot2
   and others) when one is not installed, rather than failing partway.
 - [`plot_locations()`](https://traitecoevo.github.io/traits.use/reference/plot_locations.md)
-  draws without a map by default. Its `basemap` argument takes a data
-  frame of map cells (columns `x` and `y`) to draw the locations over;
+  draws the locations over a map of the world cropped to them by default
+  (`basemap = "world"`,
+  [\#42](https://github.com/traitecoevo/traits.use/issues/42)), so a
+  database from anywhere gets a map. The map is a 0.05° grid of Natural
+  Earth’s 1:10m land (public domain), 76 kB in the package.
+  `basemap = NULL` draws no map, and a data frame of map cells (columns
+  `x` and `y`) draws the locations over that map;
   `basemap = "australia"` now gives an error pointing to the `austraits`
   package.
 - In the `extract_*()` functions, a value that is itself in the column,
