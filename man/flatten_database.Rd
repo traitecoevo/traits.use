@@ -20,7 +20,14 @@ the contributors column defaults to "single_column_pretty" when this option is s
 \item{include_description}{A logical indicating whether to include (TRUE) or omit (FALSE) the context_property descriptions; defaults to TRUE.}
 }
 \value{
-A table combining information in 8 traits.build relational tables: traits, locations, contexts, methods, taxa, taxonomic_updates, contributors, and identifiers
+A table combining information in 8 traits.build relational tables: traits, locations, contexts, methods, taxa, taxonomic_updates, contributors, and identifiers.
+It is a tibble of class \code{traits.build_flat}, stamped with the database it came from: the attribute
+\code{traits.build_stamp} is a list of its \code{title}, \code{version}, \code{doi}, \code{data_model_version} and
+\code{traits_build_version} (each \code{NA} if the database does not record it). The stamp is kept by
+\code{saveRDS()} and, with the class, by \code{arrow::write_parquet()}, which stores it in the file's metadata,
+and is shown when the table is printed. \code{\link[=extract_trait]{extract_trait()}}, \code{\link[=extract_taxa]{extract_taxa()}}, \code{\link[=extract_dataset]{extract_dataset()}},
+\code{\link[=summarise_database]{summarise_database()}} and the plots take this table as well as the relational database, and keep the
+stamp on what they return.
 }
 \description{
 Create a single database output that merges together the information
@@ -35,4 +42,5 @@ flat <- austraits_lite \%>\%
   extract_dataset("Falster_2003") \%>\%
   flatten_database()
 flat
+attr(flat, "traits.build_stamp")$version
 }

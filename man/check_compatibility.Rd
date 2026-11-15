@@ -4,12 +4,19 @@
 \alias{check_compatibility}
 \title{Check compatibility of traits.build object}
 \usage{
-check_compatibility(database, single_table_allowed = FALSE)
+check_compatibility(
+  database,
+  single_table_allowed = FALSE,
+  call = rlang::caller_env()
+)
 }
 \arguments{
-\item{database}{traits.build database (list object)}
+\item{database}{traits.build database (list object), or a flat table from one}
 
-\item{single_table_allowed}{logical for when the input might be a single table instead of a complete database; defaults to FALSE}
+\item{single_table_allowed}{logical: can the calling function take a flat
+table (a flattened database, or a traits table)? Defaults to \code{FALSE}}
+
+\item{call}{the calling function's environment, named in errors}
 }
 \value{
 logical (T/F) output and messaging for incompatible versions
@@ -26,6 +33,12 @@ number is one this version of traits.use reads
 compatible if \code{metadata$related_identifiers} says it was compiled by
 traits.build, which is how releases built before the field existed, such as
 AusTraits 7.0.0 and earlier, are recognised.
+
+A flat table (see \code{database_format()}) is accepted only when
+\code{single_table_allowed} is \code{TRUE}, and, if \code{\link[=flatten_database]{flatten_database()}} stamped it
+with a data model version, only if that version is supported; otherwise it
+stops with an error saying the function needs the relational database. Anything that is neither a
+relational database nor a traits table stops with an error.
 }
 \author{
 Elizabeth Wenk - e.wenk@unsw.edu.au

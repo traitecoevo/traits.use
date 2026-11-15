@@ -12,7 +12,7 @@ extract_trait(
 )
 }
 \arguments{
-\item{database}{traits.build database (list object)}
+\item{database}{traits.build database (list object), or a flat table from one: a table made by \code{\link[=flatten_database]{flatten_database()}} (whose class and stamp the result keeps), or a traits table}
 
 \item{trait_names}{character string of trait(s) for which data will be extracted}
 

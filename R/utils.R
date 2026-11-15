@@ -72,16 +72,17 @@ function_not_supported <- function(database, ...){
   function_name <- as.character(sys.calls()[[1]]) %>% dplyr::last()
 
   # A database that records a data model version this traits.use cannot read:
-  # the fix is a newer traits.use, not older data
-  data_model_version <-
-    if (is.null(dim(database))) get_data_model_version(database) else NA_character_
+  # the fix is a newer traits.use, not older data. The function is named by the
+  # error's header (`call`), not by `function_name`, which is the last element
+  # of the outermost call and so often an argument or another function.
+  data_model_version <- get_data_model_version(database)
   if (!is.na(data_model_version) && !data_model_supported(data_model_version)) {
     majors <- paste0(supported_data_model_majors(), ".x", collapse = ", ")
     problem <-
       if (data_model_version_valid(data_model_version)) {
-        "{function_name} cannot read this database: its tables follow traits.build data model {data_model_version}, and this version of traits.use ({utils::packageVersion('traits.use')}) reads data model {majors}."
+        "This database cannot be read: its tables follow traits.build data model {data_model_version}, and this version of traits.use ({utils::packageVersion('traits.use')}) reads data model {majors}."
       } else {
-        "{function_name} cannot read this database: its data model version, \"{data_model_version}\", is not a version number (major.minor.patch)."
+        "This database cannot be read: its data model version, \"{data_model_version}\", is not a version number (major.minor.patch)."
       }
     cli::cli_abort(c(
       "x" = problem,
@@ -92,12 +93,12 @@ function_not_supported <- function(database, ...){
     )
   }
 
-  # Determine if traits table or traits.build object
-  if( is.null(dim(database))){
-    # Extract AusTraits version
-    AusTraits_version <- print_version(database)
-  } else
+  # Name the release: a relational database records it in build_info
+  if (is.data.frame(database)) {
     AusTraits_version <- "< 5.0.0"
+  } else {
+    AusTraits_version <- print_version(database)
+  }
   
   # Formulate message
   cli::cli_abort(c(
@@ -117,13 +118,7 @@ function_not_supported <- function(database, ...){
 
 
 get_traits_table <- function(database){
-  if( is.null(dim(database)) ){
-    traits <- database$traits
-  } else{
-    traits <- database
-  }
-  
-  return(traits)
+  if (is_flat(database)) database else database$traits
 }
 
 

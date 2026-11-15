@@ -13,7 +13,7 @@ extract_taxa(
 )
 }
 \arguments{
-\item{database}{traits.build database (list object)}
+\item{database}{traits.build database (list object), or a flat table from one: a table made by \code{\link[=flatten_database]{flatten_database()}} (whose class and stamp the result keeps), or a traits table}
 
 \item{family}{character string of family or families}
 

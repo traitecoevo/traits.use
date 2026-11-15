@@ -7,7 +7,9 @@
 summarise_database(database, var)
 }
 \arguments{
-\item{database}{traits.build database (list object)}
+\item{database}{traits.build database (list object), or a flat table from
+one: a table made by \code{\link[=flatten_database]{flatten_database()}}, or a traits table (for \code{"family"}
+or \code{"genus"}, it must then have that column, e.g. from \code{\link[=join_taxa]{join_taxa()}})}
 
 \item{var}{variable you use wish to see summary of (trait_name, genus, family)}
 }

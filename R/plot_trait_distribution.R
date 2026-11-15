@@ -31,7 +31,7 @@ plot_trait_distribution <- function(database, trait_name, ...) {
   # The trait's type from its definition; for a traits table, categorical
   # traits are the ones without units
   type <- NA
-  if (is.null(dim(database))) {
+  if (!is_flat(database)) {
     type <- purrr::pluck(database, "definitions", trait_name, "type", .default = NA)
   }
   if (is.na(type)) {
@@ -341,11 +341,6 @@ trait_plot_data <- function(database, trait_name) {
   if (is.null(database)) {
     return(NULL)
   }
-  # extract_trait() needs a traits table to be a tibble
-  if (is.data.frame(database) && !tibble::is_tibble(database)) {
-    database <- tibble::as_tibble(database)
-  }
-
   status <- check_compatibility(database, single_table_allowed = TRUE)
   if (!status) {
     function_not_supported(database)
@@ -359,7 +354,7 @@ trait_plot_data <- function(database, trait_name) {
 
   database_trait <- extract_trait(database, trait_name, partial_matches_allowed = FALSE)
 
-  if (is.null(dim(database_trait))) {
+  if (!is_flat(database_trait)) {
     traits <- database_trait$traits
     # Add family and genus, unless already joined
     tax_cols <- setdiff(intersect(c("family", "genus"), names(database_trait$taxa)), names(traits))

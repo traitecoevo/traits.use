@@ -22,6 +22,29 @@
 #' unique(both$traits$dataset_id)
 #' @export
 bind_databases <- function(..., databases = list(...)) {
+
+  # Each database must be relational: a flat table has no tables to bind
+  for (database in databases[!vapply(databases, is.null, logical(1))]) {
+    if (is_flat(database)) {
+      abort_flat_input()
+    }
+    # The result keeps the first database's metadata, so a data model version
+    # this traits.use cannot read must be refused here, or binding it after a
+    # readable one would pass it off as readable (#40)
+    data_model_version <- get_data_model_version(database)
+    if (!is.na(data_model_version) && !data_model_supported(data_model_version)) {
+      function_not_supported(database)
+    }
+  }
+  data_model_versions <-
+    unique(stats::na.omit(vapply(databases[!vapply(databases, is.null, logical(1))],
+                                 get_data_model_version, character(1))))
+  if (length(data_model_versions) > 1) {
+    cli::cli_warn(c(
+      "!" = "The databases follow different versions of the traits.build data model: {.val {data_model_versions}}.",
+      "i" = "The result records the first database's version."
+    ))
+  }
   
   combine <- function(name, databases) {
     

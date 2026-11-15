@@ -13,7 +13,7 @@ check_arg_missingness <- function(database, col, col_value){
 # First check if table is NA
 
 check_table_name_exists <- function(database, table){
-  if(!is.na(table) & !tibble::is_tibble(database)){ # database is NOT $traits and `table` is supplied
+  if(!is.na(table) & !is.data.frame(database)){ # database is NOT $traits and `table` is supplied
     if(! names(database) %in% table |> any()){ # Does any names of the tables in database contain `table` 
       cli::cli_abort(
         c(
@@ -28,7 +28,7 @@ check_table_name_exists <- function(database, table){
 # Check if col exists in specified table when database is traits.build object
 check_col_exists_in_table <- function(database, table, col){
   # If traits table supplied and no table is specified
-  if(tibble::is_tibble(database)){
+  if(is.data.frame(database)){
     if(! names(database) %in% col |> any()){ # Does any names in table contain `col`
       cli::cli_abort(c(
         "x" = "`{col}` is not a valid column name in the `traits` table",
@@ -51,7 +51,7 @@ check_col_exists_in_table <- function(database, table, col){
 # Accommodating for multiple values supplied AND partial matching
 
 check_col_value_exists <- function(ret, table, col, col_value){
-  if(tibble::is_tibble(ret)){
+  if(is.data.frame(ret)){
     if(nrow(ret) == 0)
       cli::cli_abort(c(
         "x" = "`{col_value}` is not a valid value in `{col}` column of the `traits` table",

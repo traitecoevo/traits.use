@@ -15,6 +15,7 @@
 - **Wrangle/extract:** `extract_*()` (data/dataset/taxa/trait), `join_*()` (taxa, methods,
   contributors, locations, context/location properties), `lookup_*()`, `trait_pivot_longer/wider()`,
   `summarise_database()`, `bind_databases()`, `flatten_database()`, `as_wide_table()`.
+- **Two input formats, told apart by class** (#41): the relational database (list, class `traits.build`) and a flat table (data frame; `flatten_database()` output has class `traits.build_flat` and a `traits.build_stamp` attribute). `database_format()` in `R/check_compatibility.R` is the one place that decides; don't branch on `dim()` or `is_tibble()`. `extract_trait/taxa/dataset()`, `summarise_database()` and the plots take both, so test them with both (`tests/testthat/test-flat.R`); everything else stops on a flat table via `check_compatibility()`.
 - **Build/test (standard R-package workflow):** `devtools::load_all()`, `devtools::test()`,
   `devtools::check()`. The package targets `R >= 4.1.0` (it uses `|>`); tidyverse-style Imports (dplyr, tidyr,
   purrr, etc.). Lifecycle badge is **experimental** until the first CRAN release.

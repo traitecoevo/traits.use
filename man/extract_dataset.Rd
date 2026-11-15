@@ -7,7 +7,7 @@
 extract_dataset(database, dataset_id, partial_matches_allowed = TRUE)
 }
 \arguments{
-\item{database}{traits.build database (list object)}
+\item{database}{traits.build database (list object), or a flat table from one: a table made by \code{\link[=flatten_database]{flatten_database()}} (whose class and stamp the result keeps), or a traits table}
 
 \item{dataset_id}{character string that matches a \code{dataset_id} in the database}
 
