@@ -139,8 +139,9 @@ warn_exact_copies <- function(tables, name) {
   if (length(tables) == 0) return(invisible())
 
   # `.id` keeps rows of different databases apart, so only copies within one
-  # database are counted
-  bound <- dplyr::bind_rows(tables, .id = ".database")
+  # database are counted. Unnamed, so it numbers them: `.id` takes names when
+  # there are any, and two databases passed under one name would merge
+  bound <- dplyr::bind_rows(unname(tables), .id = ".database")
   kept <- dplyr::distinct(bound)
   if (nrow(kept) == nrow(bound)) return(invisible())
 
@@ -152,12 +153,17 @@ warn_exact_copies <- function(tables, name) {
 
   warning(
     sprintf(
-      "Dropped %d row%s of `%s` that exactly copy another row of the same dataset: %s. ",
+      "Dropped %d row%s of `%s` that exactly copy another row in the same database: %s. ",
       sum(dropped$n), if (sum(dropped$n) == 1) "" else "s", name,
       paste(sprintf("%s (%d)", dropped$dataset_id, dropped$n), collapse = ", ")
     ),
-    "An exact copy means the dataset's configuration is wrong; ",
-    "`traits.build::dataset_find_pivot_duplicates()` finds the rows.",
+    "An exact copy means the dataset's configuration is wrong",
+    # It reads only the traits table
+    if (name == "traits") {
+      "; `traits.build::dataset_find_pivot_duplicates()` finds the rows."
+    } else {
+      "."
+    },
     call. = FALSE
   )
 
