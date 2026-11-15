@@ -22,6 +22,13 @@
 #' unique(both$traits$dataset_id)
 #' @export
 bind_databases <- function(..., databases = list(...)) {
+
+  # Each database must be relational: a flat table has no tables to bind
+  for (database in databases[!vapply(databases, is.null, logical(1))]) {
+    if (is_flat(database)) {
+      abort_flat_input()
+    }
+  }
   
   combine <- function(name, databases) {
     

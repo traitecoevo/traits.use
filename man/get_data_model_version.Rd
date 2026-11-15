@@ -7,13 +7,15 @@
 get_data_model_version(database)
 }
 \arguments{
-\item{database}{traits.build database (list object)}
+\item{database}{traits.build database (list object), or a flat table}
 }
 \value{
 The version as a string, such as \code{"1.4.0"}, or \code{NA} for a database
-built before traits.build recorded it (traits.build 2.2 and earlier).
+built before traits.build recorded it (traits.build 2.2 and earlier), and
+for a flat table without a stamp.
 }
 \description{
-The traits.build data model version a database's tables follow
+The one place the version is read, for both the compatibility check and the
+stamp \code{\link[=flatten_database]{flatten_database()}} puts on a flat table.
 }
 \keyword{internal}

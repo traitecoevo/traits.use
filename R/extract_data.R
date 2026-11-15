@@ -6,13 +6,13 @@
 #' The output a traits.build formatted database with all tables subset 
 #' based on the specified table, column (variable) and column value.
 #'
-#' @param database traits.build database (list object)
+#' @param database traits.build database (list object), or a flat table from one: a table made by [flatten_database()] (whose class and stamp the result keeps), or a traits table
 #' @param table Table within a traits.build database
 #' @param col Column name within the specified table.
 #' @param col_value Value (of column, from with a table) that is used to subset database. This can be a single value or a vector. It includes partial string matches. 
 #' @param partial_matches_allowed logical. If `TRUE` (the default), each value is matched as a case-insensitive regular expression, so `"Acacia"` also matches `"Acacia celsa"`; a value that is itself in the column, such as a taxon name with brackets, is matched as plain text instead, so it finds itself and the values containing it; a value that is not a valid regular expression is also matched as plain text. If `FALSE`, only exact matches are kept.
 #' @importFrom rlang :=
-#' @return subset traits.build database
+#' @return subset traits.build database, or for a flat table, the matching rows of it. A flat table can't be extracted from by context or location property, which it packs into text columns.
 #' @export
 #'
 #' @examples 
@@ -31,11 +31,28 @@ extract_data <- function(database, table = NA, col, col_value, partial_matches_a
     function_not_supported(database)
   }
 
+  flat <- is_flat(database)
+
+  # A flat table packs the context and location properties into text columns
+  # (and its `value` is the trait value), so it can't be searched by them
+  if (flat && isTRUE(table == "contexts" ||
+                     (table == "locations" && col %in% c("location_property", "value")))) {
+    cli::cli_abort(c(
+      "x" = "Extracting by context or location property needs the relational database, not a single table.",
+      "i" = "Use the database the table came from, e.g. {.code load_database(doi)} without {.code flattened = TRUE}."
+    ))
+  }
+
   # Check table value is valid 
   check_table_name_exists(database, table)
   
-  # If just the traits table is read in
-  if (tibble::is_tibble(database)) {
+  # If a flat table is read in: a flattened database or the traits table
+  if (flat) {
+
+    # A data.frame is sliced as a tibble; a stamped table keeps its class and stamp
+    if (!tibble::is_tibble(database)) {
+      database <- tibble::as_tibble(database)
+    }
     
     check_col_exists_in_table(database, table, col)
     
@@ -263,7 +280,7 @@ extract_data <- function(database, table = NA, col, col_value, partial_matches_a
   }
   
   # Check full database is provided, assign class
-  if(!tibble::is_tibble(ret)){
+  if(!flat){
     
     # Check if extraction was successful based on col value
     check_col_value_exists(ret, table, col, col_value)

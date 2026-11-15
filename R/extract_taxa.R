@@ -2,7 +2,7 @@
 #'
 #' @description Function to subset of all data associated with a particular taxon from a traits.build relational database.
 #' 
-#' @param database traits.build database (list object)
+#' @param database traits.build database (list object), or a flat table from one: a table made by [flatten_database()] (whose class and stamp the result keeps), or a traits table
 #' @param family character string of family or families
 #' @param genus character string of genus or genera
 #' @param taxon_name character string of taxon name(s)

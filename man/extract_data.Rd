@@ -13,7 +13,7 @@ extract_data(
 )
 }
 \arguments{
-\item{database}{traits.build database (list object)}
+\item{database}{traits.build database (list object), or a flat table from one: a table made by \code{\link[=flatten_database]{flatten_database()}} (whose class and stamp the result keeps), or a traits table}
 
 \item{table}{Table within a traits.build database}
 
@@ -24,7 +24,7 @@ extract_data(
 \item{partial_matches_allowed}{logical. If \code{TRUE} (the default), each value is matched as a case-insensitive regular expression, so \code{"Acacia"} also matches \code{"Acacia celsa"}; a value that is itself in the column, such as a taxon name with brackets, is matched as plain text instead, so it finds itself and the values containing it; a value that is not a valid regular expression is also matched as plain text. If \code{FALSE}, only exact matches are kept.}
 }
 \value{
-subset traits.build database
+subset traits.build database, or for a flat table, the matching rows of it. A flat table can't be extracted from by context or location property, which it packs into text columns.
 }
 \description{
 Function to extract data from a traits.build database based on

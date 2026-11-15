@@ -2,7 +2,7 @@
 #'
 #' @description Function to subset all data associated with a particular dataset from a traits.build relational database.
 #' 
-#' @param database traits.build database (list object)
+#' @param database traits.build database (list object), or a flat table from one: a table made by [flatten_database()] (whose class and stamp the result keeps), or a traits table
 #' @param dataset_id character string that matches a `dataset_id` in the database
 #' @param partial_matches_allowed logical. If `TRUE` (the default), each value is matched as a case-insensitive regular expression, so `"Acacia"` also matches `"Acacia celsa"`; a value that is itself in the column, such as a taxon name with brackets, is matched as plain text instead, so it finds itself and the values containing it; a value that is not a valid regular expression is also matched as plain text. If `FALSE`, only exact matches are kept.
 #' @return List of tibbles containing all traits.build data and metadata for the specified dataset(s).

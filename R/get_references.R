@@ -68,6 +68,11 @@
 #' unlink(bib_file)
 get_references <- function(database, file = NULL) {
 
+  # A flat table has no `sources`
+  if (is.data.frame(database)) {
+    abort_flat_input()
+  }
+
   sources <- if (is.list(database) && !is.data.frame(database)) database[["sources"]]
   # An extraction citing no reference in `sources` has an empty list there
   no_sources <- is.list(sources) && length(sources) == 0

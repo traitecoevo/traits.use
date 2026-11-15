@@ -11,19 +11,34 @@
 #' traits.build, which is how releases built before the field existed, such as
 #' AusTraits 7.0.0 and earlier, are recognised.
 #'
-#' @param database traits.build database (list object)
-#' @param single_table_allowed logical for when the input might be a single table instead of a complete database; defaults to FALSE
+#' A flat table (see `database_format()`) is accepted only when
+#' `single_table_allowed` is `TRUE`, and, if [flatten_database()] stamped it
+#' with a data model version, only if that version is supported; otherwise it
+#' stops with an error saying the function needs the relational database. Anything that is neither a
+#' relational database nor a traits table stops with an error.
+#'
+#' @param database traits.build database (list object), or a flat table from one
+#' @param single_table_allowed logical: can the calling function take a flat
+#'   table (a flattened database, or a traits table)? Defaults to `FALSE`
+#' @param call the calling function's environment, named in errors
 #'
 #' @return logical (T/F) output and messaging for incompatible versions
 #' @keywords internal
 #'
 #' @author Elizabeth Wenk - e.wenk@unsw.edu.au
 
-check_compatibility <- function(database, single_table_allowed = FALSE) {
+check_compatibility <- function(database, single_table_allowed = FALSE, call = rlang::caller_env()) {
 
-  if (!is.null(dim(database)) & single_table_allowed == TRUE) {
+  if (database_format(database, call = call) == "flat") {
 
-    compatible <- TRUE
+    if (!isTRUE(single_table_allowed)) {
+      abort_flat_input(call = call)
+    }
+
+    # A stamped flat table records its data model version too; an unstamped
+    # one (a traits table, or a release flattened before the stamp) is let in
+    version <- get_data_model_version(database)
+    compatible <- is.na(version) || data_model_supported(version)
 
   } else {
 
@@ -74,15 +89,27 @@ supported_data_model_majors <- function() {
 
 #' The traits.build data model version a database's tables follow
 #'
-#' @param database traits.build database (list object)
+#' The one place the version is read, for both the compatibility check and the
+#' stamp [flatten_database()] puts on a flat table.
+#'
+#' @param database traits.build database (list object), or a flat table
 #'
 #' @return The version as a string, such as `"1.4.0"`, or `NA` for a database
-#'   built before traits.build recorded it (traits.build 2.2 and earlier).
+#'   built before traits.build recorded it (traits.build 2.2 and earlier), and
+#'   for a flat table without a stamp.
 #' @keywords internal
 get_data_model_version <- function(database) {
-  version <- database$metadata$data_model_version
-  if (is.null(version)) {
-    return(NA_character_)
+  if (is.data.frame(database)) {
+    # stamp_flat() writes NA when the database recorded no version
+    version <- attr(database, "traits.build_stamp")[["data_model_version"]]
+    if (is.null(version) || (length(version) == 1 && is.na(version))) {
+      return(NA_character_)
+    }
+  } else {
+    version <- database$metadata$data_model_version
+    if (is.null(version)) {
+      return(NA_character_)
+    }
   }
   paste(as.character(unlist(version)), collapse = ", ")
 }
@@ -108,6 +135,65 @@ data_model_supported <- function(version) {
 data_model_version_valid <- function(version) {
   length(version) == 1 && !is.na(version) &&
     grepl("^[0-9]+\\.[0-9]+\\.[0-9]+$", version)
+}
+
+
+#' Is a database relational or flat?
+#'
+#' traits.use takes a database in one of two formats, told apart by class:
+#'
+#' - **relational**: a list of tables, of class `traits.build`, as a release's
+#'   `.rds` holds and [extract_data()] returns. A list with a `traits` table
+#'   but no class is taken as relational too.
+#' - **flat**: one table, a data frame. A table [flatten_database()] makes has
+#'   the class `traits.build_flat` and is stamped with the database it came
+#'   from (see `stamp_flat()`); a database's `traits` table, or a flattened
+#'   table made before the stamp, is a flat table without the stamp.
+#'
+#' Anything else, including a data frame without a `trait_name` column, stops
+#' with an error.
+#'
+#' @param database the object passed as a function's `database`
+#' @param call the calling function's environment, named in errors
+#' @return `"relational"` or `"flat"`
+#' @noRd
+#' @keywords internal
+database_format <- function(database, call = rlang::caller_env()) {
+  if (inherits(database, "traits.build_flat") || is.data.frame(database)) {
+    if (!"trait_name" %in% names(database)) {
+      cli::cli_abort(c(
+        "x" = "{.arg database} is a data frame without a {.field trait_name} column, so not a table from a traits.build database.",
+        "i" = "Pass a traits.build database, its {.field traits} table, or a table made by {.fn flatten_database}."
+      ), call = call)
+    }
+    return("flat")
+  }
+  if (inherits(database, "traits.build") ||
+      (is.list(database) && "traits" %in% names(database))) {
+    return("relational")
+  }
+  cli::cli_abort(c(
+    "x" = "{.arg database} must be a traits.build database or a table from one, not {.obj_type_friendly {database}}.",
+    "i" = "Load a database with {.fn load_database}."
+  ), call = call)
+}
+
+#' Is `database` a flat table?
+#' @noRd
+#' @keywords internal
+is_flat <- function(database, call = rlang::caller_env()) {
+  database_format(database, call = call) == "flat"
+}
+
+#' Stop because a function that needs the relational database was given a flat table
+#' @noRd
+#' @keywords internal
+abort_flat_input <- function(call = rlang::caller_env()) {
+  cli::cli_abort(c(
+    "x" = "{.arg database} is a single table, but this needs the relational database (a list of tables).",
+    "i" = "A flattened table or {.field traits} table has its other tables joined in, or left out.",
+    "i" = "Use the database the table came from, e.g. {.code load_database(doi)} without {.code flattened = TRUE}."
+  ), call = call)
 }
 
 
@@ -141,4 +227,42 @@ get_compiled_by_traits.build <- function(database){
   convert_list_to_df2() %>%
   dplyr::filter(relation_type == "isCompiledBy") %>% 
   dplyr::filter(stringr::str_detect(identifier, "github.com/traitecoevo/traits.build"))
+}
+
+
+#' Version of traits.build that built a relational database
+#'
+#' From the `isCompiledBy` entries of `metadata$related_identifiers`: the
+#' `version` field where there is one, otherwise the release tag in the
+#' identifier (".../releases/tag/v2.1.0").
+#'
+#' @param database traits.build database (list object)
+#' @return the version as a string, or `NA_character_`
+#' @noRd
+#' @keywords internal
+traits_build_version <- function(database) {
+  ids <- database[["metadata"]][["related_identifiers"]]
+  if (!is.list(ids) || length(ids) == 0) {
+    return(NA_character_)
+  }
+  compiled_by <- Filter(function(id) identical(id[["relation_type"]], "isCompiledBy"), ids)
+  versions <- vapply(compiled_by, function(id) {
+    version <- scalar_or_na(id[["version"]])
+    if (is.na(version)) {
+      version <- stringr::str_match(scalar_or_na(id[["identifier"]]), "traits\\.build/releases/tag/v?([0-9][0-9.]*)")[, 2]
+    }
+    as.character(version)
+  }, character(1))
+  versions <- versions[!is.na(versions)]
+  if (length(versions) == 0) NA_character_ else versions[[1]]
+}
+
+#' A single value as a string, or NA if there isn't one
+#' @noRd
+#' @keywords internal
+scalar_or_na <- function(x) {
+  if (length(x) != 1 || is.list(x) || is.na(x)) {
+    return(NA_character_)
+  }
+  as.character(x)
 }
