@@ -40,13 +40,23 @@ jobs:
         run: |
           install.packages(c("remotes"))
           remotes::install_deps(dependencies = TRUE)
-          remotes::install_cran("covr")
+          remotes::install_cran(c("covr", "xml2"))
         shell: Rscript {0}
 
       - name: Test coverage
-        # traits.use's own upload token (codecov.io > traits.use > Settings);
-        # without it Codecov rate-limits the tokenless upload
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-        run: covr::codecov()
+        run: |
+          cov <- covr::package_coverage(quiet = FALSE)
+          print(cov)
+          covr::to_cobertura(cov)
         shell: Rscript {0}
+
+      # The org-wide CODECOV_TOKEN is a global upload token: Codecov
+      # accepts it through this action but not through covr::codecov()
+      # ("Could not find a repository associated with upload token")
+      - uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
+        with:
+          fail_ci_if_error: ${{ github.event_name != 'pull_request' || secrets.CODECOV_TOKEN }}
+          files: ./cobertura.xml
+          plugins: noop
+          disable_search: true
+          token: ${{ secrets.CODECOV_TOKEN }}
