@@ -10,7 +10,8 @@
   (Zenodo, Figshare, or a doi resolving directly to an `.rds`).
 - **AusTraits-specific code lives in `austraits`, not here** (decided 2026-11-14, #13): `load_austraits()`,
   `get_versions()` / `get_version_latest()`, the AusTraits vignette and the map of Australia. `plot_locations()`
-  takes a `basemap` data frame so `austraits` can pass its map.
+  draws over a world map cropped to the locations by default (`inst/extdata/world_land.rds`, from
+  `data-raw/world_land.R`), and takes a `basemap` data frame so `austraits` can pass its map.
 - **Wrangle/extract:** `extract_*()` (data/dataset/taxa/trait), `join_*()` (taxa, methods,
   contributors, locations, context/location properties), `lookup_*()`, `trait_pivot_longer/wider()`,
   `summarise_database()`, `bind_databases()`, `flatten_database()`, `as_wide_table()`.
