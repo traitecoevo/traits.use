@@ -24,6 +24,14 @@ duplicate keys removed. They are a \code{\link[RefManageR:BibEntry]{RefManageR::
 class \code{\link{traits_build_sources}}, so a reference can be
 looked up by key with \code{$} as well as \code{[[} and \code{[}, e.g.
 \code{database$sources$Falster_2005}.
+
+Each table keeps one of each set of identical rows, so binding two extracts
+of one database that overlap, e.g. by two contexts, holds each shared
+observation once. A row of \code{traits} or \code{excluded_data} that exactly copies
+another row of the \emph{same} database is dropped too, but with a warning naming
+the dataset: two genuine measurements differ in \code{observation_id} or
+\code{repeat_measurements_id}, so an exact copy means the dataset's configuration
+is wrong.
 }
 \examples{
 a <- extract_dataset(austraits_lite, "Falster_2003")

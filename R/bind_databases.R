@@ -9,6 +9,14 @@
 #' looked up by key with `$` as well as `[[` and `[`, e.g.
 #' `database$sources$Falster_2005`.
 #'
+#' Each table keeps one of each set of identical rows, so binding two extracts
+#' of one database that overlap, e.g. by two contexts, holds each shared
+#' observation once. A row of `traits` or `excluded_data` that exactly copies
+#' another row of the *same* database is dropped too, but with a warning naming
+#' the dataset: two genuine measurements differ in `observation_id` or
+#' `repeat_measurements_id`, so an exact copy means the dataset's configuration
+#' is wrong.
+#'
 #' @param ... Arguments passed to other functions
 #' @param databases List of traits.build databases to be bond together
 #'
@@ -33,8 +41,13 @@ bind_databases <- function(..., databases = list(...)) {
       return(NULL)
     }
 
-    databases %>%
-    lapply("[[", name) %>%
+    tables <- databases %>% lapply("[[", name)
+
+    if (name %in% c("traits", "excluded_data")) {
+      warn_exact_copies(tables, name)
+    }
+
+    tables %>%
     dplyr::bind_rows() %>%
     dplyr::distinct()
   }
@@ -100,6 +113,61 @@ bind_databases <- function(..., databases = list(...)) {
   class(ret) <- c("traits.build")
 
   ret
+}
+
+#' Warn if a database holds exact copies of its own observations
+#'
+#' Binding keeps one of each set of identical rows. Across databases that is
+#' wanted: two extracts of one release, e.g. by two contexts, share rows, and
+#' their union should hold each once. Within one database it is not: two
+#' genuine measurements differ in `observation_id` or `repeat_measurements_id`,
+#' so an exact copy means a dataset's configuration is wrong (e.g. a
+#' species-level value repeated on every location row). Dropping it unseen left
+#' the compiled database looking clean while `traits.build::dataset_test()`
+#' failed on it (#36). Copies are still dropped, so the result can be pivoted
+#' wider, but each dataset holding them is named.
+#'
+#' @param tables List of one table (`traits` or `excluded_data`) from each
+#'   database
+#' @param name Name of the table, for the message
+#' @return Nothing; warns, naming each dataset and its count of dropped rows
+#' @noRd
+#' @keywords internal
+warn_exact_copies <- function(tables, name) {
+
+  tables <- tables[!vapply(tables, function(x) is.null(x) || nrow(x) == 0, logical(1))]
+  if (length(tables) == 0) return(invisible())
+
+  # `.id` keeps rows of different databases apart, so only copies within one
+  # database are counted. Unnamed, so it numbers them: `.id` takes names when
+  # there are any, and two databases passed under one name would merge
+  bound <- dplyr::bind_rows(unname(tables), .id = ".database")
+  kept <- dplyr::distinct(bound)
+  if (nrow(kept) == nrow(bound)) return(invisible())
+
+  dropped <-
+    dplyr::count(bound, .data$dataset_id, name = "n_bound") %>%
+    dplyr::left_join(dplyr::count(kept, .data$dataset_id, name = "n_kept"), by = "dataset_id") %>%
+    dplyr::mutate(n = .data$n_bound - .data$n_kept) %>%
+    dplyr::filter(.data$n > 0)
+
+  warning(
+    sprintf(
+      "Dropped %d row%s of `%s` that exactly copy another row in the same database: %s. ",
+      sum(dropped$n), if (sum(dropped$n) == 1) "" else "s", name,
+      paste(sprintf("%s (%d)", dropped$dataset_id, dropped$n), collapse = ", ")
+    ),
+    "An exact copy means the dataset's configuration is wrong",
+    # It reads only the traits table
+    if (name == "traits") {
+      "; `traits.build::dataset_find_pivot_duplicates()` finds the rows."
+    } else {
+      "."
+    },
+    call. = FALSE
+  )
+
+  invisible()
 }
 
 #' Warn if one citation key names different references in different databases
