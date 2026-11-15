@@ -70,7 +70,28 @@ function_not_supported <- function(database, ...){
   
   # Extract function name
   function_name <- as.character(sys.calls()[[1]]) %>% dplyr::last()
-  
+
+  # A database that records a data model version this traits.use cannot read:
+  # the fix is a newer traits.use, not older data
+  data_model_version <-
+    if (is.null(dim(database))) get_data_model_version(database) else NA_character_
+  if (!is.na(data_model_version) && !data_model_supported(data_model_version)) {
+    majors <- paste0(supported_data_model_majors(), ".x", collapse = ", ")
+    problem <-
+      if (data_model_version_valid(data_model_version)) {
+        "{function_name} cannot read this database: its tables follow traits.build data model {data_model_version}, and this version of traits.use ({utils::packageVersion('traits.use')}) reads data model {majors}."
+      } else {
+        "{function_name} cannot read this database: its data model version, \"{data_model_version}\", is not a version number (major.minor.patch)."
+      }
+    cli::cli_abort(c(
+      "x" = problem,
+      "i" = "Install the latest version of traits.use, e.g. with `install.packages(\"traits.use\")` or `remotes::install_github(\"traitecoevo/traits.use\")`.",
+      "i" = "The data model is described at https://w3id.org/traits.build."
+    ),
+    call = rlang::caller_env()
+    )
+  }
+
   # Determine if traits table or traits.build object
   if( is.null(dim(database))){
     # Extract AusTraits version

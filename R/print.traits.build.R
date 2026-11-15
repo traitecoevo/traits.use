@@ -24,11 +24,14 @@ print.traits.build <- function(x, ...){
       dplyr::filter(resource_type == "software") |> 
       dplyr::pull(version)
     
+    data_model_version <- get_data_model_version(x)
+
     nice_summary_output <- function() {
       cli::cli_h1("This is {version} of {database_name}!")
-      
+
       cli::cli_bullets(c(
         "i" = "This database is built using traits.build version {traits.build_version}",
+        if (!is.na(data_model_version)) c("i" = "Its tables follow traits.build data model {data_model_version}"),
         "i" = "This database contains a total of {nrecords} records, for {nspecies} taxa and {ntraits} traits."
       )
       )
@@ -58,6 +61,12 @@ print.traits.build <- function(x, ...){
     }
     
     nice_summary_output()
+  } else if (!is.na(get_data_model_version(x))) {
+    # Records a data model this version of traits.use cannot read: newer, not older
+    data_model_version <- get_data_model_version(x)
+    cli::cli_h1("{x$metadata$title}")
+    cli::cli_alert_warning("This database's tables follow traits.build data model {data_model_version}, which this version of traits.use ({utils::packageVersion('traits.use')}) cannot read. Install the latest version of traits.use.")
+    cli::cli_alert_info("To access a component, try using the $ e.g. database$traits")
   } else { # If not compatible (i.e. old version of database)
     # Setting up
     database_name <- x$definitions$austraits$description
