@@ -10,6 +10,11 @@ copyright holders and licence:
 - tests/testthat/benchmarks/austraits_identifiers.rds, a test fixture from a
   development build of AusTraits 6.0.0.
 
+inst/extdata/world_land.rds, the world map of plot_locations(), is made from
+Natural Earth's 1:10m land polygons (https://www.naturalearthdata.com/),
+which are in the public domain, by data-raw/world_land.R in the package's
+GitHub repository.
+
 The release `austraits_lite` comes from:
 
   Title:    AusTraits: a curated plant trait database for the Australian flora

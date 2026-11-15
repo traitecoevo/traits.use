@@ -65,8 +65,8 @@ test_that("plot_locations draws over a basemap, reporting locations beyond it", 
   expect_equal(shown(p), sort(c("Perth", "Brisbane", "Byron Bay", "Torres Strait")))
   expect_length(p$layers, 2)
 
-  # Without a map (the default), every location is shown
-  p <- plot_locations(sites)
+  # Without a map, every location is shown
+  p <- plot_locations(sites, basemap = NULL)
   expect_equal(shown(p), sort(sites$location_name))
   expect_length(p$layers, 1)
 
@@ -83,10 +83,10 @@ test_that("plot_locations draws over a basemap, reporting locations beyond it", 
 
   # The map of Australia is in the austraits package now
   expect_error(plot_locations(sites, basemap = "australia"), "austraits")
-  expect_error(plot_locations(sites, basemap = "malaysia"), "must be NULL or a data frame")
-  expect_error(plot_locations(sites, basemap = data.frame(lon = 1, lat = 1)), "must be NULL or a data frame")
-  expect_error(plot_locations(sites, basemap = australia[0, ]), "must be NULL or a data frame")
-  expect_error(plot_locations(sites, basemap = data.frame(x = NA_real_, y = NA_real_)), "must be NULL or a data frame")
+  expect_error(plot_locations(sites, basemap = "malaysia"), "must be .*world.*, NULL or a data frame")
+  expect_error(plot_locations(sites, basemap = data.frame(lon = 1, lat = 1)), "NULL or a data frame")
+  expect_error(plot_locations(sites, basemap = australia[0, ]), "NULL or a data frame")
+  expect_error(plot_locations(sites, basemap = data.frame(x = NA_real_, y = NA_real_)), "NULL or a data frame")
 
   # Cells missing a coordinate are ignored, rather than making the extent NA,
   # and a grouped basemap works too
@@ -103,6 +103,66 @@ test_that("plot_locations draws over a basemap, reporting locations beyond it", 
   sites_none <- sites
   sites_none$`latitude (deg)` <- "unknown"
   expect_error(plot_locations(sites_none), "No records have a numeric")
+})
+
+test_that("plot_locations draws over the world map by default, cropped to the locations", {
+  sites <- tibble::tibble(
+    trait_name = "leaf_area",
+    location_name = c("Perth", "Brisbane", "Lord Howe Island", "Kuala Lumpur"),
+    `latitude (deg)` = c(-31.95, -27.47, -31.55, 3.14),
+    `longitude (deg)` = c(115.86, 153.03, 159.08, 101.69)
+  )
+  shown <- function(p) sort(unique(p$layers[[length(p$layers)]]$data$location_name))
+
+  # Every location is shown, over the map, with none reported beyond it
+  expect_no_message(p <- plot_locations(sites))
+  expect_equal(shown(p), sort(sites$location_name))
+  expect_length(p$layers, 2)
+  expect_s3_class(p$layers[[1]]$geom, "GeomRasterAnn")
+  expect_equal(plot_locations(sites, basemap = "world")$layers[[1]]$geom_params, p$layers[[1]]$geom_params)
+
+  # The window is the locations' extent plus a tenth of it on each side
+  expect_equal(p$coordinates$limits$x, c(101.69, 159.08) + c(-1, 1) * 0.1 * (159.08 - 101.69))
+  expect_equal(p$coordinates$limits$y, c(-31.95, 3.14) + c(-1, 1) * 0.1 * (3.14 + 31.95))
+  # and at least two degrees, within the world
+  expect_equal(map_window(101.69, 3.14), list(x = c(99.69, 103.69), y = c(1.14, 5.14)))
+  expect_equal(map_window(c(-179, 179), c(-89, 89)), list(x = c(-180, 180), y = c(-90, 90)))
+
+  # A location at sea, with no land in its window, still plots
+  at_sea <- sites[1, ]
+  at_sea$`latitude (deg)` <- -40
+  at_sea$`longitude (deg)` <- -140
+  p <- plot_locations(at_sea)
+  expect_false(any(p$layers[[1]]$geom_params$raster == "cadetblue4"))
+})
+
+test_that("the world map lines up with known land and sea", {
+  land_at <- function(lon, lat) {
+    m <- world_map_raster(lon + c(-0.01, 0.01), lat + c(-0.01, 0.01))
+    expect_true(m$x[1] <= lon && lon <= m$x[2] && m$y[1] <= lat && lat <= m$y[2])
+    all(m$is_land)
+  }
+  # Canberra, Uluru, Kuala Lumpur (30 km inland), Oslo, Manaus
+  expect_true(land_at(149.13, -35.28))
+  expect_true(land_at(131.04, -25.34))
+  expect_true(land_at(101.69, 3.14))
+  expect_true(land_at(10.75, 59.91))
+  expect_true(land_at(-60.02, -3.12))
+  # The Tasman Sea, the Gulf of Guinea, the Strait of Malacca, mid-Pacific
+  expect_false(land_at(160, -35))
+  expect_false(land_at(0, 0))
+  expect_false(land_at(100.5, 3.5))
+  expect_false(land_at(-150, 0))
+
+  # The whole world is shown coarser, at most 600 cells a side, edge to edge
+  m <- world_map_raster(c(-180, 180), c(-90, 90))
+  expect_lte(max(dim(m$is_land)), 600)
+  expect_equal(m$x, c(-180, 180))
+  expect_equal(m$y, c(-90, 90))
+  # with land about 29% of the Earth's surface, more of the cells as they
+  # shrink towards the poles (Antarctica, Greenland)
+  expect_gt(mean(m$is_land), 0.25)
+  expect_lt(mean(m$is_land), 0.35)
 })
 
 test_that("Function throws error", {

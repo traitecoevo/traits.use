@@ -3,14 +3,19 @@
 #' @param database traits.build database OR traits table from a traits.build database. Note location details must be joined. See join_location_coordinates and examples
 #' @param feature grouping/classification categories e.g trait_name, collection_type for <= v3.0.2, basis of record for >3.0.2
 #' @param ... arguments passed to ggpointdensity::geom_pointdensity()
-#' @param basemap `NULL` (the default) draws every location without a map.
-#' Or a data frame of map cells to draw the locations over, with numeric
-#' columns `x` (longitude) and `y` (latitude), one row per land cell, as used
-#' by [ggplot2::geom_raster()]; other columns, and rows missing `x` or `y`, are
-#' ignored. Locations beyond
-#' the map (plus half a degree) are left out, with a message saying how many
-#' records that affects; if no location lies on the map, it stops with an
-#' error. The `austraits` package passes a map of Australia here.
+#' @param basemap The map to draw the locations over:
+#' * `"world"` (the default): a map of the world's land, cropped to the
+#'   locations being drawn, so that any database gets a map. It is a 0.05
+#'   degree grid (about 5 km), rasterised from Natural Earth's 1:10m land
+#'   (public domain, <https://www.naturalearthdata.com/>), and shown coarser
+#'   when the locations span a large area.
+#' * `NULL`: no map, just the locations.
+#' * A data frame of map cells, with numeric columns `x` (longitude) and `y`
+#'   (latitude), one row per land cell, as used by [ggplot2::geom_raster()];
+#'   other columns, and rows missing `x` or `y`, are ignored. Locations beyond
+#'   the map (plus half a degree) are left out, with a message saying how many
+#'   records that affects; if no location lies on the map, it stops with an
+#'   error. The `austraits` package passes its map of Australia here.
 #' @author Dony Indiarto - d.indiarto@student.unsw.edu.au
 #' @return ggplot of sites
 #' @examplesIf rlang::is_installed(c("ggplot2", "ggpointdensity", "viridis"))
@@ -26,13 +31,16 @@
 #'   join_location_coordinates()
 #' data$traits %>% plot_locations("trait_name")
 #'
-#' # Over a map: pass `basemap`, a data frame of land cells with columns x and
-#' # y, such as `raster::as.data.frame(r, xy = TRUE, na.rm = TRUE)` of a land
-#' # raster `r`. `austraits::plot_locations()` draws a map of Australia.
+#' # Without a map
+#' data$traits %>% plot_locations("trait_name", basemap = NULL)
+#'
+#' # Over your own map: pass `basemap`, a data frame of land cells with columns
+#' # x and y, such as `raster::as.data.frame(r, xy = TRUE, na.rm = TRUE)` of a
+#' # land raster `r`. `austraits::plot_locations()` draws a map of Australia.
 #' @export
 
 
-plot_locations <- function(database, feature="trait_name", ..., basemap = NULL){
+plot_locations <- function(database, feature="trait_name", ..., basemap = "world"){
 
   rlang::check_installed(c("ggplot2", "ggpointdensity", "viridis"), reason = "to use `plot_locations()`")
 
@@ -42,11 +50,11 @@ plot_locations <- function(database, feature="trait_name", ..., basemap = NULL){
       "i" = "Use {.fn austraits::plot_locations}, or pass a data frame of map cells as {.arg basemap}."
     ))
   }
-  if(!is.null(basemap) &&
+  if(!is.null(basemap) && !identical(basemap, "world") &&
      !(is.data.frame(basemap) && all(c("x", "y") %in% names(basemap)) &&
        is.numeric(basemap$x) && is.numeric(basemap$y) &&
        any(!is.na(basemap$x) & !is.na(basemap$y)))){
-    cli::cli_abort("{.arg basemap} must be NULL or a data frame with numeric columns {.field x} (longitude) and {.field y} (latitude)")
+    cli::cli_abort("{.arg basemap} must be {.val world}, NULL or a data frame with numeric columns {.field x} (longitude) and {.field y} (latitude)")
   }
   
   # Check if traits.build object or the traits table
@@ -74,7 +82,7 @@ plot_locations <- function(database, feature="trait_name", ..., basemap = NULL){
 
 #' Location plot for AusTraits versions > 3.0.2
 #' @noRd
-plot_locations2 <- function(database, feature, basemap = NULL, ...){
+plot_locations2 <- function(database, feature, basemap = "world", ...){
   #Create site data
   sites <-
     database %>%
@@ -88,8 +96,19 @@ plot_locations2 <- function(database, feature, basemap = NULL, ...){
   }
 
   site_map <- ggplot2::ggplot()
+  # The window to show; NULL lets the data set it
+  window <- NULL
 
-  if(!is.null(basemap)){
+  if(identical(basemap, "world")){
+    window <- map_window(sites$`longitude (deg)`, sites$`latitude (deg)`)
+    land <- world_map_raster(window$x, window$y)
+    # Drawn as an image, rather than one tile per land cell
+    site_map <- site_map +
+      ggplot2::annotation_raster(
+        ifelse(land$is_land, "cadetblue4", "#FFFFFF00"),
+        xmin = land$x[1], xmax = land$x[2], ymin = land$y[1], ymax = land$y[2]
+      )
+  } else if(!is.null(basemap)){
     map_cells <- basemap %>%
       dplyr::ungroup() %>%
       dplyr::select("x", "y") %>%
@@ -150,13 +169,77 @@ plot_locations2 <- function(database, feature, basemap = NULL, ...){
       axis.ticks.length = ggplot2::unit(1, "mm"),
       axis.ticks = ggplot2::element_line(linewidth = 1)
     )  + ggplot2::xlab("") + ggplot2::ylab("") + 
-    ggplot2::coord_fixed()
+    ggplot2::coord_fixed(xlim = window$x, ylim = window$y, expand = is.null(window))
   
   # facet by feature if specified - default
   if(!is.na(feature)){
     site_map <- site_map + ggplot2::facet_wrap(paste("~", feature))
   }
   suppressWarnings(print(site_map))
+}
+
+
+#' The window of the world map around a set of locations
+#'
+#' Their extent plus a margin of a tenth of it, and at least two degrees, so that
+#' a single location still gets a map around it; within the world.
+#' @noRd
+map_window <- function(lon, lat){
+  pad <- function(v, lim){
+    margin <- max(2, 0.1 * diff(range(v)))
+    c(max(-lim, min(v) - margin), min(lim, max(v) + margin))
+  }
+  list(x = pad(lon, 180), y = pad(lat, 90))
+}
+
+# The world map, read from inst/extdata/world_land.rds when first needed
+world_land_cache <- new.env(parent = emptyenv())
+
+world_land <- function(){
+  if(is.null(world_land_cache$map)){
+    world_land_cache$map <- readRDS(system.file("extdata", "world_land.rds", package = "traits.use", mustWork = TRUE))
+  }
+  world_land_cache$map
+}
+
+#' The world map within a window
+#'
+#' Unpacks only the rows of the map in the window. A wide window is shown
+#' coarser, taking every `step`-th cell, so that no side has more than
+#' `max_cells` cells and the plot stays quick to draw.
+#' @param xlim,ylim the window, in degrees of longitude and latitude
+#' @param max_cells the most cells along either side of the window
+#' @return a list: `is_land`, a logical matrix of the cells covering the
+#'   window, rows north to south and columns west to east, and `x` and `y`,
+#'   the longitudes and latitudes of its edges
+#' @noRd
+world_map_raster <- function(xlim, ylim, max_cells = 600){
+  map <- world_land()
+  res <- map$res
+  n_rows <- nrow(map$bits)
+  n_cols <- 8 * ncol(map$bits)
+
+  # Rows run north to south from 90, columns west to east from -180; take
+  # those whose cells overlap the window
+  rows <- seq(max(1, floor((90 - ylim[2]) / res) + 1), min(n_rows, ceiling((90 - ylim[1]) / res)))
+  cols <- seq(max(1, floor((xlim[1] + 180) / res) + 1), min(n_cols, ceiling((xlim[2] + 180) / res)))
+
+  step <- max(1, ceiling(max(length(rows), length(cols)) / max_cells))
+  rows <- rows[seq(1, length(rows), by = step)]
+  cols <- cols[seq(1, length(cols), by = step)]
+
+  # Each row of `bits` packs a row of the map, 8 cells a byte
+  is_land <- matrix(as.logical(rawToBits(t(map$bits[rows, , drop = FALSE]))),
+                    nrow = length(rows), byrow = TRUE)[, cols, drop = FALSE]
+
+  # Each cell kept stands for `step` cells of the map, along each side
+  west <- -180 + (cols[1] - 1) * res
+  north <- 90 - (rows[1] - 1) * res
+  list(
+    is_land = is_land,
+    x = c(west, west + length(cols) * step * res),
+    y = c(north - length(rows) * step * res, north)
+  )
 }
 
 

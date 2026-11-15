@@ -4,7 +4,7 @@
 \alias{plot_locations}
 \title{Produce location maps of trait values}
 \usage{
-plot_locations(database, feature = "trait_name", ..., basemap = NULL)
+plot_locations(database, feature = "trait_name", ..., basemap = "world")
 }
 \arguments{
 \item{database}{traits.build database OR traits table from a traits.build database. Note location details must be joined. See join_location_coordinates and examples}
@@ -13,14 +13,21 @@ plot_locations(database, feature = "trait_name", ..., basemap = NULL)
 
 \item{...}{arguments passed to ggpointdensity::geom_pointdensity()}
 
-\item{basemap}{\code{NULL} (the default) draws every location without a map.
-Or a data frame of map cells to draw the locations over, with numeric
-columns \code{x} (longitude) and \code{y} (latitude), one row per land cell, as used
-by \code{\link[ggplot2:geom_raster]{ggplot2::geom_raster()}}; other columns, and rows missing \code{x} or \code{y}, are
-ignored. Locations beyond
+\item{basemap}{The map to draw the locations over:
+\itemize{
+\item \code{"world"} (the default): a map of the world's land, cropped to the
+locations being drawn, so that any database gets a map. It is a 0.05
+degree grid (about 5 km), rasterised from Natural Earth's 1:10m land
+(public domain, \url{https://www.naturalearthdata.com/}), and shown coarser
+when the locations span a large area.
+\item \code{NULL}: no map, just the locations.
+\item A data frame of map cells, with numeric columns \code{x} (longitude) and \code{y}
+(latitude), one row per land cell, as used by \code{\link[ggplot2:geom_raster]{ggplot2::geom_raster()}};
+other columns, and rows missing \code{x} or \code{y}, are ignored. Locations beyond
 the map (plus half a degree) are left out, with a message saying how many
 records that affects; if no location lies on the map, it stops with an
-error. The \code{austraits} package passes a map of Australia here.}
+error. The \code{austraits} package passes its map of Australia here.
+}}
 }
 \value{
 ggplot of sites
@@ -42,9 +49,12 @@ data <- austraits_lite \%>\%
   join_location_coordinates()
 data$traits \%>\% plot_locations("trait_name")
 
-# Over a map: pass `basemap`, a data frame of land cells with columns x and
-# y, such as `raster::as.data.frame(r, xy = TRUE, na.rm = TRUE)` of a land
-# raster `r`. `austraits::plot_locations()` draws a map of Australia.
+# Without a map
+data$traits \%>\% plot_locations("trait_name", basemap = NULL)
+
+# Over your own map: pass `basemap`, a data frame of land cells with columns
+# x and y, such as `raster::as.data.frame(r, xy = TRUE, na.rm = TRUE)` of a
+# land raster `r`. `austraits::plot_locations()` draws a map of Australia.
 \dontshow{\}) # examplesIf}
 }
 \author{
