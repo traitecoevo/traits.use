@@ -135,9 +135,9 @@ test_that("functions needing the relational database stop on a flat table", {
 })
 
 test_that("anything that is not a database or a table from one stops", {
-  expect_error(extract_trait(mtcars, "leaf_area"), "without a .*trait_name.* column")
+  expect_error(extract_trait(mtcars, "leaf_area"), "without a .*trait_name.* or .*dataset_id.* column")
   expect_error(extract_trait("austraits", "leaf_area"), "must be a traits.build database")
-  expect_error(summarise_database(mtcars, "trait_name"), "without a .*trait_name.* column")
+  expect_error(summarise_database(mtcars, "trait_name"), "without a .*trait_name.* or .*dataset_id.* column")
   expect_error(join_taxa(list(a = 1)), "must be a traits.build database")
 })
 
@@ -158,4 +158,58 @@ test_that("a flat table stamped with an unsupported data model version is refuse
 
   # A relational-only function still says it needs the relational database
   expect_error(join_taxa(newer), "needs the relational database")
+})
+
+test_that("traits_build_version() prefers the recorded version, from traits.build's repository", {
+  db <- austraits_lite
+  ids <- db$metadata$related_identifiers
+  # A tag typed into the metadata (2.1.0) comes before the entry traits.build writes
+  ids[[7]]$version <- "2.3.0"
+  db$metadata$related_identifiers <- ids
+  expect_equal(traits_build_version(db), "2.3.0")
+
+  # The tag is used only when no entry records a version
+  ids[[7]]$version <- NULL
+  db$metadata$related_identifiers <- ids
+  expect_equal(traits_build_version(db), "2.1.0")
+
+  # austraits.build's tag is the database's version, not traits.build's
+  db$metadata$related_identifiers <- list(list(
+    related_identifier_type = "url", relation_type = "isCompiledBy",
+    identifier = "https://github.com/traitecoevo/austraits.build/releases/tag/v7.0.0"
+  ))
+  expect_true(is.na(traits_build_version(db)))
+})
+
+test_that("tables with dataset_id but no trait_name are still taken", {
+  wide <- trait_pivot_wider(extract_dataset(database, "Falster_2003")$traits)
+  expect_false("trait_name" %in% names(wide))
+  expect_equal(nrow(extract_dataset(wide, "Falster_2003")), nrow(wide))
+
+  skip_if_not_installed("ggplot2")
+  skip_if_not_installed("ggpointdensity")
+  skip_if_not_installed("viridis")
+  sites <- extract_dataset(database, "Falster_2003") %>%
+    join_location_coordinates() %>%
+    purrr::pluck("traits") %>%
+    dplyr::distinct(dataset_id, location_name, `latitude (deg)`, `longitude (deg)`)
+  expect_s3_class(plot_locations(sites, "dataset_id"), "ggplot")
+})
+
+test_that("dplyr verbs keep the stamp only on tables of trait records", {
+  filtered <- dplyr::filter(flat, trait_name == "leaf_area")
+  expect_s3_class(filtered, "traits.build_flat")
+  expect_identical(attr(filtered, "traits.build_stamp"), attr(flat, "traits.build_stamp"))
+
+  counted <- dplyr::count(flat, family)
+  expect_false(inherits(counted, "traits.build_flat"))
+  expect_null(attr(counted, "traits.build_stamp"))
+})
+
+test_that("extract_data() on a flat table refuses other tables' value and the excluded data", {
+  expect_error(extract_data(flat, "excluded_data", "value", "3"), "excluded data")
+  expect_error(extract_data(flat, "excluded_data", "dataset_id", "Falster_2003"), "excluded data")
+  expect_error(extract_data(flat, "methods", "value", "3"), "relational database")
+  # A table's own columns still work, and `table = NA` means the traits table
+  expect_equal(key(extract_data(flat, NA, "value", "3")), key(extract_data(flat, "traits", "value", "3")))
 })

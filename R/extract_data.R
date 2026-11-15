@@ -33,12 +33,15 @@ extract_data <- function(database, table = NA, col, col_value, partial_matches_a
 
   flat <- is_flat(database)
 
-  # A flat table packs the context and location properties into text columns
-  # (and its `value` is the trait value), so it can't be searched by them
-  if (flat && isTRUE(table == "contexts" ||
-                     (table == "locations" && col %in% c("location_property", "value")))) {
+  # A flat table packs the context and location properties into text columns,
+  # holds no excluded data, and its `value` is the trait value, so it can't be
+  # searched by any of them
+  flat_table <- if (length(table) == 1 && !is.na(table)) table else "traits"
+  if (flat && (flat_table %in% c("contexts", "excluded_data") ||
+               (flat_table == "locations" && identical(col, "location_property")) ||
+               (flat_table != "traits" && identical(col, "value")))) {
     cli::cli_abort(c(
-      "x" = "Extracting by context or location property needs the relational database, not a single table.",
+      "x" = "Extracting by context or location property, by another table's {.field value}, or from the excluded data needs the relational database, not a single table.",
       "i" = "Use the database the table came from, e.g. {.code load_database(doi)} without {.code flattened = TRUE}."
     ))
   }

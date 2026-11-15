@@ -109,6 +109,25 @@ stamp_flat <- function(table, database) {
   table
 }
 
+#' Keep the class and stamp only on tables of trait records
+#'
+#' dplyr verbs keep a data frame subclass's class and attributes. That is right
+#' for `filter()`, `mutate()` or `arrange()`, but `count()` or `summarise()`
+#' make a table of something else, which would still print as a
+#' `traits.build_flat` table from the database. Without a `trait_name` column,
+#' the result is a plain tibble.
+#' @param data,template see [dplyr::dplyr_reconstruct()]
+#' @noRd
+#' @exportS3Method dplyr::dplyr_reconstruct
+dplyr_reconstruct.traits.build_flat <- function(data, template) {
+  out <- NextMethod()
+  if (!"trait_name" %in% names(out)) {
+    attr(out, "traits.build_stamp") <- NULL
+    class(out) <- setdiff(class(out), "traits.build_flat")
+  }
+  out
+}
+
 #' Header of a printed flat table: the database it came from
 #' @param x a `traits.build_flat` table
 #' @param ... passed on

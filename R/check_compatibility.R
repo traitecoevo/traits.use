@@ -153,8 +153,8 @@ data_model_version_valid <- function(version) {
 #'   from (see `stamp_flat()`); a database's `traits` table, or a flattened
 #'   table made before the stamp, is a flat table without the stamp.
 #'
-#' Anything else, including a data frame without a `trait_name` column, stops
-#' with an error.
+#' Anything else, including a data frame with neither a `trait_name` nor a
+#' `dataset_id` column, stops with an error.
 #'
 #' @param database the object passed as a function's `database`
 #' @param call the calling function's environment, named in errors
@@ -163,9 +163,11 @@ data_model_version_valid <- function(version) {
 #' @keywords internal
 database_format <- function(database, call = rlang::caller_env()) {
   if (inherits(database, "traits.build_flat") || is.data.frame(database)) {
-    if (!"trait_name" %in% names(database)) {
+    # Every table made from a database has one of these: the traits table, a
+    # flattened one, a wide one from trait_pivot_wider(), a table of locations
+    if (!any(c("trait_name", "dataset_id") %in% names(database))) {
       cli::cli_abort(c(
-        "x" = "{.arg database} is a data frame without a {.field trait_name} column, so not a table from a traits.build database.",
+        "x" = "{.arg database} is a data frame without a {.field trait_name} or {.field dataset_id} column, so not a table from a traits.build database.",
         "i" = "Pass a traits.build database, its {.field traits} table, or a table made by {.fn flatten_database}."
       ), call = call)
     }
@@ -235,9 +237,11 @@ get_compiled_by_traits.build <- function(database){
 
 #' Version of traits.build that built a relational database
 #'
-#' From the `isCompiledBy` entries of `metadata$related_identifiers`: the
-#' `version` field where there is one, otherwise the release tag in the
-#' identifier (".../releases/tag/v2.1.0").
+#' From the `isCompiledBy` entries of `metadata$related_identifiers` naming
+#' traits.build's repository: the `version` traits.build records, if any entry
+#' has one, otherwise the release tag in an identifier
+#' (".../traits.build/releases/tag/v2.1.0"), which is typed by hand and may
+#' be stale.
 #'
 #' @param database traits.build database (list object)
 #' @return the version as a string, or `NA_character_`
@@ -248,16 +252,25 @@ traits_build_version <- function(database) {
   if (!is.list(ids) || length(ids) == 0) {
     return(NA_character_)
   }
-  compiled_by <- Filter(function(id) identical(id[["relation_type"]], "isCompiledBy"), ids)
-  versions <- vapply(compiled_by, function(id) {
-    version <- scalar_or_na(id[["version"]])
-    if (is.na(version)) {
-      version <- stringr::str_match(scalar_or_na(id[["identifier"]]), "traits\\.build/releases/tag/v?([0-9][0-9.]*)")[, 2]
-    }
-    as.character(version)
-  }, character(1))
-  versions <- versions[!is.na(versions)]
-  if (length(versions) == 0) NA_character_ else versions[[1]]
+  # traits.build's own repository, not e.g. austraits.build's
+  is_traits_build <- function(id) {
+    identical(id[["relation_type"]], "isCompiledBy") &&
+      grepl("github\\.com/traitecoevo/traits\\.build(/|$)", scalar_or_na(id[["identifier"]]))
+  }
+  compiled_by <- Filter(is_traits_build, ids)
+  first_found <- function(x) {
+    x <- x[!is.na(x)]
+    if (length(x) == 0) NA_character_ else x[[1]]
+  }
+  # The `version` traits.build records takes precedence over a release tag
+  # typed into a database's metadata, which may be stale
+  recorded <- first_found(vapply(compiled_by, function(id) scalar_or_na(id[["version"]]), character(1)))
+  if (!is.na(recorded)) {
+    return(recorded)
+  }
+  first_found(vapply(compiled_by, function(id) {
+    stringr::str_match(scalar_or_na(id[["identifier"]]), "traits\\.build/releases/tag/v?([0-9][0-9.]*[0-9])")[, 2]
+  }, character(1)))
 }
 
 #' A single value as a string, or NA if there isn't one

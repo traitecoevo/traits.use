@@ -6,7 +6,7 @@
 #' @param trait_names character string of trait(s) for which data will be extracted
 #' @param taxon_names optional argument, specifying taxa for which data will be extracted 
 #' @param partial_matches_allowed logical. If `TRUE` (the default), each value is matched as a case-insensitive regular expression, so `"Acacia"` also matches `"Acacia celsa"`; a value that is itself in the column, such as a taxon name with brackets, is matched as plain text instead, so it finds itself and the values containing it; a value that is not a valid regular expression is also matched as plain text. If `FALSE`, only exact matches are kept.
-#' @return List of tibbles containing all traits.build data and metadata for the specified trait(s).
+#' @return List of tibbles containing all traits.build data and metadata for the specified trait(s). For a flat table, the matching rows of it, as a table of the same class.
 #' @details
 #' `extract_trait` has been developed to extract data for specific traits from databases built using the traits.build workflow. 
 #' Learn more at:
