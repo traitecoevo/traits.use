@@ -131,7 +131,12 @@ load_database <- function(doi = NULL, path = NULL, update = TRUE, flattened = FA
     if(! is.data.frame(data) || ! all(c("dataset_id", "taxon_name", "trait_name", "value") %in% names(data))){
       rlang::abort(paste0("'", file_nm, "' is not a flattened traits.build database!"))
     }
-    return(dplyr::as_tibble(data))
+    # A file flattened since #41 holds a stamped `traits.build_flat` tibble;
+    # as_tibble() would drop its class, so convert only an older plain table
+    if(! tibble::is_tibble(data)){
+      data <- tibble::as_tibble(data)
+    }
+    return(data)
   }
 
   # Check it looks like a traits.build database

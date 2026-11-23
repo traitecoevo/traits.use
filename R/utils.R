@@ -72,16 +72,17 @@ function_not_supported <- function(database, ...){
   function_name <- as.character(sys.calls()[[1]]) %>% dplyr::last()
 
   # A database that records a data model version this traits.use cannot read:
-  # the fix is a newer traits.use, not older data
-  data_model_version <-
-    if (is.null(dim(database))) get_data_model_version(database) else NA_character_
+  # the fix is a newer traits.use, not older data. The function is named by the
+  # error's header (`call`), not by `function_name`, which is the last element
+  # of the outermost call and so often an argument or another function.
+  data_model_version <- get_data_model_version(database)
   if (!is.na(data_model_version) && !data_model_supported(data_model_version)) {
     majors <- paste0(supported_data_model_majors(), ".x", collapse = ", ")
     problem <-
       if (data_model_version_valid(data_model_version)) {
-        "{function_name} cannot read this database: its tables follow traits.build data model {data_model_version}, and this version of traits.use ({utils::packageVersion('traits.use')}) reads data model {majors}."
+        "This database cannot be read: its tables follow traits.build data model {data_model_version}, and this version of traits.use ({utils::packageVersion('traits.use')}) reads data model {majors}."
       } else {
-        "{function_name} cannot read this database: its data model version, \"{data_model_version}\", is not a version number (major.minor.patch)."
+        "This database cannot be read: its data model version, \"{data_model_version}\", is not a version number (major.minor.patch)."
       }
     cli::cli_abort(c(
       "x" = problem,
@@ -92,14 +93,31 @@ function_not_supported <- function(database, ...){
     )
   }
 
-  # Determine if traits table or traits.build object
-  if( is.null(dim(database))){
-    # Extract AusTraits version
-    AusTraits_version <- print_version(database)
-  } else
-    AusTraits_version <- "< 5.0.0"
-  
-  # Formulate message
+  if (!is.data.frame(database)) {
+    # A list without metadata: nothing says which data model its tables follow
+    if (is.null(database[["metadata"]])) {
+      cli::cli_abort(c(
+        "x" = "{.arg database} has no {.field metadata} table, so traits.use can't tell which traits.build data model its tables follow.",
+        "i" = "Pass the database as {.fn load_database} returns it, or a subset made with the {.fn extract_*} functions, which keep {.field metadata}.",
+        "i" = "If you built or edited the list yourself, copy {.field metadata} across from the database it came from."
+      ),
+      call = rlang::caller_env()
+      )
+    }
+
+    # Metadata that names neither a data model version nor traits.build, e.g.
+    # an AusTraits release older than 5.0.0, built before traits.build existed
+    cli::cli_abort(c(
+      "x" = "This doesn't look like a database built by traits.build: its {.field metadata} records neither a data model version nor traits.build as the software that built it.",
+      "i" = "Load a traits.build database with {.fn load_database}.",
+      "i" = "For an AusTraits release older than 5.0.0, install an older version of the {.pkg austraits} package, e.g. {.code remotes::install_github(\"traitecoevo/austraits@v2.2.2\")}."
+    ),
+    call = rlang::caller_env()
+    )
+  }
+
+  # A table, e.g. the wide table the deprecated trait_pivot_longer() is given
+  AusTraits_version <- "< 5.0.0"
   cli::cli_abort(c(
     "x" = "{function_name} no longer supports this version of AusTraits, {AusTraits_version}",
     "i" = "You can either load a newer version of the data, e.g. with `load_database()` or `austraits::load_austraits()`, OR",
@@ -117,13 +135,7 @@ function_not_supported <- function(database, ...){
 
 
 get_traits_table <- function(database){
-  if( is.null(dim(database)) ){
-    traits <- database$traits
-  } else{
-    traits <- database
-  }
-  
-  return(traits)
+  if (is_flat(database)) database else database$traits
 }
 
 
@@ -146,17 +158,6 @@ clean_NA <- function(x) {
   # Not ifelse(), which returns a logical vector when every element is NA
   x[x %in% "NA"] <- NA_character_
   x
-}
-
-#' Print version of AusTraits object
-#'
-#' @param database traits.build database (list object)
-#' @return binary version for switch statements
-#' @noRd
-#' @keywords internal
-#' 
-print_version <- function(database){
-  database$build_info$version %>% as.character()
 }
 
 #' Give the reference columns of a methods table their current names

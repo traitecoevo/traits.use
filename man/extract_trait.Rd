@@ -12,7 +12,7 @@ extract_trait(
 )
 }
 \arguments{
-\item{database}{traits.build database (list object)}
+\item{database}{traits.build database (list object), or a flat table from one: a table made by \code{\link[=flatten_database]{flatten_database()}} (whose class and stamp the result keeps), or a traits table}
 
 \item{trait_names}{character string of trait(s) for which data will be extracted}
 
@@ -21,7 +21,7 @@ extract_trait(
 \item{partial_matches_allowed}{logical. If \code{TRUE} (the default), each value is matched as a case-insensitive regular expression, so \code{"Acacia"} also matches \code{"Acacia celsa"}; a value that is itself in the column, such as a taxon name with brackets, is matched as plain text instead, so it finds itself and the values containing it; a value that is not a valid regular expression is also matched as plain text. If \code{FALSE}, only exact matches are kept.}
 }
 \value{
-List of tibbles containing all traits.build data and metadata for the specified trait(s).
+List of tibbles containing all traits.build data and metadata for the specified trait(s). For a flat table, the matching rows of it, as a table of the same class.
 }
 \description{
 Function to subset all data associated with a particular trait from a traits.build relational database.

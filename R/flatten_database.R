@@ -16,12 +16,20 @@
 #' @param vars List specifying which columns or properties to include from each table. The detail is for all columns/properties to be included.
 #' @param include_description A logical indicating whether to include (TRUE) or omit (FALSE) the context_property descriptions; defaults to TRUE.
 #'
-#' @return A table combining information in 8 traits.build relational tables: traits, locations, contexts, methods, taxa, taxonomic_updates, contributors, and identifiers
+#' @return A table combining information in 8 traits.build relational tables: traits, locations, contexts, methods, taxa, taxonomic_updates, contributors, and identifiers.
+#' It is a tibble of class `traits.build_flat`, stamped with the database it came from: the attribute
+#' `traits.build_stamp` is a list of its `title`, `version`, `doi`, `data_model_version` and
+#' `traits_build_version` (each `NA` if the database does not record it). The stamp is kept by
+#' `saveRDS()` and, with the class, by `arrow::write_parquet()`, which stores it in the file's metadata,
+#' and is shown when the table is printed. [extract_trait()], [extract_taxa()], [extract_dataset()],
+#' [summarise_database()] and the plots take this table as well as the relational database, and keep the
+#' stamp on what they return.
 #' @examples
 #' flat <- austraits_lite %>%
 #'   extract_dataset("Falster_2003") %>%
 #'   flatten_database()
 #' flat
+#' attr(flat, "traits.build_stamp")$version
 #' @export
 #'
 #' @usage flatten_database(database, format, vars, include_description)
@@ -42,6 +50,11 @@ flatten_database <- function(database,
   ) {
   # Since `data_collectors` is also merged into the combined_table via the contributors tibble, we don't want the information twice.
   # Likewise the references come from `join_sources()`, not from the methods table.
+
+  # Before `vars` is evaluated, since its default reads `database$methods`
+  if (!check_compatibility(database)) {
+    function_not_supported(database)
+  }
 
   if (format == "many_columns") {
     format_contributors = "single_column_pretty"
@@ -65,6 +78,78 @@ flatten_database <- function(database,
   }
   
   combined_table <- combined_table_relational$traits
-  
-  return(combined_table)
+
+  stamp_flat(combined_table, database)
+}
+
+#' Stamp a flat table with the database it came from
+#'
+#' Gives `table` the class `traits.build_flat` and the attribute
+#' `traits.build_stamp`: a list of the database's `title`, `version`, `doi`,
+#' `data_model_version` (see [get_data_model_version()]) and
+#' `traits_build_version`, each a string or `NA`. Plain attributes, so
+#' `saveRDS()` keeps them, and arrow keeps them in a Parquet file's metadata.
+#'
+#' @param table a table made from `database`, such as its flattened form
+#' @param database the traits.build database (list object) it was made from
+#' @return `table`, with the class and stamp
+#' @noRd
+#' @keywords internal
+stamp_flat <- function(table, database) {
+  stamp <- list(
+    title = scalar_or_na(database[["metadata"]][["title"]]),
+    version = scalar_or_na(database[["build_info"]][["version"]]),
+    doi = scalar_or_na(database[["metadata"]][["doi"]]),
+    data_model_version = get_data_model_version(database),
+    traits_build_version = traits_build_version(database)
+  )
+  table <- tibble::as_tibble(table)
+  attr(table, "traits.build_stamp") <- stamp
+  class(table) <- c("traits.build_flat", setdiff(class(table), "traits.build_flat"))
+  table
+}
+
+#' Keep the class and stamp only on tables of trait records
+#'
+#' dplyr verbs keep a data frame subclass's class and attributes. That is right
+#' for `filter()`, `mutate()` or `arrange()`, but `count()` or `summarise()`
+#' make a table of something else, which would still print as a
+#' `traits.build_flat` table from the database. Without a `trait_name` column,
+#' the result is a plain tibble.
+#' @param data,template see [dplyr::dplyr_reconstruct()]
+#' @noRd
+#' @exportS3Method dplyr::dplyr_reconstruct
+dplyr_reconstruct.traits.build_flat <- function(data, template) {
+  out <- NextMethod()
+  if (!"trait_name" %in% names(out)) {
+    attr(out, "traits.build_stamp") <- NULL
+    class(out) <- setdiff(class(out), "traits.build_flat")
+  }
+  out
+}
+
+#' Header of a printed flat table: the database it came from
+#' @param x a `traits.build_flat` table
+#' @param ... passed on
+#' @noRd
+#' @exportS3Method pillar::tbl_sum
+tbl_sum.traits.build_flat <- function(x, ...) {
+  out <- NextMethod()
+  names(out)[1] <- "A traits.build_flat table"
+  stamp <- attr(x, "traits.build_stamp")
+  if (is.list(stamp)) {
+    title <- scalar_or_na(stamp$title)
+    version <- scalar_or_na(stamp$version)
+    doi <- scalar_or_na(stamp$doi)
+    described <- c(
+      title,
+      if (!is.na(version)) paste("version", version),
+      if (!is.na(doi)) paste0("doi:", doi)
+    )
+    described <- described[!is.na(described)]
+    if (length(described) > 0) {
+      out <- c(out, "From" = paste(described, collapse = ", "))
+    }
+  }
+  out
 }

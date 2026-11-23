@@ -59,7 +59,7 @@ plot_locations <- function(database, feature="trait_name", ..., basemap = "world
   
   # Check if traits.build object or the traits table
   # If traits.build, check if traits table contains coordinate cols
-  if( is.null(dim(database)) ){
+  if( !is_flat(database) ){
     
     # Extract traits table if needed
     traits <- get_traits_table(database)
@@ -279,13 +279,6 @@ world_map_raster <- function(xlim, ylim, max_cells = 600){
 plot_site_locations <- function(trait_data, feature="trait_name", ...){
   # Extract function name
   function_name <- as.character(sys.calls()[[1]])[1]
-  
-  # Determine if traits table or traits.build object
-  if( is.null(dim(trait_data))){
-    # Extract AusTraits version
-    AusTraits_version <- print_version(trait_data)
-  } else
-    AusTraits_version <- "< 5.0.0"
   
   cli::cli_abort(c(
     "i" = "{function_name} has been deprecated!",

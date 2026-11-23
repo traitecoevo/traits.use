@@ -7,14 +7,14 @@
 extract_dataset(database, dataset_id, partial_matches_allowed = TRUE)
 }
 \arguments{
-\item{database}{traits.build database (list object)}
+\item{database}{traits.build database (list object), or a flat table from one: a table made by \code{\link[=flatten_database]{flatten_database()}} (whose class and stamp the result keeps), or a traits table}
 
 \item{dataset_id}{character string that matches a \code{dataset_id} in the database}
 
 \item{partial_matches_allowed}{logical. If \code{TRUE} (the default), each value is matched as a case-insensitive regular expression, so \code{"Acacia"} also matches \code{"Acacia celsa"}; a value that is itself in the column, such as a taxon name with brackets, is matched as plain text instead, so it finds itself and the values containing it; a value that is not a valid regular expression is also matched as plain text. If \code{FALSE}, only exact matches are kept.}
 }
 \value{
-List of tibbles containing all traits.build data and metadata for the specified dataset(s).
+List of tibbles containing all traits.build data and metadata for the specified dataset(s). For a flat table, the matching rows of it, as a table of the same class.
 }
 \description{
 Function to subset all data associated with a particular dataset from a traits.build relational database.

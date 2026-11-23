@@ -19,10 +19,9 @@ print.traits.build <- function(x, ...){
   if(check_compatibility(x)){
     database_name <- x$metadata$title
     
-    traits.build_version <- x$metadata$related_identifiers |> 
-      convert_list_to_df2() |> 
-      dplyr::filter(resource_type == "software") |> 
-      dplyr::pull(version)
+    # NA when related_identifiers names no traits.build version, which a
+    # database recognised by its data model version need not (#40)
+    traits.build_version <- traits_build_version(x)
     
     data_model_version <- get_data_model_version(x)
 
@@ -30,7 +29,7 @@ print.traits.build <- function(x, ...){
       cli::cli_h1("This is {version} of {database_name}!")
 
       cli::cli_bullets(c(
-        "i" = "This database is built using traits.build version {traits.build_version}",
+        if (!is.na(traits.build_version)) c("i" = "This database is built using traits.build version {traits.build_version}"),
         if (!is.na(data_model_version)) c("i" = "Its tables follow traits.build data model {data_model_version}"),
         "i" = "This database contains a total of {nrecords} records, for {nspecies} taxa and {ntraits} traits."
       )
@@ -65,7 +64,11 @@ print.traits.build <- function(x, ...){
     # Records a data model this version of traits.use cannot read: newer, not older
     data_model_version <- get_data_model_version(x)
     cli::cli_h1("{x$metadata$title}")
-    cli::cli_alert_warning("This database's tables follow traits.build data model {data_model_version}, which this version of traits.use ({utils::packageVersion('traits.use')}) cannot read. Install the latest version of traits.use.")
+    if (data_model_version_valid(data_model_version)) {
+      cli::cli_alert_warning("This database's tables follow traits.build data model {data_model_version}, which this version of traits.use ({utils::packageVersion('traits.use')}) cannot read. Install the latest version of traits.use.")
+    } else {
+      cli::cli_alert_warning("This database's data model version, \"{data_model_version}\", is not a version number (major.minor.patch), so traits.use cannot tell whether it can read it.")
+    }
     cli::cli_alert_info("To access a component, try using the $ e.g. database$traits")
   } else { # If not compatible (i.e. old version of database)
     # Setting up

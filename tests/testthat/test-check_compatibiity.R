@@ -20,7 +20,16 @@ test_that("databases built before the data model version are recognised by the t
   expect_identical(get_data_model_version(austraits_lite), NA_character_)
 
   expect_false(check_compatibility(without_compiled_by(austraits_5.0.0_lite)))
-  expect_error(join_taxa(without_compiled_by(austraits_5.0.0_lite)), "no longer supports")
+  expect_error(join_taxa(without_compiled_by(austraits_5.0.0_lite)),
+               "doesn't look like a database built by traits.build")
+})
+
+test_that("a list without metadata is told so, not that it is an old release", {
+  no_metadata <- austraits_lite
+  no_metadata$metadata <- NULL
+  expect_false(check_compatibility(no_metadata))
+  expect_error(flatten_database(no_metadata), "has no .*metadata.* table")
+  expect_error(join_taxa(no_metadata), "has no .*metadata.* table")
 })
 
 test_that("AusTraits 3.0.2 is not supported", {
@@ -100,4 +109,37 @@ test_that("print() shows the data model version", {
 
   out <- cli::cli_fmt(print(with_data_model_version(austraits_lite, "2.0.0")))
   expect_true(any(grepl("cannot read", out, fixed = TRUE)))
+})
+
+test_that("the data model error does not name an argument as the function (review of #44)", {
+  newer <- with_data_model_version(austraits_lite, "2.0.0")
+  err <- tryCatch(newer |> extract_trait("leaf_area"), error = identity)
+  expect_match(conditionMessage(err), "This database cannot be read")
+  expect_no_match(conditionMessage(err), "leaf_area cannot")
+})
+
+test_that("print() works on a stamped database that names no traits.build version", {
+  db <- without_compiled_by(with_data_model_version(austraits_lite, "1.4.0"))
+  out <- expect_no_error(cli::cli_fmt(print(db)))
+  expect_true(any(grepl("traits.build data model 1.4.0", out, fixed = TRUE)))
+  expect_false(any(grepl("traits.build version", out, fixed = TRUE)))
+
+  out <- cli::cli_fmt(print(with_data_model_version(austraits_lite, "1.4")))
+  expect_true(any(grepl("is not a version number", out, fixed = TRUE)))
+})
+
+test_that("a major version past the integer range is unsupported, without a warning", {
+  db <- with_data_model_version(austraits_lite, "99999999999.0.0")
+  expect_no_warning(expect_false(check_compatibility(db)))
+})
+
+test_that("bind_databases() refuses an unreadable data model version in any position", {
+  a <- with_data_model_version(extract_dataset(austraits_lite, "Falster_2003"), "1.4.0")
+  b <- with_data_model_version(extract_dataset(austraits_lite, "Westoby_2014"), "2.0.0")
+  expect_error(bind_databases(a, b), "data model 2.0.0")
+  expect_error(bind_databases(b, a), "data model 2.0.0")
+
+  c <- with_data_model_version(extract_dataset(austraits_lite, "Westoby_2014"), "1.5.0")
+  expect_warning(bound <- bind_databases(a, c), "different versions")
+  expect_identical(get_data_model_version(bound), "1.4.0")
 })

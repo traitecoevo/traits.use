@@ -9,6 +9,11 @@
 #' @examples
 #' austraits_lite %>% lookup_trait("leaf") %>% extract_trait(database = austraits_lite, .)
 lookup_trait <- function(database, term){
+
+  # Check compatibility
+  if(!check_compatibility(database)){
+    function_not_supported(database)
+  }
   
   all_traits <- database$traits$trait_name %>% unique()
 
@@ -37,6 +42,11 @@ lookup_trait <- function(database, term){
 #' @examples
 #' austraits_lite %>% lookup_location_property("soil")
 lookup_location_property <- function(database, term){
+
+  # Check compatibility
+  if(!check_compatibility(database)){
+    function_not_supported(database)
+  }
   
   all_location_properties <- database$locations$location_property %>% unique()
   
@@ -65,6 +75,11 @@ lookup_location_property <- function(database, term){
 #' @examples
 #' austraits_lite %>% lookup_context_property("temperature")
 lookup_context_property <- function(database, term){
+
+  # Check compatibility
+  if(!check_compatibility(database)){
+    function_not_supported(database)
+  }
   
   all_context_properties <- database$contexts$context_property %>% unique()
   
