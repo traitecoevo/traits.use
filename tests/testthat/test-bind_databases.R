@@ -73,6 +73,8 @@ test_that("Binding names datasets holding exact copies of their own rows (#36)",
   expect_match(w, "Dropped 1 row of `excluded_data`.*Choat_2006 \\(1\\)")
   # dataset_find_pivot_duplicates() reads only `traits`, so isn't offered
   expect_no_match(w, "dataset_find_pivot_duplicates")
+  # One copy reads in the singular
+  expect_match(w, "Dropped 1 row of `excluded_data` that exactly copies another row")
 })
 
 test_that("Binding warns when one key names different references", {

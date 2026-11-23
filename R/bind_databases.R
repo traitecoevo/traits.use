@@ -151,10 +151,11 @@ warn_exact_copies <- function(tables, name) {
     dplyr::mutate(n = .data$n_bound - .data$n_kept) %>%
     dplyr::filter(.data$n > 0)
 
+  n <- sum(dropped$n)
   warning(
     sprintf(
-      "Dropped %d row%s of `%s` that exactly copy another row in the same database: %s. ",
-      sum(dropped$n), if (sum(dropped$n) == 1) "" else "s", name,
+      "Dropped %d %s of `%s` that exactly %s another row in the same database: %s. ",
+      n, if (n == 1) "row" else "rows", name, if (n == 1) "copies" else "copy",
       paste(sprintf("%s (%d)", dropped$dataset_id, dropped$n), collapse = ", ")
     ),
     "An exact copy means the dataset's configuration is wrong",
