@@ -130,6 +130,13 @@ test_that("a categorical trait gets its modal value, with ties joined in sorted 
   expect_equal(b$dataset_id, "D1; D2")
 
   expect_equal(means$value_count[means$taxon_name == "Acacia c"], "tree (1)")
+
+  # a value a record lists twice counts once for that record
+  repeated <- summarise_trait_means(
+    record("Acacia a", "plant_growth_form", c("tree tree", "shrub", "shrub"), unit = NA)
+  )
+  expect_equal(repeated$value_mode, "shrub")
+  expect_equal(repeated$value_count, "shrub (2); tree (1)")
 })
 
 test_that("subspecies, varieties and forms are rolled up to their species", {
@@ -188,6 +195,23 @@ test_that("a species takes from its subspecies what its own taxa row lacks", {
   expect_equal(means$genus, "Ephedra")
   expect_equal(means$family, "Fabaceae")
   expect_true(is.na(means$taxon_id))
+
+  # whichever traits are summarised: here the subspecies has records only of
+  # another trait
+  records$trait_name[2] <- "leaf_length"
+  height <- summarise_trait_means(records, traits = "plant_height")
+  expect_equal(height[c("taxon_rank", "genus")], tibble::tibble(taxon_rank = "species", genus = "Ephedra"))
+})
+
+test_that("a record without a taxon name is not given a rank", {
+  records <- dplyr::bind_rows(
+    record("Acacia a", "plant_height", 1),
+    record(NA_character_, "plant_height", 2, taxon_rank = NA_character_)
+  )
+  records$genus[2] <- NA
+  means <- summarise_trait_means(records)
+  expect_equal(means$taxon_rank, c("species", NA))
+  expect_equal(trait_means_roll_up(c("Acacia a subsp. b", NA)), c("Acacia a", NA))
 })
 
 test_that("`by` gives a row per group, with missing values a group of their own", {
@@ -207,8 +231,10 @@ test_that("`by` gives a row per group, with missing values a group of their own"
   form <- means[means$trait_name == "plant_growth_form", ]
   expect_equal(form$value_mode, c("tree", "herb"))
 
-  # no rows still gives the `by` column
-  expect_equal(names(summarise_trait_means(records[0, ], by = "life_stage")), names(means))
+  # no rows still gives the `by` column, of its type
+  empty <- summarise_trait_means(records[0, ], by = "life_stage")
+  expect_equal(names(empty), names(means))
+  expect_type(empty$life_stage, "character")
 
   expect_error(summarise_trait_means(records, by = "sex"), "no column")
   expect_error(summarise_trait_means(records, by = "dataset_id"), "cannot include")
@@ -247,8 +273,10 @@ test_that("a database, its flattened table and its traits table give the same me
   expect_equal(summarise_trait_means(flatten_database(database)), means)
 
   # a traits table carries no taxonomy: the same values, without the taxon
-  # columns, rolled up by name alone
+  # columns, rolled up by name alone; as a tibble or a plain data frame
   from_traits <- summarise_trait_means(database$traits)
+  expect_equal(summarise_trait_means(as.data.frame(database$traits), roll_up = FALSE),
+               summarise_trait_means(database$traits, roll_up = FALSE))
   expect_equal(names(from_traits), setdiff(names(means), c("taxon_rank", "genus", "family", "establishment_means", "taxon_id")))
   by_rank <- summarise_trait_means(database, traits = "leaf_length")
   by_name <- summarise_trait_means(database$traits, traits = "leaf_length")
@@ -299,6 +327,17 @@ test_that("`by` takes a context property from the relational database", {
   expect_equal(sum(means$n_records), sum(ungrouped$n_records))
 
   expect_error(summarise_trait_means(database, by = "no such property"), "neither")
+
+  # a property whose name has characters a regular expression would read, as
+  # AusTraits' "DBH (cm) [mean (min-max)]" does
+  renamed <- database
+  renamed$contexts$context_property[renamed$contexts$context_property == property] <- "season (sampled) [n+1]"
+  by_renamed <- summarise_trait_means(renamed, by = "season (sampled) [n+1]")
+  expect_equal(unname(by_renamed[["season (sampled) [n+1]"]]), unname(means[[property]]))
+
+  # a database whose traits table already has its contexts joined in
+  prejoined <- join_context_properties(database, format = "many_columns", include_description = FALSE)
+  expect_equal(summarise_trait_means(prejoined, by = property)[[property]], means[[property]])
   # a flat table has its context properties joined into one column
   expect_error(summarise_trait_means(flatten_database(database), by = property), "no column")
 })

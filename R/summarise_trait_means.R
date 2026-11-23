@@ -130,17 +130,19 @@ summarise_trait_means <- function(database,
   # Roll infraspecific names up to their species
   details <- taxa
   if (isTRUE(roll_up)) {
-    names_in <- unique(records$taxon_name)
+    # Over every name the taxa table has, not only those of the traits asked
+    # for, so a species' details do not depend on which traits are summarised
+    names_in <- unique(c(taxa$taxon_name, records$taxon_name))
     rank <- if ("taxon_rank" %in% names(taxa)) taxa$taxon_rank[match(names_in, taxa$taxon_name)]
     species <- trait_means_roll_up(names_in, rank)
-    rolled <- species != names_in
+    rolled <- (species != names_in) %in% TRUE
     records$taxon_name <- species[match(records$taxon_name, names_in)]
 
     # A species takes from its infraspecific taxa what its own row of the taxa
     # table lacks, or all of it if it has no row: being a species, its genus
     # and its family. A species name outside the taxonomic reference has a
     # row with nothing in it, while its subspecies' rows are complete.
-    from_infraspecific <- taxa[match(names_in[rolled], taxa$taxon_name), intersect(c("genus", "family"), names(taxa))]
+    from_infraspecific <- taxa[match(names_in[rolled], taxa$taxon_name), intersect(c("genus", "family"), names(taxa)), drop = FALSE]
     from_infraspecific$taxon_name <- species[rolled]
     if ("taxon_rank" %in% names(taxa)) {
       from_infraspecific$taxon_rank <- rep("species", nrow(from_infraspecific))
@@ -160,9 +162,10 @@ summarise_trait_means <- function(database,
   columns <- trait_means_dictionary()$column
   columns <- c("taxon_name", by, setdiff(columns, c("taxon_name", setdiff(trait_means_taxon_columns, taxon_columns))))
 
-  means <- dplyr::bind_rows(trait_means_template(by), numeric, categorical)
+  means <- dplyr::bind_rows(trait_means_template(), numeric, categorical)
   for (variable in setdiff(by, names(means))) {
-    means[[variable]] <- rep(NA, nrow(means))
+    # an empty result: the column, of its type in the records
+    means[[variable]] <- rep(records[[variable]][NA_integer_], nrow(means))
   }
   means$estimate_type <- rep("observed_mean", nrow(means))
   means$method <- rep("geometric", nrow(means))
@@ -249,8 +252,8 @@ trait_means_input <- function(database, by, call = rlang::caller_env()) {
         "i" = "A flat table can be grouped by its own columns. To group by a context property, pass the relational database."
       ), call = call)
     }
-    taxa <- records[intersect(c("taxon_name", trait_means_taxon_columns), names(records))]
-    taxa <- taxa[!duplicated(taxa$taxon_name), ]
+    taxa <- as.data.frame(records)[intersect(c("taxon_name", trait_means_taxon_columns), names(records))]
+    taxa <- taxa[!duplicated(taxa$taxon_name), , drop = FALSE]
 
   } else {
 
@@ -267,19 +270,33 @@ trait_means_input <- function(database, by, call = rlang::caller_env()) {
       ), call = call)
     }
     if (length(contexts) > 0) {
+      # The columns `join_context_properties()` names "<category>: <property>",
+      # one per category a property is recorded under. Matched by their exact
+      # names, since a property name can hold brackets and other characters a
+      # regular expression would read. A traits table that already has them
+      # joined in is joined afresh, rather than given suffixed copies.
+      contexts_used <- database$contexts[database$contexts$context_property %in% contexts, ]
+      wanted <- unique(paste0(contexts_used$category, ": ", contexts_used$context_property))
+      fresh <- database
+      fresh$traits <- fresh$traits[setdiff(names(fresh$traits), wanted)]
       joined <- join_context_properties(
-        database, format = "many_columns", vars = contexts, include_description = FALSE
+        fresh, format = "many_columns", vars = contexts, include_description = FALSE
       )$traits
       for (property in contexts) {
-        # A property can be recorded under more than one context category
-        columns <- joined[grepl(paste0(": ", property, "$"), names(joined)) &
-                            sub("^[^:]*: ", "", names(joined)) == property]
-        records[[property]] <- do.call(dplyr::coalesce, unname(as.list(columns)))
+        columns <- intersect(
+          paste0(unique(contexts_used$category[contexts_used$context_property == property]), ": ", property),
+          names(joined)
+        )
+        records[[property]] <- if (length(columns) == 0) {
+          rep(NA_character_, nrow(records))
+        } else {
+          do.call(dplyr::coalesce, unname(as.list(joined[columns])))
+        }
       }
     }
 
-    taxa <- database$taxa[intersect(c("taxon_name", trait_means_taxon_columns), names(database$taxa))]
-    taxa <- taxa[!duplicated(taxa$taxon_name), ]
+    taxa <- as.data.frame(database$taxa)[intersect(c("taxon_name", trait_means_taxon_columns), names(database$taxa))]
+    taxa <- taxa[!duplicated(taxa$taxon_name), , drop = FALSE]
   }
 
   missing <- setdiff(trait_means_record_columns, names(records))
@@ -317,7 +334,7 @@ trait_means_roll_up <- function(taxon_name, rank = NULL) {
   rank_marker <- "\\s(subsp|var|f|forma|nothosubsp|nothovar)\\.\\s.*$"
   hybrid_formula <- "\\s(x|-)\\s[A-Z]"
 
-  infraspecific <- grepl(rank_marker, taxon_name) & !grepl(hybrid_formula, taxon_name)
+  infraspecific <- (grepl(rank_marker, taxon_name) & !grepl(hybrid_formula, taxon_name)) %in% TRUE
   if (!is.null(rank)) {
     infraspecific <- infraspecific & rank %in% c("subspecies", "variety", "form")
   }
@@ -336,7 +353,7 @@ trait_means_reliability <- function(n_datasets, n_records) {
 
 # The result's columns with no rows, so that a database with no numeric
 # traits, or no categorical ones, still gives every column
-trait_means_template <- function(by) {
+trait_means_template <- function() {
   template <- tibble::tibble(
     taxon_name = character(), trait_name = character(), unit = character(),
     value = numeric(), log_value = numeric(), arithmetic_mean = numeric(),
@@ -479,8 +496,10 @@ trait_means_categorical <- function(records, by) {
 
   taxa <- trait_means_groups(records[c("taxon_name", by, "trait_name")])
 
-  # One row per value a record lists
+  # One row per value a record lists, each value once per record
   values <- stringr::str_split(records$value, " ")
+  several <- lengths(values) > 1
+  values[several] <- lapply(values[several], unique)
   listed <- tibble::tibble(taxon = rep(taxa$id, lengths(values)), value = unlist(values))
   listed <- listed[!is.na(listed$value) & listed$value != "", ]
 
