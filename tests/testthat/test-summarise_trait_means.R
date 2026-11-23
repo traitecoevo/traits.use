@@ -66,6 +66,45 @@ test_that("the columns are those of the dictionary, whatever the traits", {
   expect_equal(nrow(none), 0)
 })
 
+test_that("a signed trait gets an arithmetic mean of every record", {
+  records <- dplyr::bind_rows(
+    # one location: -1 and -3, mean -2; another: 0
+    record("Acacia a", "water_potential_midday", c(-1, -3), unit = "MPa"),
+    record("Acacia a", "water_potential_midday", 0, unit = "MPa", location_id = "02"),
+    # a flora range, midpoint -5
+    record("Acacia a", "water_potential_midday", c(-8, -2), unit = "MPa",
+           value_type = c("minimum", "maximum"), dataset_id = "D2",
+           location_id = NA, basis_of_record = "literature"),
+    # a positive-scale trait alongside, which keeps its geometric mean
+    record("Acacia a", "plant_height", c(1, 4))
+  )
+
+  # a flat table: signed because it has a negative record
+  means <- summarise_trait_means(records)
+  wp <- means[means$trait_name == "water_potential_midday", ]
+  expect_equal(wp$method, "arithmetic")
+  expect_equal(wp$value, mean(c(-2, 0, -5)))
+  expect_equal(wp$arithmetic_mean, wp$value)
+  expect_true(is.na(wp$log_value))
+  expect_true(is.na(wp$sd_log))
+  expect_equal(wp$n_records, 5)
+  expect_equal(c(wp$value_min, wp$value_max), c(-8, 0))
+
+  height <- means[means$trait_name == "plant_height", ]
+  expect_equal(height$method, "geometric")
+  expect_equal(height$value, 2)
+
+  # the relational database: signed because its definition allows negative
+  # values, even in a subset whose records are all positive
+  database <- austraits_lite
+  signed <- names(Filter(function(d) isTRUE(as.numeric(d$allowed_values_min) < 0), database$definitions))
+  skip_if(length(intersect(signed, database$traits$trait_name)) == 0)
+  trait <- intersect(signed, database$traits$trait_name)[1]
+  all_means <- summarise_trait_means(database, traits = trait)
+  expect_equal(unique(all_means$method), "arithmetic")
+  expect_equal(trait_means_signed(database, database$traits), signed)
+})
+
 test_that("a lone flora bound stands in for the midpoint", {
   means <- summarise_trait_means(
     record("Acacia b", "plant_height", 3, value_type = "minimum", basis_of_record = "preserved_specimen")
@@ -260,7 +299,13 @@ test_that("a database, its flattened table and its traits table give the same me
   expect_equal(anyDuplicated(means[c("taxon_name", "trait_name", "unit")]), 0)
   expect_equal(names(means), trait_means_dictionary()$column)
 
-  numeric <- means[means$type == "numerical", ]
+  arithmetic <- means[means$method %in% "arithmetic", ]
+  expect_gt(nrow(arithmetic), 0)
+  expect_equal(arithmetic$value, arithmetic$arithmetic_mean)
+  expect_true(all(arithmetic$value >= arithmetic$value_min - 1e-9 &
+                    arithmetic$value <= arithmetic$value_max + 1e-9))
+
+  numeric <- means[means$type == "numerical" & means$method == "geometric", ]
   expect_true(all(numeric$value > 0))
   expect_true(all(numeric$value >= numeric$value_min * (1 - 1e-9)))
   expect_true(all(numeric$value <= numeric$value_max * (1 + 1e-9)))
@@ -270,7 +315,15 @@ test_that("a database, its flattened table and its traits table give the same me
   infraspecific <- means$taxon_rank %in% c("subspecies", "variety", "form")
   expect_false(any(infraspecific & !grepl("\\s(x|-)\\s[A-Z]", means$taxon_name)))
 
-  expect_equal(summarise_trait_means(flatten_database(database)), means)
+  # A flat table has no definitions, so it calls a trait signed only if it has
+  # a negative record; the two agree on every other trait
+  flat <- summarise_trait_means(flatten_database(database))
+  signed_by_definition <- trait_means_signed(database, database$traits)
+  signed_by_records <- trait_means_signed(flatten_database(database), database$traits)
+  expect_true(all(signed_by_records %in% signed_by_definition))
+  same <- !means$trait_name %in% signed_by_definition
+  expect_equal(flat[!flat$trait_name %in% signed_by_definition, ], means[same, ])
+  expect_equal(flat[flat$trait_name %in% signed_by_records, ], means[means$trait_name %in% signed_by_records, ])
 
   # a traits table carries no taxonomy: the same values, without the taxon
   # columns, rolled up by name alone; as a tibble or a plain data frame

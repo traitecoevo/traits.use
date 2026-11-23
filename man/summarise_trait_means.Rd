@@ -44,8 +44,9 @@ has.
 }
 \description{
 One row per taxon and trait, computed directly from the records, with no
-model: for a numeric trait, the \strong{observed mean}, a geometric mean; for a
-categorical trait, the most frequent value and the count of every value.
+model: for a numeric trait, the \strong{observed mean}, a geometric mean, or an
+arithmetic mean for a trait on a signed scale; for a categorical trait, the
+most frequent value and the count of every value.
 Works on a whole database, on any subset of one made with the \verb{extract_*()}
 functions (the taxa of one family, the records from one state), and on a
 table made by \code{\link[=flatten_database]{flatten_database()}}.
@@ -72,8 +73,20 @@ of its records (for a flora range, the geometric midpoint,
 \code{value} is the geometric mean of the groups. Traits are treated as
 log-normal, for which the geometric mean is the median. A geometric mean
 needs positive values, so records with a zero or negative value are not
-used, and a trait whose values are all negative has no rows. The arithmetic
-mean of the same groups is given alongside, in \code{arithmetic_mean}.
+used. The arithmetic mean of the same groups is given alongside, in
+\code{arithmetic_mean}.
+
+\strong{Signed traits.} A trait whose values can be negative, such as a water
+potential, a temperature or an isotope ratio, is not log-normal and has no
+geometric mean. For such a trait \code{value} is the arithmetic mean of the same
+groups (a flora range gives its arithmetic midpoint), every record is used,
+including zeros and negative values, \code{method} is \code{"arithmetic"}, and
+\code{log_value} and \code{sd_log} are empty. A trait is signed when its definition
+allows values below zero (\code{allowed_values_min} in the database's
+\code{definitions}). A flat table carries no definitions, so there a trait is
+signed when any of its records is negative; summarise the relational
+database to have the definitions decide, so that a subset whose records
+all happen to be positive is treated as the whole database is.
 
 \strong{Categorical traits.} A record listing several space-separated values
 counts once for each. \code{value_mode} is the most frequent value, with tied
@@ -97,7 +110,7 @@ value for a \code{by} variable form a group of their own (\code{NA}).
 
 \strong{How much evidence.} \code{n_records}, \code{n_datasets}, \code{n_locations}, \code{n_flora}
 and \code{n_field} count what is behind each value, and \code{sd_log} is the spread
-of the records. \code{reliability} is a provisional class from those counts:
+of the records on the log scale (empty for a signed trait). \code{reliability} is a provisional class from those counts:
 \code{high} with at least 3 datasets and 10 records, \code{medium} with at least 2
 datasets or 5 records, \code{low} otherwise.
 

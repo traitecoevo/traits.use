@@ -2,8 +2,9 @@
 #'
 #' @description
 #' One row per taxon and trait, computed directly from the records, with no
-#' model: for a numeric trait, the **observed mean**, a geometric mean; for a
-#' categorical trait, the most frequent value and the count of every value.
+#' model: for a numeric trait, the **observed mean**, a geometric mean, or an
+#' arithmetic mean for a trait on a signed scale; for a categorical trait, the
+#' most frequent value and the count of every value.
 #' Works on a whole database, on any subset of one made with the `extract_*()`
 #' functions (the taxa of one family, the records from one state), and on a
 #' table made by [flatten_database()].
@@ -29,8 +30,20 @@
 #' `value` is the geometric mean of the groups. Traits are treated as
 #' log-normal, for which the geometric mean is the median. A geometric mean
 #' needs positive values, so records with a zero or negative value are not
-#' used, and a trait whose values are all negative has no rows. The arithmetic
-#' mean of the same groups is given alongside, in `arithmetic_mean`.
+#' used. The arithmetic mean of the same groups is given alongside, in
+#' `arithmetic_mean`.
+#'
+#' **Signed traits.** A trait whose values can be negative, such as a water
+#' potential, a temperature or an isotope ratio, is not log-normal and has no
+#' geometric mean. For such a trait `value` is the arithmetic mean of the same
+#' groups (a flora range gives its arithmetic midpoint), every record is used,
+#' including zeros and negative values, `method` is `"arithmetic"`, and
+#' `log_value` and `sd_log` are empty. A trait is signed when its definition
+#' allows values below zero (`allowed_values_min` in the database's
+#' `definitions`). A flat table carries no definitions, so there a trait is
+#' signed when any of its records is negative; summarise the relational
+#' database to have the definitions decide, so that a subset whose records
+#' all happen to be positive is treated as the whole database is.
 #'
 #' **Categorical traits.** A record listing several space-separated values
 #' counts once for each. `value_mode` is the most frequent value, with tied
@@ -54,7 +67,7 @@
 #'
 #' **How much evidence.** `n_records`, `n_datasets`, `n_locations`, `n_flora`
 #' and `n_field` count what is behind each value, and `sd_log` is the spread
-#' of the records. `reliability` is a provisional class from those counts:
+#' of the records on the log scale (empty for a signed trait). `reliability` is a provisional class from those counts:
 #' `high` with at least 3 datasets and 10 records, `medium` with at least 2
 #' datasets or 5 records, `low` otherwise.
 #'
@@ -155,7 +168,7 @@ summarise_trait_means <- function(database,
   }
   details <- details[!duplicated(details$taxon_name), ]
 
-  numeric <- trait_means_numeric(records[!is.na(records$unit), ], by, value_type_rules)
+  numeric <- trait_means_numeric(records[!is.na(records$unit), ], by, value_type_rules, input$signed)
   categorical <- trait_means_categorical(records[is.na(records$unit), ], by)
 
   taxon_columns <- setdiff(names(details), "taxon_name")
@@ -168,7 +181,7 @@ summarise_trait_means <- function(database,
     means[[variable]] <- rep(records[[variable]][NA_integer_], nrow(means))
   }
   means$estimate_type <- rep("observed_mean", nrow(means))
-  means$method <- rep("geometric", nrow(means))
+  means$method[is.na(means$method)] <- "geometric"
   means$reliability <- trait_means_reliability(means$n_datasets, means$n_records)
 
   means <- dplyr::left_join(means, details, by = "taxon_name")
@@ -197,10 +210,10 @@ trait_means_dictionary <- function() {
     "trait_name", "Trait name.",
     "unit", "Unit of the numeric trait values; empty for categorical traits.",
     "estimate_type", "Always observed_mean: computed directly from the records, with no model.",
-    "method", "Always geometric: the geometric method.",
-    "value", "Numeric traits: the observed mean, a geometric mean. Records are averaged on the log scale within each dataset x location, flora minimum and maximum bounds give a geometric midpoint per observation, and the value is exp(mean) over those groups, each group counting once. Records with zero or negative values are not used.",
-    "log_value", "Natural log of value.",
-    "arithmetic_mean", "Arithmetic mean over the same groups and records (each group's arithmetic mean or midpoint, then their mean). Not the observed mean; given for comparison.",
+    "method", "geometric for a trait on a positive scale; arithmetic for a trait on a signed scale, whose definition allows values below zero (a water potential, a temperature, an isotope ratio), for which a geometric mean does not exist.",
+    "value", "Numeric traits: the observed mean. With method geometric, a geometric mean: records are averaged on the log scale within each dataset x location, flora minimum and maximum bounds give a geometric midpoint per observation, and the value is exp(mean) over those groups, each group counting once; records with zero or negative values are not used. With method arithmetic, the arithmetic mean over the same groups, using every record.",
+    "log_value", "Natural log of value; empty with method arithmetic.",
+    "arithmetic_mean", "Arithmetic mean over the same groups and records (each group's arithmetic mean or midpoint, then their mean). With method geometric it is not the observed mean and is given for comparison; with method arithmetic it equals value.",
     "value_min", "Smallest record value used.",
     "value_max", "Largest record value used.",
     "n_records", "Number of records used.",
@@ -208,7 +221,7 @@ trait_means_dictionary <- function() {
     "n_datasets", "Number of datasets contributing records.",
     "n_flora", "Numeric traits: number of minimum and maximum records from preserved specimens or the literature (floras) used.",
     "n_field", "Number of records used whose basis of record is field.",
-    "sd_log", "Numeric traits: standard deviation of the natural log of the record values used; empty with a single record.",
+    "sd_log", "Numeric traits: standard deviation of the natural log of the record values used; empty with a single record, or with method arithmetic.",
     "reliability", "Provisional class from the evidence behind the value: high (at least 3 datasets and 10 records), medium (at least 2 datasets or 5 records), low (otherwise). Thresholds are provisional.",
     "dataset_id", "Datasets contributing, sorted, joined by '; '. Each dataset's reference is in the database's sources table under the same key.",
     "type", "numerical or categorical.",
@@ -310,7 +323,23 @@ trait_means_input <- function(database, by, call = rlang::caller_env()) {
   records <- tibble::as_tibble(as.data.frame(records)[c(trait_means_record_columns, by)])
   records$value <- as.character(records$value)
 
-  list(records = records, taxa = tibble::as_tibble(as.data.frame(taxa)))
+  list(records = records, taxa = tibble::as_tibble(as.data.frame(taxa)),
+       signed = trait_means_signed(database, records))
+}
+
+# Traits on a signed scale, which get an arithmetic mean: those whose
+# definition allows values below zero, or, for a flat table, which carries no
+# definitions, those with a negative record
+trait_means_signed <- function(database, records) {
+  if (!is_flat(database) && length(database$definitions) > 0) {
+    minimum <- vapply(database$definitions, function(definition) {
+      x <- suppressWarnings(as.numeric(definition$allowed_values_min))
+      if (length(x) == 1) x else NA_real_
+    }, numeric(1))
+    return(names(minimum)[!is.na(minimum) & minimum < 0])
+  }
+  value <- suppressWarnings(as.numeric(records$value))
+  unique(records$trait_name[!is.na(value) & value < 0 & !is.na(records$unit)])
 }
 
 trait_means_check_rules <- function(rules, call = rlang::caller_env()) {
@@ -356,6 +385,7 @@ trait_means_reliability <- function(n_datasets, n_records) {
 trait_means_template <- function() {
   template <- tibble::tibble(
     taxon_name = character(), trait_name = character(), unit = character(),
+    method = character(),
     value = numeric(), log_value = numeric(), arithmetic_mean = numeric(),
     value_min = numeric(), value_max = numeric(),
     n_records = integer(), n_locations = integer(), n_datasets = integer(),
@@ -412,10 +442,11 @@ trait_means_datasets <- function(dataset_id, id, n) {
   )
 }
 
-trait_means_numeric <- function(records, by, rules) {
+trait_means_numeric <- function(records, by, rules, signed = character()) {
 
+  # A signed trait keeps every value; the others need positive ones
   records$value <- suppressWarnings(as.numeric(records$value))
-  records <- records[!is.na(records$value) & records$value > 0, ]
+  records <- records[!is.na(records$value) & (records$value > 0 | records$trait_name %in% signed), ]
 
   # Records summarised per dataset x location: raw, mean and median records,
   # and whatever the rules allow for the datasets they name. Bounds from
@@ -433,7 +464,10 @@ trait_means_numeric <- function(records, by, rules) {
   if (nrow(records) == 0) {
     return(NULL)
   }
-  log_value <- log(records$value)
+  # Logs of the positive-scale traits; empty for the signed ones
+  log_value <- rep(NA_real_, nrow(records))
+  positive <- !records$trait_name %in% signed
+  log_value[positive] <- log(records$value[positive])
 
   taxa <- trait_means_groups(records[c("taxon_name", by, "trait_name", "unit")])
 
@@ -467,13 +501,16 @@ trait_means_numeric <- function(records, by, rules) {
 
   datasets <- trait_means_datasets(records$dataset_id, taxa$id, taxa$n)
   log_mean <- trait_means_sum(group_log_mean, taxon, taxa$n) / n_groups
+  arithmetic_mean <- trait_means_sum(group_mean, taxon, taxa$n) / n_groups
+  arithmetic <- taxa$keys$trait_name %in% signed
 
   dplyr::bind_cols(
     taxa$keys,
     tibble::tibble(
-      value = exp(log_mean),
-      log_value = log_mean,
-      arithmetic_mean = trait_means_sum(group_mean, taxon, taxa$n) / n_groups,
+      method = ifelse(arithmetic, "arithmetic", "geometric"),
+      value = ifelse(arithmetic, arithmetic_mean, exp(log_mean)),
+      log_value = ifelse(arithmetic, NA_real_, log_mean),
+      arithmetic_mean = arithmetic_mean,
       value_min = value_min,
       value_max = value_max,
       n_records = n_records,
@@ -481,7 +518,7 @@ trait_means_numeric <- function(records, by, rules) {
       n_datasets = datasets$n_datasets,
       n_flora = as.integer(trait_means_sum(flora, taxa$id, taxa$n)),
       n_field = as.integer(trait_means_sum(records$basis_of_record %in% "field", taxa$id, taxa$n)),
-      sd_log = sd_log,
+      sd_log = ifelse(arithmetic, NA_real_, sd_log),
       dataset_id = datasets$dataset_id,
       type = "numerical"
     )
