@@ -69,6 +69,13 @@ duplicate keys removed. They are a <code><a href="https://docs.ropensci.org/RefM
 class <code><a href="traits_build_sources.html">traits_build_sources</a></code>, so a reference can be
 looked up by key with <code>$</code> as well as <code>[[</code> and <code>[</code>, e.g.
 <code>database$sources$Falster_2005</code>.</p>
+<p>Each table keeps one of each set of identical rows, so binding two extracts
+of one database that overlap, e.g. by two contexts, holds each shared
+observation once. A row of <code>traits</code> or <code>excluded_data</code> that exactly copies
+another row of the <em>same</em> database is dropped too, but with a warning naming
+the dataset: two genuine measurements differ in <code>observation_id</code> or
+<code>repeat_measurements_id</code>, so an exact copy means the dataset's configuration
+is wrong.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

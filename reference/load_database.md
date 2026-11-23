@@ -68,8 +68,8 @@ a large list containing traits.build data tables, or with
 ## See also
 
 [`database_cache_dir()`](https://traitecoevo.github.io/traits.use/reference/database_cache_dir.md);
-[`austraits::load_austraits()`](https://traitecoevo.github.io/austraits/reference/load_austraits.html),
-which loads a release of AusTraits by version number
+`austraits::load_austraits()`, which loads a release of AusTraits by
+version number
 
 ## Examples
 

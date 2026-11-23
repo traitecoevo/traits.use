@@ -178,6 +178,18 @@
   [`summarise_database()`](https://traitecoevo.github.io/traits.use/reference/summarise_database.md)
   sorts the same way.
 - [`bind_databases()`](https://traitecoevo.github.io/traits.use/reference/bind_databases.md)
+  warns when a database holds rows of `traits` or `excluded_data` that
+  exactly copy another of its own rows, naming each dataset and the
+  number of copies found in each database passed
+  ([\#36](https://github.com/traitecoevo/traits.use/issues/36)). Such
+  copies were always dropped, and still are, but silently, so a dataset
+  failing `traits.build::dataset_test()` for duplicate rows looked clean
+  once compiled. Two genuine measurements differ in `observation_id` or
+  `repeat_measurements_id`, so a copy means the dataset’s configuration
+  is wrong. Rows shared between the databases being bound, such as two
+  overlapping extracts of one release, are still kept once without a
+  warning.
+- [`bind_databases()`](https://traitecoevo.github.io/traits.use/reference/bind_databases.md)
   warns when one citation key names different references in different
   datasets (titles or years differ), since `sources` keeps only one
   entry per key and the other is lost.

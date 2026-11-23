@@ -33,6 +33,14 @@ object with the class
 so a reference can be looked up by key with `$` as well as `[[` and `[`,
 e.g. `database$sources$Falster_2005`.
 
+Each table keeps one of each set of identical rows, so binding two
+extracts of one database that overlap, e.g. by two contexts, holds each
+shared observation once. A row of `traits` or `excluded_data` that
+exactly copies another row of the *same* database is dropped too, but
+with a warning naming the dataset: two genuine measurements differ in
+`observation_id` or `repeat_measurements_id`, so an exact copy means the
+dataset's configuration is wrong.
+
 ## See also
 
 [traits_build_sources](https://traitecoevo.github.io/traits.use/reference/traits_build_sources.md)
