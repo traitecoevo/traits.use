@@ -149,6 +149,22 @@ test_that("A record without a relational .rds gives a clear error", {
   expect_error(load_database(doi = "10.5281/zenodo.3568418", path = path), "No .rds file found")
 })
 
+test_that("A stamped flattened file keeps its class and stamp (#47)", {
+  src <- tempfile("flatsrc"); path_flat <- tempfile("flat")
+  on.exit(unlink(c(src, path_flat), recursive = TRUE), add = TRUE)
+  dir.create(src)
+  flat <- austraits_lite %>% extract_dataset("Falster_2003") %>% flatten_database()
+  file <- file.path(src, "db-flattened.rds")
+  saveRDS(flat, file)
+  local_mocked_bindings(
+    resolve_doi_files = function(doi) list(doi = doi, source = "zenodo", version = "1",
+      files = data.frame(key = "db-flattened.rds", url = file_url(file), md5 = unname(tools::md5sum(file))))
+  )
+  loaded <- suppressMessages(load_database(doi = "10.5281/zenodo.9", path = path_flat, flattened = TRUE))
+  expect_s3_class(loaded, "traits.build_flat")
+  expect_identical(attr(loaded, "traits.build_stamp"), attr(flat, "traits.build_stamp"))
+})
+
 test_that("A record whose only .rds is flattened is not downloaded", {
   path_flat <- tempfile("flat")
   on.exit(unlink(path_flat, recursive = TRUE), add = TRUE)

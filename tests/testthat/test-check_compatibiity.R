@@ -20,7 +20,16 @@ test_that("databases built before the data model version are recognised by the t
   expect_identical(get_data_model_version(austraits_lite), NA_character_)
 
   expect_false(check_compatibility(without_compiled_by(austraits_5.0.0_lite)))
-  expect_error(join_taxa(without_compiled_by(austraits_5.0.0_lite)), "no longer supports")
+  expect_error(join_taxa(without_compiled_by(austraits_5.0.0_lite)),
+               "doesn't look like a database built by traits.build")
+})
+
+test_that("a list without metadata is told so, not that it is an old release", {
+  no_metadata <- austraits_lite
+  no_metadata$metadata <- NULL
+  expect_false(check_compatibility(no_metadata))
+  expect_error(flatten_database(no_metadata), "has no .*metadata.* table")
+  expect_error(join_taxa(no_metadata), "has no .*metadata.* table")
 })
 
 test_that("AusTraits 3.0.2 is not supported", {

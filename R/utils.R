@@ -93,14 +93,31 @@ function_not_supported <- function(database, ...){
     )
   }
 
-  # Name the release: a relational database records it in build_info
-  if (is.data.frame(database)) {
-    AusTraits_version <- "< 5.0.0"
-  } else {
-    AusTraits_version <- print_version(database)
+  if (!is.data.frame(database)) {
+    # A list without metadata: nothing says which data model its tables follow
+    if (is.null(database[["metadata"]])) {
+      cli::cli_abort(c(
+        "x" = "{.arg database} has no {.field metadata} table, so traits.use can't tell which traits.build data model its tables follow.",
+        "i" = "Pass the database as {.fn load_database} returns it, or a subset made with the {.fn extract_*} functions, which keep {.field metadata}.",
+        "i" = "If you built or edited the list yourself, copy {.field metadata} across from the database it came from."
+      ),
+      call = rlang::caller_env()
+      )
+    }
+
+    # Metadata that names neither a data model version nor traits.build, e.g.
+    # an AusTraits release older than 5.0.0, built before traits.build existed
+    cli::cli_abort(c(
+      "x" = "This doesn't look like a database built by traits.build: its {.field metadata} records neither a data model version nor traits.build as the software that built it.",
+      "i" = "Load a traits.build database with {.fn load_database}.",
+      "i" = "For an AusTraits release older than 5.0.0, install an older version of the {.pkg austraits} package, e.g. {.code remotes::install_github(\"traitecoevo/austraits@v2.2.2\")}."
+    ),
+    call = rlang::caller_env()
+    )
   }
-  
-  # Formulate message
+
+  # A table, e.g. the wide table the deprecated trait_pivot_longer() is given
+  AusTraits_version <- "< 5.0.0"
   cli::cli_abort(c(
     "x" = "{function_name} no longer supports this version of AusTraits, {AusTraits_version}",
     "i" = "You can either load a newer version of the data, e.g. with `load_database()` or `austraits::load_austraits()`, OR",
@@ -141,17 +158,6 @@ clean_NA <- function(x) {
   # Not ifelse(), which returns a logical vector when every element is NA
   x[x %in% "NA"] <- NA_character_
   x
-}
-
-#' Print version of AusTraits object
-#'
-#' @param database traits.build database (list object)
-#' @return binary version for switch statements
-#' @noRd
-#' @keywords internal
-#' 
-print_version <- function(database){
-  database$build_info$version %>% as.character()
 }
 
 #' Give the reference columns of a methods table their current names
