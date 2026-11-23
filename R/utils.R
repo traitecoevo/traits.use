@@ -87,7 +87,7 @@ function_not_supported <- function(database, ...){
     cli::cli_abort(c(
       "x" = problem,
       "i" = "Install the latest version of traits.use, e.g. with `install.packages(\"traits.use\")` or `remotes::install_github(\"traitecoevo/traits.use\")`.",
-      "i" = "The data model is described at https://w3id.org/traits.build."
+      "i" = "The data model is described at https://w3id.org/traits.build/."
     ),
     call = rlang::caller_env()
     )
