@@ -47,7 +47,20 @@ flatten_database(database, format, vars, include_description)
 
 A table combining information in 8 traits.build relational tables:
 traits, locations, contexts, methods, taxa, taxonomic_updates,
-contributors, and identifiers
+contributors, and identifiers. It is a tibble of class
+`traits.build_flat`, stamped with the database it came from: the
+attribute `traits.build_stamp` is a list of its `title`, `version`,
+`doi`, `data_model_version` and `traits_build_version` (each `NA` if the
+database does not record it). The stamp is kept by
+[`saveRDS()`](https://rdrr.io/r/base/readRDS.html) and, with the class,
+by `arrow::write_parquet()`, which stores it in the file's metadata, and
+is shown when the table is printed.
+[`extract_trait()`](https://traitecoevo.github.io/traits.use/reference/extract_trait.md),
+[`extract_taxa()`](https://traitecoevo.github.io/traits.use/reference/extract_taxa.md),
+[`extract_dataset()`](https://traitecoevo.github.io/traits.use/reference/extract_dataset.md),
+[`summarise_database()`](https://traitecoevo.github.io/traits.use/reference/summarise_database.md)
+and the plots take this table as well as the relational database, and
+keep the stamp on what they return.
 
 ## Examples
 
@@ -56,7 +69,9 @@ flat <- austraits_lite %>%
   extract_dataset("Falster_2003") %>%
   flatten_database()
 flat
-#> # A tibble: 114 × 66
+#> # A traits.build_flat table: 114 × 66
+#> # From:                      AusTraits: a curated plant trait database for the
+#> #   Australian flora, version 7.0.0, doi:10.5281/zenodo.3568417
 #>    dataset_id   taxon_name     observation_id trait_name value unit  entity_type
 #>    <chr>        <chr>          <chr>          <chr>      <chr> <chr> <chr>      
 #>  1 Falster_2003 Acacia florib… 01             leaf_area  142   mm2   population 
@@ -76,4 +91,6 @@ flat
 #> #   temporal_context_id <chr>, source_id <chr>, location_id <chr>,
 #> #   entity_context_id <chr>, plot_context_id <chr>, treatment_context_id <chr>,
 #> #   collection_date <chr>, measurement_remarks <chr>, method_id <chr>, …
+attr(flat, "traits.build_stamp")$version
+#> [1] "7.0.0"
 ```

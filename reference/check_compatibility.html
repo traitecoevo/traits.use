@@ -8,7 +8,12 @@ number is one this version of traits.use reads
 (supported_data_model_majors()). A database without that field is
 compatible if metadata$related_identifiers says it was compiled by
 traits.build, which is how releases built before the field existed, such as
-AusTraits 7.0.0 and earlier, are recognised."><meta property="og:description" content="Function to check whether the data object has been compiled by the traits.build workflow and
+AusTraits 7.0.0 and earlier, are recognised.
+A flat table (see database_format()) is accepted only when
+single_table_allowed is TRUE, and, if flatten_database() stamped it
+with a data model version, only if that version is supported; otherwise it
+stops with an error saying the function needs the relational database. Anything that is neither a
+relational database nor a traits table stops with an error."><meta property="og:description" content="Function to check whether the data object has been compiled by the traits.build workflow and
 therefore has a data structure that is appropriate for use with traits.use functions.
 A database built by traits.build 2.3 or later records the version of the
 traits.build data model its tables follow, in metadata$data_model_version
@@ -17,7 +22,12 @@ number is one this version of traits.use reads
 (supported_data_model_majors()). A database without that field is
 compatible if metadata$related_identifiers says it was compiled by
 traits.build, which is how releases built before the field existed, such as
-AusTraits 7.0.0 and earlier, are recognised."></head><body>
+AusTraits 7.0.0 and earlier, are recognised.
+A flat table (see database_format()) is accepted only when
+single_table_allowed is TRUE, and, if flatten_database() stamped it
+with a data model version, only if that version is supported; otherwise it
+stops with an error saying the function needs the relational database. Anything that is neither a
+relational database nor a traits table stops with an error."></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -63,11 +73,20 @@ number is one this version of traits.use reads
 compatible if <code>metadata$related_identifiers</code> says it was compiled by
 traits.build, which is how releases built before the field existed, such as
 AusTraits 7.0.0 and earlier, are recognised.</p>
+<p>A flat table (see <code>database_format()</code>) is accepted only when
+<code>single_table_allowed</code> is <code>TRUE</code>, and, if <code><a href="flatten_database.html">flatten_database()</a></code> stamped it
+with a data model version, only if that version is supported; otherwise it
+stops with an error saying the function needs the relational database. Anything that is neither a
+relational database nor a traits table stops with an error.</p>
     </div>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">check_compatibility</span><span class="op">(</span><span class="va">database</span>, single_table_allowed <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">check_compatibility</span><span class="op">(</span></span>
+<span>  <span class="va">database</span>,</span>
+<span>  single_table_allowed <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  call <span class="op">=</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/stack.html" class="external-link">caller_env</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -75,11 +94,16 @@ AusTraits 7.0.0 and earlier, are recognised.</p>
 
 
 <dl><dt id="arg-database">database<a class="anchor" aria-label="anchor" href="#arg-database"></a></dt>
-<dd><p>traits.build database (list object)</p></dd>
+<dd><p>traits.build database (list object), or a flat table from one</p></dd>
 
 
 <dt id="arg-single-table-allowed">single_table_allowed<a class="anchor" aria-label="anchor" href="#arg-single-table-allowed"></a></dt>
-<dd><p>logical for when the input might be a single table instead of a complete database; defaults to FALSE</p></dd>
+<dd><p>logical: can the calling function take a flat
+table (a flattened database, or a traits table)? Defaults to <code>FALSE</code></p></dd>
+
+
+<dt id="arg-call">call<a class="anchor" aria-label="anchor" href="#arg-call"></a></dt>
+<dd><p>the calling function's environment, named in errors</p></dd>
 
 </dl></div>
     <div class="section level2">

@@ -25,8 +25,11 @@
   newer major version is refused with a message to update traits.use,
   where before it would have been told its data were too old;
   [`print()`](https://rdrr.io/r/base/print.html) shows the version.
-  Databases built before the field existed, such as AusTraits 7.0.0 and
-  earlier, are recognised by the address as before.
+  [`bind_databases()`](https://traitecoevo.github.io/traits.use/reference/bind_databases.md)
+  refuses such a database too, since its result keeps the first
+  database’s metadata, and warns when the databases it binds record
+  different versions. Databases built before the field existed, such as
+  AusTraits 7.0.0 and earlier, are recognised by the address as before.
 - New dataset `austraits_lite`: 24 datasets from AusTraits 7.0.0 (CC BY
   4.0), a small traits.build database to try the package on without
   downloading anything. The examples now use it and run; those of
@@ -155,6 +158,62 @@
   year before for every reference (e.g. Falster_2003 as 2002). The
   references’ dates are stored as midnight in Sydney, the previous day
   in UTC; they are now read from each reference’s own fields.
+- [`flatten_database()`](https://traitecoevo.github.io/traits.use/reference/flatten_database.md)
+  stamps its output with the database it came from
+  ([\#41](https://github.com/traitecoevo/traits.use/issues/41)): the
+  table has the class `traits.build_flat`, and its attribute
+  `traits.build_stamp` lists the database’s `title`, `version`, `doi`,
+  `data_model_version` and the `traits_build_version` that built it.
+  [`saveRDS()`](https://rdrr.io/r/base/readRDS.html) keeps the stamp, as
+  does `arrow::write_parquet()` (in the file’s metadata), and printing
+  the table shows it. `data_model_version` is the version recorded in
+  `metadata$data_model_version`
+  ([\#40](https://github.com/traitecoevo/traits.use/issues/40)), `NA`
+  for a database built before traits.build 2.3; a flat table stamped
+  with a data model version this traits.use cannot read is refused as
+  the database would be.
+- The functions now tell the two formats of a database apart by class:
+  the relational database (a list of tables, class `traits.build`) and a
+  flat table (a table from
+  [`flatten_database()`](https://traitecoevo.github.io/traits.use/reference/flatten_database.md),
+  or a traits table).
+  [`extract_trait()`](https://traitecoevo.github.io/traits.use/reference/extract_trait.md),
+  [`extract_taxa()`](https://traitecoevo.github.io/traits.use/reference/extract_taxa.md),
+  [`extract_dataset()`](https://traitecoevo.github.io/traits.use/reference/extract_dataset.md),
+  [`summarise_database()`](https://traitecoevo.github.io/traits.use/reference/summarise_database.md)
+  and the plots take either, and a stamped table keeps its class and
+  stamp through `extract_*()`.
+  [`summarise_database()`](https://traitecoevo.github.io/traits.use/reference/summarise_database.md)
+  used to need the relational database. The `join_*()`, `lookup_*()`,
+  [`flatten_database()`](https://traitecoevo.github.io/traits.use/reference/flatten_database.md),
+  [`as_wide_table()`](https://traitecoevo.github.io/traits.use/reference/as_wide_table.md),
+  [`bind_databases()`](https://traitecoevo.github.io/traits.use/reference/bind_databases.md)
+  and
+  [`get_references()`](https://traitecoevo.github.io/traits.use/reference/get_references.md)
+  functions, and
+  [`extract_data()`](https://traitecoevo.github.io/traits.use/reference/extract_data.md)
+  by context or location property, need the relational database. Given a
+  flat table, they now stop with an error saying so, where the
+  `join_*()` functions said the database was a version older than 5.0.0.
+  A data frame with neither a `trait_name` nor a `dataset_id` column, or
+  anything else that is not a database or a table from one, now gives an
+  error. Before, any data frame was taken as a traits table. The
+  `lookup_*()` functions and
+  [`summarise_database()`](https://traitecoevo.github.io/traits.use/reference/summarise_database.md)
+  now check the database’s version as the `join_*()` functions do, so
+  stop on a database they cannot read.
+- `load_database(flattened = TRUE)` keeps the class and stamp of a
+  flattened file that has them
+  ([\#47](https://github.com/traitecoevo/traits.use/issues/47)).
+  Flattened files published before
+  [\#41](https://github.com/traitecoevo/traits.use/issues/41) have no
+  stamp and still load as plain tibbles.
+- A database the functions cannot read is now told why. A list without
+  `metadata` is told that nothing says which data model its tables
+  follow, and one whose `metadata` names neither a data model version
+  nor traits.build is told it doesn’t look like a traits.build database.
+  Before, both were told they were an AusTraits release the function no
+  longer supports.
 - [`flatten_database()`](https://traitecoevo.github.io/traits.use/reference/flatten_database.md)
   takes its references from
   [`join_sources()`](https://traitecoevo.github.io/traits.use/reference/join_sources.md),

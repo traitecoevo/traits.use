@@ -12,7 +12,12 @@ summarise_database(database, var)
 
 - database:
 
-  traits.build database (list object)
+  traits.build database (list object), or a flat table from one: a table
+  made by
+  [`flatten_database()`](https://traitecoevo.github.io/traits.use/reference/flatten_database.md),
+  or a traits table (for `"family"` or `"genus"`, it must then have that
+  column, e.g. from
+  [`join_taxa()`](https://traitecoevo.github.io/traits.use/reference/join_taxa.md))
 
 - var:
 

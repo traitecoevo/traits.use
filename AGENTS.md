@@ -35,6 +35,19 @@ is now a thin AusTraits-specific layer over it. The first CRAN release
   [`bind_databases()`](https://traitecoevo.github.io/traits.use/reference/bind_databases.md),
   [`flatten_database()`](https://traitecoevo.github.io/traits.use/reference/flatten_database.md),
   [`as_wide_table()`](https://traitecoevo.github.io/traits.use/reference/as_wide_table.md).
+- **Two input formats, told apart by class** (#41): the relational
+  database (list, class `traits.build`) and a flat table (data frame;
+  [`flatten_database()`](https://traitecoevo.github.io/traits.use/reference/flatten_database.md)
+  output has class `traits.build_flat` and a `traits.build_stamp`
+  attribute). `database_format()` in `R/check_compatibility.R` is the
+  one place that decides; don’t branch on
+  [`dim()`](https://rdrr.io/r/base/dim.html) or `is_tibble()`.
+  `extract_trait/taxa/dataset()`,
+  [`summarise_database()`](https://traitecoevo.github.io/traits.use/reference/summarise_database.md)
+  and the plots take both, so test them with both
+  (`tests/testthat/test-flat.R`); everything else stops on a flat table
+  via
+  [`check_compatibility()`](https://traitecoevo.github.io/traits.use/reference/check_compatibility.md).
 - **Build/test (standard R-package workflow):** `devtools::load_all()`,
   `devtools::test()`, `devtools::check()`. The package targets
   `R >= 4.1.0` (it uses `|>`); tidyverse-style Imports (dplyr, tidyr,

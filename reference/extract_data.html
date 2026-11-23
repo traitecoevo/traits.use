@@ -66,7 +66,7 @@ based on the specified table, column (variable) and column value.</p>
 
 
 <dl><dt id="arg-database">database<a class="anchor" aria-label="anchor" href="#arg-database"></a></dt>
-<dd><p>traits.build database (list object)</p></dd>
+<dd><p>traits.build database (list object), or a flat table from one: a table made by <code><a href="flatten_database.html">flatten_database()</a></code> (whose class and stamp the result keeps), or a traits table</p></dd>
 
 
 <dt id="arg-table">table<a class="anchor" aria-label="anchor" href="#arg-table"></a></dt>
@@ -87,7 +87,7 @@ based on the specified table, column (variable) and column value.</p>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>subset traits.build database</p>
+    <p>subset traits.build database, or for a flat table, the matching rows of it. A flat table can't be extracted from by context or location property, which it packs into text columns.</p>
     </div>
 
     <div class="section level2">

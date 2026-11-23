@@ -16,22 +16,38 @@ A database without that field is compatible if
 which is how releases built before the field existed, such as AusTraits
 7.0.0 and earlier, are recognised.
 
+A flat table (see `database_format()`) is accepted only when
+`single_table_allowed` is `TRUE`, and, if
+[`flatten_database()`](https://traitecoevo.github.io/traits.use/reference/flatten_database.md)
+stamped it with a data model version, only if that version is supported;
+otherwise it stops with an error saying the function needs the
+relational database. Anything that is neither a relational database nor
+a traits table stops with an error.
+
 ## Usage
 
 ``` r
-check_compatibility(database, single_table_allowed = FALSE)
+check_compatibility(
+  database,
+  single_table_allowed = FALSE,
+  call = rlang::caller_env()
+)
 ```
 
 ## Arguments
 
 - database:
 
-  traits.build database (list object)
+  traits.build database (list object), or a flat table from one
 
 - single_table_allowed:
 
-  logical for when the input might be a single table instead of a
-  complete database; defaults to FALSE
+  logical: can the calling function take a flat table (a flattened
+  database, or a traits table)? Defaults to `FALSE`
+
+- call:
+
+  the calling function's environment, named in errors
 
 ## Value
 

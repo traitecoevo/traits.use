@@ -13,7 +13,10 @@ extract_dataset(database, dataset_id, partial_matches_allowed = TRUE)
 
 - database:
 
-  traits.build database (list object)
+  traits.build database (list object), or a flat table from one: a table
+  made by
+  [`flatten_database()`](https://traitecoevo.github.io/traits.use/reference/flatten_database.md)
+  (whose class and stamp the result keeps), or a traits table
 
 - dataset_id:
 
@@ -32,7 +35,8 @@ extract_dataset(database, dataset_id, partial_matches_allowed = TRUE)
 ## Value
 
 List of tibbles containing all traits.build data and metadata for the
-specified dataset(s).
+specified dataset(s). For a flat table, the matching rows of it, as a
+table of the same class.
 
 ## Details
 

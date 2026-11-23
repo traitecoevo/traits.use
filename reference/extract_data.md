@@ -22,7 +22,10 @@ extract_data(
 
 - database:
 
-  traits.build database (list object)
+  traits.build database (list object), or a flat table from one: a table
+  made by
+  [`flatten_database()`](https://traitecoevo.github.io/traits.use/reference/flatten_database.md)
+  (whose class and stamp the result keeps), or a traits table
 
 - table:
 
@@ -50,7 +53,9 @@ extract_data(
 
 ## Value
 
-subset traits.build database
+subset traits.build database, or for a flat table, the matching rows of
+it. A flat table can't be extracted from by context or location
+property, which it packs into text columns.
 
 ## Examples
 
