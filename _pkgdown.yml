@@ -15,6 +15,7 @@ reference:
 - title: Accessing and exploring the database
 - contents:
   - load_database
+  - list_versions
   - database_cache_dir
   - austraits_lite
   - starts_with("get_")

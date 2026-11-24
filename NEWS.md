@@ -1,5 +1,7 @@
 # traits.use (development version)
 
+- New function `list_versions()` lists the releases of a traits.build database on Zenodo or Figshare, given any of its dois, with each release's version, doi and publication date, newest first (#52). Pass a release's doi to `load_database()` to load it. Before, only AusTraits' releases could be listed, with `austraits::get_versions()`.
+
 # traits.use 0.1.1
 
 - First release as `traits.use`, a generic package for loading and wrangling any traits.build database. The code and history come from the `austraits` package (version 3.1.1 and earlier, listed below), which becomes a thin AusTraits-specific layer over `traits.use` (austraits#188).

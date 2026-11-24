@@ -35,7 +35,8 @@
 #' @return a large list containing traits.build data tables, or with
 #'   `flattened = TRUE`, a single table (tibble)
 #' @export
-#' @seealso [database_cache_dir()]; `austraits::load_austraits()`, which loads
+#' @seealso [list_versions()] to find the dois of a database's releases;
+#'   [database_cache_dir()]; `austraits::load_austraits()`, which loads
 #'   a release of AusTraits by version number
 #'
 #' @examplesIf interactive()
@@ -68,9 +69,7 @@ load_database <- function(doi = NULL, path = NULL, update = TRUE, flattened = FA
     rlang::abort("`path` must be a single folder path, or NULL for the cache folder.")
   }
 
-  # Remove any url prefix from doi
-  doi <- stringr::str_remove(doi, "^(https?://)?(dx\\.)?doi\\.org/") %>%
-    stringr::str_remove("^doi:")
+  doi <- clean_doi(doi)
 
   # Does the path exist?
   if(! file.exists(path)) {
@@ -277,20 +276,11 @@ record_cache_size <- function(path, file_nm){
 #' @keywords internal
 
 resolve_doi_files <- function(doi){
-  # Zenodo dois contain the record id, so no need to resolve them
-  if(stringr::str_detect(doi, stringr::regex("^10\\.5281/zenodo\\.[0-9]+$", ignore_case = TRUE))){
-    landing_url <- paste0("https://zenodo.org/records/", stringr::str_extract(doi, "[0-9]+$"))
-  } else {
-    landing_url <- resolve_doi(doi)
-  }
+  landing_url <- doi_landing_url(doi)
 
   # Zenodo
-  if(stringr::str_detect(landing_url, "zenodo\\.org/")){
-    id <- stringr::str_match(landing_url, "zenodo\\.org/(?:api/)?records?/([0-9]+)")[, 2]
-
-    if(is.na(id)){
-      rlang::abort(paste0("Could not find Zenodo record id for doi '", doi, "'"))
-    }
+  if(is_zenodo(landing_url)){
+    id <- zenodo_id(doi, landing_url)
 
     # Concept record ids redirect to the latest version
     res <- jsonlite::read_json(paste0("https://zenodo.org/api/records/", id),
@@ -311,18 +301,8 @@ resolve_doi_files <- function(doi){
   }
 
   # Figshare
-  if(stringr::str_detect(landing_url, "figshare\\.com/")){
-    # Take the article id and version from the doi itself
-    # (10.6084/m9.figshare.<id>[.v<version>]); the landing url's slug can
-    # contain numbers too, so it is only a fallback.
-    ids <- stringr::str_match(doi, stringr::regex("figshare\\.([0-9]+)(?:\\.v([0-9]+))?/?$", ignore_case = TRUE))
-    if(is.na(ids[, 2])) {
-      ids <- stringr::str_match(landing_url, "/([0-9]+)(?:/([0-9]+))?/?$")
-    }
-
-    if(is.na(ids[, 2])){
-      rlang::abort(paste0("Could not find Figshare article id for doi '", doi, "'"))
-    }
+  if(is_figshare(landing_url)){
+    ids <- figshare_ids(doi, landing_url)
 
     api_url <- paste0("https://api.figshare.com/v2/articles/", ids[, 2])
     if(!is.na(ids[, 3])) {
@@ -350,6 +330,78 @@ resolve_doi_files <- function(doi){
 
   rlang::abort(paste0("doi '", doi, "' resolves to '", landing_url,
                       "', which is not a supported repository (Zenodo, Figshare or a direct .rds link)"))
+}
+
+#' Remove a url or `doi:` prefix from a doi
+#' @noRd
+#' @keywords internal
+
+clean_doi <- function(doi){
+  stringr::str_remove(doi, "^(https?://)?(dx\\.)?doi\\.org/") %>%
+    stringr::str_remove("^doi:")
+}
+
+#' The landing page url of a doi
+#'
+#' Zenodo dois contain the record id, so are not sent to doi.org
+#' @noRd
+#' @keywords internal
+
+doi_landing_url <- function(doi){
+  if(stringr::str_detect(doi, stringr::regex("^10\\.5281/zenodo\\.[0-9]+$", ignore_case = TRUE))){
+    return(paste0("https://zenodo.org/records/", stringr::str_extract(doi, "[0-9]+$")))
+  }
+  resolve_doi(doi)
+}
+
+#' Which repository a landing page url is in
+#' @noRd
+#' @keywords internal
+
+is_zenodo <- function(landing_url){
+  stringr::str_detect(landing_url, "zenodo\\.org/")
+}
+
+#' @rdname is_zenodo
+#' @noRd
+is_figshare <- function(landing_url){
+  stringr::str_detect(landing_url, "figshare\\.com/")
+}
+
+#' The Zenodo record id in a landing page url
+#' @noRd
+#' @keywords internal
+
+zenodo_id <- function(doi, landing_url){
+  id <- stringr::str_match(landing_url, "zenodo\\.org/(?:api/)?records?/([0-9]+)")[, 2]
+
+  if(is.na(id)){
+    rlang::abort(paste0("Could not find Zenodo record id for doi '", doi, "'"))
+  }
+
+  id
+}
+
+#' The Figshare article id and version of a doi
+#'
+#' Taken from the doi itself (`10.6084/m9.figshare.<id>[.v<version>]`); the
+#' landing url's slug can contain numbers too, so it is only a fallback.
+#' @return a one-row character matrix: the match, the article id and the
+#'   version (`NA` if the doi names no version)
+#' @noRd
+#' @keywords internal
+
+figshare_ids <- function(doi, landing_url){
+  ids <- stringr::str_match(doi, stringr::regex("figshare\\.([0-9]+)(?:\\.v([0-9]+))?/?$", ignore_case = TRUE))
+  if(is.na(ids[, 2])) {
+    ids <- stringr::str_match(landing_url, "/([0-9]+)(?:/([0-9]+))?/?$")
+  }
+
+  if(is.na(ids[, 2])){
+    rlang::abort(paste0("Could not find Figshare article id for doi '", doi, "'"))
+  }
+
+  ids
 }
 
 #' Check a file against its md5 checksum
