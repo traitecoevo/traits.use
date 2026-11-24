@@ -2,6 +2,9 @@
 
 ## traits.use (development version)
 
+- [`library(traits.use)`](https://traitecoevo.github.io/traits.use/) no
+  longer prints a message asking to cite the package;
+  `citation("traits.use")` still gives the citation.
 - New function
   [`list_versions()`](https://traitecoevo.github.io/traits.use/reference/list_versions.md)
   lists the releases of a traits.build database on Zenodo or Figshare,
