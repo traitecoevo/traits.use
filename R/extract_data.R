@@ -309,8 +309,8 @@ extract_data <- function(database, table = NA, col, col_value, partial_matches_a
 #' @param col_value values to look for
 #' @param partial_matches_allowed if `TRUE`, each value also matches the
 #'   elements containing it, ignoring case. A value that is itself an element
-#'   of `x`, such as a taxon name with brackets ("Abrotanella sp.
-#'   [White_2020]"), is searched for as plain text, so it finds itself and the
+#'   of `x`, such as a taxon name with brackets (`"Abrotanella sp.
+#'   [White_2020]"`), is searched for as plain text, so it finds itself and the
 #'   names containing it, not what its brackets would match as a regular
 #'   expression (#10). Any other value is a regular expression; one that is not
 #'   valid is searched for as plain text, with a message.

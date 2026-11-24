@@ -78,6 +78,7 @@ austraits <- load_database(doi = "10.5281/zenodo.11188867",
 \dontshow{\}) # examplesIf}
 }
 \seealso{
+\code{\link[=list_versions]{list_versions()}} to find the dois of a database's releases;
 \code{\link[=database_cache_dir]{database_cache_dir()}}; \code{austraits::load_austraits()}, which loads
 a release of AusTraits by version number
 }

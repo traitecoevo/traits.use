@@ -7,9 +7,10 @@
 - **Code:** `R/` (functions), `tests/` (testthat), `man/` (generated docs), `NAMESPACE`,
   `data-raw/` and `inst/` hold raw assets (incl. the cheatsheet); `data/austraits_lite.rda` is the exported example database (24 datasets of AusTraits 7.0.0, used by the examples); `R/sysdata.rda` holds the tests' fixtures: `austraits_5.0.0_lite` (23 datasets of 5.0.0, the main one) and tiny 3.0.2/4.2.0 ones for version checks. Regenerate both with `data-raw/create_data.R`.
 - **Access entry point:** `load_database()` (`R/load_database.R`) loads any traits.build database from its doi
-  (Zenodo, Figshare, or a doi resolving directly to an `.rds`). `flattened = TRUE` loads the flattened table and `means = TRUE` the observed means published with the release (`*-observed-means.csv.gz`); `means_file()` picks that file and `cached_records()` (`R/database_cache.R`) must know every kind of file `load_database()` downloads.
+  (Zenodo, Figshare, or a doi resolving directly to an `.rds`). `flattened = TRUE` loads the flattened table and `means = TRUE` the observed means published with the release (`*-observed-means.csv.gz`); `means_file()` picks that file and `cached_records()` (`R/database_cache.R`) must know every kind of file `load_database()` downloads. `list_versions()` (`R/list_versions.R`) lists a record's releases; it resolves a doi with the same helpers as `load_database()`, at the end of `R/load_database.R`.
 - **AusTraits-specific code lives in `austraits`, not here** (decided 2026-11-14, #13): `load_austraits()`,
-  `get_versions()` / `get_version_latest()`, the AusTraits vignette and the map of Australia. `plot_locations()`
+  `get_versions()` / `get_version_latest()`, the AusTraits vignette and the map of Australia. The generic part of
+  `get_versions()` is `list_versions()` here (#52), which lists the releases of any Zenodo or Figshare record. `plot_locations()`
   draws over a world map cropped to the locations by default (`inst/extdata/world_land.rds`, from
   `data-raw/world_land.R`), and takes a `basemap` data frame so `austraits` can pass its map.
 - **Wrangle/extract:** `extract_*()` (data/dataset/taxa/trait), `join_*()` (taxa, methods,
