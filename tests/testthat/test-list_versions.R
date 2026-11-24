@@ -110,6 +110,18 @@ test_that("list_versions() sorts releases of one day by version", {
   # number last
   expect_equal(list_versions("10.5281/zenodo.1")$version,
                c("v4.0.0", "v3.0.10", "v3.0.2", "v3.0.1", "v3.0.0", "draft"))
+
+  # Equal versions of one day keep the repository's order
+  local_mocked_bindings(
+    read_json = function(url, ...) {
+      if (!grepl("/versions", url)) return(list(hits = list(total = 0, hits = list())))
+      hits <- data.frame(doi = paste0("10.5281/zenodo.", 1:3))
+      hits$metadata <- data.frame(version = c("v1.0.0", "v1.0", "v1.0.0"), publication_date = "2021-07-14")
+      list(hits = list(total = 3, hits = hits))
+    },
+    .package = "jsonlite"
+  )
+  expect_equal(list_versions("10.5281/zenodo.1")$doi, paste0("10.5281/zenodo.", 1:3))
 })
 
 test_that("list_versions() lists Figshare versions", {
