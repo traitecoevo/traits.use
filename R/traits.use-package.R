@@ -5,10 +5,6 @@
 ## quiets concerns of R CMD check re: the .'s that appear in pipelines
 if(getRversion() >= "2.15.1")  utils::globalVariables(c(".", "dplyr::n()"))
 
-.onAttach <- function(libname, pkgname) {
-    cli::cli_inform("Thanks for using `traits.use`! Please consider citing it: citation('traits.use')", class = "packageStartupMessage")
-}
-
 #' @keywords internal
 "_PACKAGE"
 

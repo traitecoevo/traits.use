@@ -1,5 +1,7 @@
 # traits.use (development version)
 
+- `library(traits.use)` no longer prints a message asking to cite the package; `citation("traits.use")` still gives the citation.
+
 # traits.use 0.1.1
 
 - First release as `traits.use`, a generic package for loading and wrangling any traits.build database. The code and history come from the `austraits` package (version 3.1.1 and earlier, listed below), which becomes a thin AusTraits-specific layer over `traits.use` (austraits#188).
