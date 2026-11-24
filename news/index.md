@@ -9,6 +9,11 @@
   data can show the data model a release of traits.use reads before
   AusTraits is released with it
   ([\#13](https://github.com/traitecoevo/traits.use/issues/13)).
+- [`plot_trait_distribution()`](https://traitecoevo.github.io/traits.use/reference/plot_trait_distribution.md)
+  plots a trait of any type but numeric as categorical. A trait of type
+  `monthly_presence`, such as `flowering_time` in databases built with
+  traits.build 3.0.0, used to get a blank plot saying it had no numeric
+  values.
 - [`library(traits.use)`](https://traitecoevo.github.io/traits.use/) no
   longer prints a message asking to cite the package;
   `citation("traits.use")` still gives the citation.

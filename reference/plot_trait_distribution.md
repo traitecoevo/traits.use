@@ -4,7 +4,7 @@ Plots the values of one trait, choosing the plot from the trait's type:
 [`plot_trait_distribution_jitter()`](https://traitecoevo.github.io/traits.use/reference/plot_trait_distribution_jitter.md)
 by family for a numeric trait,
 [`plot_categorical_trait_distribution()`](https://traitecoevo.github.io/traits.use/reference/plot_categorical_trait_distribution.md)
-for a categorical one.
+for any other (categorical, or another type such as `monthly_presence`).
 
 ## Usage
 
