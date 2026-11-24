@@ -52,7 +52,7 @@ table of observed means (tibble)
 \description{
 Loads a traits.build formatted database, given its doi. The doi is resolved to its repository, the
 relational database \code{.rds} file (or with \code{flattened = TRUE}, the flattened
-one) is downloaded (if there is no copy already,
+one, or with \code{means = TRUE}, the observed means published with it) is downloaded (if there is no copy already,
 or if the copy does not match the record's md5 checksum) and then loaded.
 Zenodo and Figshare records are supported, as are dois that resolve directly
 to an \code{.rds} file.
