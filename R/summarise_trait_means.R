@@ -224,6 +224,7 @@ trait_means_dictionary <- function() {
     "sd_log", "Numeric traits: standard deviation of the natural log of the record values used; empty with a single record, or with method arithmetic.",
     "reliability", "Provisional class from the evidence behind the value: high (at least 3 datasets and 10 records), medium (at least 2 datasets or 5 records), low (otherwise). Thresholds are provisional.",
     "dataset_id", "Datasets contributing, sorted, joined by '; '. Each dataset's reference is in the database's sources table under the same key.",
+    "source_id", "References the contributing records were taken from, sorted, joined by '; ': keys of the database's sources table. The same as dataset_id except for a dataset that compiles other studies, whose records name the study they came from. A record without a source_id, as in databases built before traits.build 2.3, counts its dataset as its source.",
     "type", "numerical or categorical.",
     "value_mode", "Categorical traits: the most frequent value; tied values are joined by a space.",
     "value_count", "Categorical traits: each value with the number of records carrying it, as 'value (n)' joined by '; '. A record listing several space-separated values counts once for each.",
@@ -320,7 +321,12 @@ trait_means_input <- function(database, by, call = rlang::caller_env()) {
     ), call = call)
   }
 
+  # The reference each record was taken from. A database built before
+  # traits.build 2.3 has no `source_id`, and a record collected in the
+  # dataset's own study may leave it empty: the dataset is the source then.
+  source_id <- if ("source_id" %in% names(records)) as.character(records$source_id) else rep(NA_character_, nrow(records))
   records <- tibble::as_tibble(as.data.frame(records)[c(trait_means_record_columns, by)])
+  records$source_id <- dplyr::coalesce(source_id, records$dataset_id)
   records$value <- as.character(records$value)
 
   list(records = records, taxa = tibble::as_tibble(as.data.frame(taxa)),
@@ -390,7 +396,7 @@ trait_means_template <- function() {
     value_min = numeric(), value_max = numeric(),
     n_records = integer(), n_locations = integer(), n_datasets = integer(),
     n_flora = integer(), n_field = integer(), sd_log = numeric(),
-    dataset_id = character(), type = character(),
+    dataset_id = character(), source_id = character(), type = character(),
     value_mode = character(), value_count = character()
   )
   template
@@ -433,12 +439,13 @@ trait_means_collapse <- function(x, id, n, sep) {
   out
 }
 
-# The datasets of each group: their number, and their names sorted and joined
-trait_means_datasets <- function(dataset_id, id, n) {
-  pairs <- trait_means_groups(tibble::tibble(id = id, dataset_id = dataset_id))$keys
+# The distinct keys (datasets, sources) of each group: their number, and the
+# keys sorted and joined
+trait_means_keys <- function(key, id, n) {
+  pairs <- trait_means_groups(tibble::tibble(id = id, key = key))$keys
   list(
-    n_datasets = tabulate(pairs$id, n),
-    dataset_id = trait_means_collapse(pairs$dataset_id, pairs$id, n, "; ")
+    n = tabulate(pairs$id, n),
+    keys = trait_means_collapse(pairs$key, pairs$id, n, "; ")
   )
 }
 
@@ -499,7 +506,8 @@ trait_means_numeric <- function(records, by, rules, signed = character()) {
   value_min <- records$value[by_value][!duplicated(ordered_id)]
   value_max <- records$value[by_value][!duplicated(ordered_id, fromLast = TRUE)]
 
-  datasets <- trait_means_datasets(records$dataset_id, taxa$id, taxa$n)
+  datasets <- trait_means_keys(records$dataset_id, taxa$id, taxa$n)
+  sources <- trait_means_keys(records$source_id, taxa$id, taxa$n)
   log_mean <- trait_means_sum(group_log_mean, taxon, taxa$n) / n_groups
   arithmetic_mean <- trait_means_sum(group_mean, taxon, taxa$n) / n_groups
   arithmetic <- taxa$keys$trait_name %in% signed
@@ -515,11 +523,12 @@ trait_means_numeric <- function(records, by, rules, signed = character()) {
       value_max = value_max,
       n_records = n_records,
       n_locations = as.integer(trait_means_sum(!groups$keys$flora, taxon, taxa$n)),
-      n_datasets = datasets$n_datasets,
+      n_datasets = datasets$n,
       n_flora = as.integer(trait_means_sum(flora, taxa$id, taxa$n)),
       n_field = as.integer(trait_means_sum(records$basis_of_record %in% "field", taxa$id, taxa$n)),
       sd_log = ifelse(arithmetic, NA_real_, sd_log),
-      dataset_id = datasets$dataset_id,
+      dataset_id = datasets$keys,
+      source_id = sources$keys,
       type = "numerical"
     )
   )
@@ -552,15 +561,17 @@ trait_means_categorical <- function(records, by) {
   largest[taxon[by_count][!duplicated(taxon[by_count])]] <- n[by_count][!duplicated(taxon[by_count])]
   modal <- n == largest[taxon]
 
-  datasets <- trait_means_datasets(records$dataset_id, taxa$id, taxa$n)
+  datasets <- trait_means_keys(records$dataset_id, taxa$id, taxa$n)
+  sources <- trait_means_keys(records$source_id, taxa$id, taxa$n)
 
   dplyr::bind_cols(
     taxa$keys,
     tibble::tibble(
       n_records = tabulate(taxa$id, taxa$n),
-      n_datasets = datasets$n_datasets,
+      n_datasets = datasets$n,
       n_field = as.integer(trait_means_sum(records$basis_of_record %in% "field", taxa$id, taxa$n)),
-      dataset_id = datasets$dataset_id,
+      dataset_id = datasets$keys,
+      source_id = sources$keys,
       type = "categorical",
       value_mode = trait_means_collapse(value[modal], taxon[modal], taxa$n, " "),
       value_count = trait_means_collapse(paste0(value, " (", n, ")"), taxon, taxa$n, "; ")

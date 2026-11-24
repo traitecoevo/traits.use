@@ -45,6 +45,8 @@ test_that("a numeric value is the geometric mean of location means and flora mid
   expect_equal(means$n_field, 3)
   expect_equal(means$sd_log, sd(log(c(1, 4, 8, 2, 8))))
   expect_equal(means$dataset_id, "D1; D2")
+  # no source_id: each dataset is its own source
+  expect_equal(means$source_id, "D1; D2")
   expect_equal(means$type, "numerical")
   expect_equal(means$estimate_type, "observed_mean")
   expect_equal(means$method, "geometric")
@@ -103,6 +105,28 @@ test_that("a signed trait gets an arithmetic mean of every record", {
   all_means <- summarise_trait_means(database, traits = trait)
   expect_equal(unique(all_means$method), "arithmetic")
   expect_equal(trait_means_signed(database, database$traits), signed)
+})
+
+test_that("source_id lists the references the records were taken from", {
+  records <- dplyr::bind_rows(
+    record("Acacia a", "plant_height", 1, dataset_id = "Compilation_2020"),
+    record("Acacia a", "plant_height", 2, dataset_id = "Compilation_2020", location_id = "02"),
+    record("Acacia a", "plant_height", 4, dataset_id = "Smith_2001"),
+    record("Acacia a", "plant_growth_form", "tree", unit = NA, dataset_id = "Compilation_2020")
+  )
+  # two records name the studies the compilation took them from; the others
+  # have none, so count their dataset
+  records$source_id <- c("Jones_1990", "Brown_1985", NA, "Jones_1990")
+
+  means <- summarise_trait_means(records)
+  expect_equal(means$dataset_id, c("Compilation_2020", "Compilation_2020; Smith_2001"))
+  expect_equal(means$source_id, c("Jones_1990", "Brown_1985; Jones_1990; Smith_2001"))
+  expect_equal(names(means)[match(c("dataset_id", "source_id"), names(means))], c("dataset_id", "source_id"))
+
+  # a database whose records name other sources
+  lite <- summarise_trait_means(austraits_lite)
+  expect_false(anyNA(lite$source_id))
+  expect_true(any(lite$source_id != lite$dataset_id))
 })
 
 test_that("a lone flora bound stands in for the midpoint", {
