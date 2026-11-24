@@ -8,7 +8,7 @@ summarise_trait_means(
   database,
   traits = NULL,
   by = NULL,
-  roll_up = TRUE,
+  collapse_to_species = TRUE,
   value_type_rules = NULL
 )
 }
@@ -24,8 +24,8 @@ warning.}
 trait: columns of the traits table or, when \code{database} is the relational
 database, context properties. The default, \code{NULL}, is none.}
 
-\item{roll_up}{logical: count the records of subspecies, varieties and forms
-towards their species? Default \code{TRUE}.}
+\item{collapse_to_species}{logical: count the records of subspecies,
+varieties and forms towards their species? Default \code{TRUE}.}
 
 \item{value_type_rules}{a data frame with columns \code{dataset_id} and
 \code{value_type}, one row per value type to use from a dataset in place of the
@@ -91,7 +91,7 @@ all happen to be positive is treated as the whole database is.
 \strong{Categorical traits.} A record listing several space-separated values
 counts once for each. \code{value_mode} is the most frequent value, with tied
 values joined by a space, and \code{value_count} lists every value with its
-count.
+count, and \code{method} is \code{"mode"}.
 
 \strong{Months.} A trait that records the months of something, such as
 \code{flowering_time} or \code{fruiting_time}, holds a twelve-letter string of \code{y}
@@ -100,17 +100,17 @@ summarised month by month: \code{value_count} lists each month at least one
 record marks, in calendar order, with the number of records marking it
 (\code{"Sep (2); Oct (5); Nov (5)"}), so the months listed are those any record
 gives; \code{value_mode} is a twelve-letter string marking the months at least
-half the records give. A trait is treated so when its definition's type is
+half the records give, and \code{method} is \code{"majority"}. A trait is treated so when its definition's type is
 \code{monthly_presence}, or when every one of its records is such a string (as
 in releases whose definitions call these traits categorical).
 
-\strong{Taxa.} With \code{roll_up = TRUE}, records of a subspecies, variety or form
+\strong{Taxa.} With \code{collapse_to_species = TRUE}, records of a subspecies, variety or form
 are counted towards their species: the name up to its rank marker
 (\code{subsp.}, \code{var.}, \code{f.}), so that \emph{Mentha x piperita var. citrata} becomes
 \emph{Mentha x piperita}. Hybrid formulae and intergrades, such as \emph{Acacia
 trachycarpa x Acacia tumida var. pilbarensis}, belong to neither parent and
 keep their own rows, as do genus-level names. Names without a rank marker,
-as in zoological trinomials, are not rolled up.
+as in zoological trinomials, are not collapsed.
 
 \strong{Groups.} \code{by} splits each taxon's records further, giving one row per
 taxon, group and trait: by a column of the traits table, such as

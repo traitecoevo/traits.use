@@ -185,6 +185,7 @@ test_that("a categorical trait gets its modal value, with ties joined in sorted 
   expect_equal(a$value_count, "herb (1); shrub (2); tree (2)")
   expect_equal(a$n_records, 4)
   expect_equal(a$type, "categorical")
+  expect_equal(a$method, "mode")
   expect_true(is.na(a$value))
 
   b <- means[means$taxon_name == "Acacia b", ]
@@ -220,6 +221,7 @@ test_that("a trait recording months is summarised month by month", {
   # the months at least half the records mark: Jan, Feb, Oct, Nov, Dec
   expect_equal(means$value_mode, "yynnnnnnnyyy")
   expect_equal(means$type, "categorical")
+  expect_equal(means$method, "majority")
 
   # with two records, a month either marks is at least half
   two <- summarise_trait_means(records[c(4, 5), ])
@@ -261,7 +263,7 @@ test_that("subspecies, varieties and forms are rolled up to their species", {
   expect_equal(means$taxon_id, c("id-Acacia", "id-Acacia a", NA))
   expect_equal(means$genus, c("Acacia", "Acacia", "Acacia"))
 
-  kept <- summarise_trait_means(records, roll_up = FALSE)
+  kept <- summarise_trait_means(records, collapse_to_species = FALSE)
   expect_equal(kept$taxon_name, c("Acacia", "Acacia a", "Acacia a subsp. x", "Acacia d var. y"))
   expect_equal(kept$taxon_rank, c("genus", "species", "subspecies", "variety"))
 })
@@ -278,12 +280,12 @@ test_that("hybrids roll up to the nothospecies, and hybrid formulae not at all",
     "Agrilus (Agrilus) assimilis assimilis"
   )
   ranks <- c("variety", "variety", "variety", "subspecies", "variety", "subspecies")
-  expect_equal(trait_means_roll_up(names, ranks), c("Mentha x piperita", names[-1]))
+  expect_equal(trait_means_species(names, ranks), c("Mentha x piperita", names[-1]))
 
   # a name the taxonomy does not rank infraspecific stays as it is, unless the
   # taxonomy is unknown, when the name alone decides
-  expect_equal(trait_means_roll_up("Acacia a subsp. x", NA), "Acacia a subsp. x")
-  expect_equal(trait_means_roll_up("Acacia a subsp. x"), "Acacia a")
+  expect_equal(trait_means_species("Acacia a subsp. x", NA), "Acacia a subsp. x")
+  expect_equal(trait_means_species("Acacia a subsp. x"), "Acacia a")
 })
 
 test_that("a species takes from its subspecies what its own taxa row lacks", {
@@ -316,7 +318,7 @@ test_that("a record without a taxon name is not given a rank", {
   records$genus[2] <- NA
   means <- summarise_trait_means(records)
   expect_equal(means$taxon_rank, c("species", NA))
-  expect_equal(trait_means_roll_up(c("Acacia a subsp. b", NA)), c("Acacia a", NA))
+  expect_equal(trait_means_species(c("Acacia a subsp. b", NA)), c("Acacia a", NA))
 })
 
 test_that("`by` gives a row per group, with missing values a group of their own", {
@@ -394,8 +396,8 @@ test_that("a database, its flattened table and its traits table give the same me
   # a traits table carries no taxonomy: the same values, without the taxon
   # columns, rolled up by name alone; as a tibble or a plain data frame
   from_traits <- summarise_trait_means(database$traits)
-  expect_equal(summarise_trait_means(as.data.frame(database$traits), roll_up = FALSE),
-               summarise_trait_means(database$traits, roll_up = FALSE))
+  expect_equal(summarise_trait_means(as.data.frame(database$traits), collapse_to_species = FALSE),
+               summarise_trait_means(database$traits, collapse_to_species = FALSE))
   expect_equal(names(from_traits), setdiff(names(means), c("taxon_rank", "genus", "family", "establishment_means", "taxon_id")))
   by_rank <- summarise_trait_means(database, traits = "leaf_length")
   by_name <- summarise_trait_means(database$traits, traits = "leaf_length")
@@ -408,7 +410,7 @@ test_that("a database, its flattened table and its traits table give the same me
 
 test_that("the summary agrees with a group-by-group calculation", {
   database <- austraits_lite
-  means <- summarise_trait_means(database, traits = "leaf_length", roll_up = FALSE)
+  means <- summarise_trait_means(database, traits = "leaf_length", collapse_to_species = FALSE)
 
   records <- database$traits |>
     dplyr::filter(trait_name == "leaf_length") |>

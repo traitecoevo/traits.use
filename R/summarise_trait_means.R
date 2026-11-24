@@ -48,7 +48,7 @@
 #' **Categorical traits.** A record listing several space-separated values
 #' counts once for each. `value_mode` is the most frequent value, with tied
 #' values joined by a space, and `value_count` lists every value with its
-#' count.
+#' count, and `method` is `"mode"`.
 #'
 #' **Months.** A trait that records the months of something, such as
 #' `flowering_time` or `fruiting_time`, holds a twelve-letter string of `y`
@@ -57,17 +57,17 @@
 #' record marks, in calendar order, with the number of records marking it
 #' (`"Sep (2); Oct (5); Nov (5)"`), so the months listed are those any record
 #' gives; `value_mode` is a twelve-letter string marking the months at least
-#' half the records give. A trait is treated so when its definition's type is
+#' half the records give, and `method` is `"majority"`. A trait is treated so when its definition's type is
 #' `monthly_presence`, or when every one of its records is such a string (as
 #' in releases whose definitions call these traits categorical).
 #'
-#' **Taxa.** With `roll_up = TRUE`, records of a subspecies, variety or form
+#' **Taxa.** With `collapse_to_species = TRUE`, records of a subspecies, variety or form
 #' are counted towards their species: the name up to its rank marker
 #' (`subsp.`, `var.`, `f.`), so that *Mentha x piperita var. citrata* becomes
 #' *Mentha x piperita*. Hybrid formulae and intergrades, such as *Acacia
 #' trachycarpa x Acacia tumida var. pilbarensis*, belong to neither parent and
 #' keep their own rows, as do genus-level names. Names without a rank marker,
-#' as in zoological trinomials, are not rolled up.
+#' as in zoological trinomials, are not collapsed.
 #'
 #' **Groups.** `by` splits each taxon's records further, giving one row per
 #' taxon, group and trait: by a column of the traits table, such as
@@ -92,8 +92,8 @@
 #' @param by names of further variables to group by, as well as taxon and
 #'   trait: columns of the traits table or, when `database` is the relational
 #'   database, context properties. The default, `NULL`, is none.
-#' @param roll_up logical: count the records of subspecies, varieties and forms
-#'   towards their species? Default `TRUE`.
+#' @param collapse_to_species logical: count the records of subspecies,
+#'   varieties and forms towards their species? Default `TRUE`.
 #' @param value_type_rules a data frame with columns `dataset_id` and
 #'   `value_type`, one row per value type to use from a dataset in place of the
 #'   default raw, mean and median, for a dataset that reports numeric values
@@ -122,7 +122,7 @@
 summarise_trait_means <- function(database,
                                   traits = NULL,
                                   by = NULL,
-                                  roll_up = TRUE,
+                                  collapse_to_species = TRUE,
                                   value_type_rules = NULL) {
 
   if (!check_compatibility(database, single_table_allowed = TRUE)) {
@@ -150,14 +150,14 @@ summarise_trait_means <- function(database,
     records <- records[records$trait_name %in% traits, ]
   }
 
-  # Roll infraspecific names up to their species
+  # Count infraspecific names towards their species
   details <- taxa
-  if (isTRUE(roll_up)) {
+  if (isTRUE(collapse_to_species)) {
     # Over every name the taxa table has, not only those of the traits asked
     # for, so a species' details do not depend on which traits are summarised
     names_in <- unique(c(taxa$taxon_name, records$taxon_name))
     rank <- if ("taxon_rank" %in% names(taxa)) taxa$taxon_rank[match(names_in, taxa$taxon_name)]
-    species <- trait_means_roll_up(names_in, rank)
+    species <- trait_means_species(names_in, rank)
     rolled <- (species != names_in) %in% TRUE
     records$taxon_name <- species[match(records$taxon_name, names_in)]
 
@@ -191,7 +191,7 @@ summarise_trait_means <- function(database,
     means[[variable]] <- rep(records[[variable]][NA_integer_], nrow(means))
   }
   means$estimate_type <- rep("observed_mean", nrow(means))
-  means$method[is.na(means$method)] <- "geometric"
+  means$method[is.na(means$method)] <- "mode"
   means$reliability <- trait_means_reliability(means$n_datasets, means$n_records)
 
   means <- dplyr::left_join(means, details, by = "taxon_name")
@@ -216,11 +216,11 @@ summarise_trait_means <- function(database,
 trait_means_dictionary <- function() {
   tibble::tribble(
     ~column, ~definition,
-    "taxon_name", "Taxon name as aligned in the database, with subspecies, varieties and forms rolled up to their species unless roll_up = FALSE. Genus-level names and hybrid formulae are kept as their own rows.",
+    "taxon_name", "Taxon name as aligned in the database, with subspecies, varieties and forms collapsed to their species unless collapse_to_species = FALSE. Genus-level names and hybrid formulae are kept as their own rows.",
     "trait_name", "Trait name.",
     "unit", "Unit of the numeric trait values; empty for categorical traits.",
     "estimate_type", "Always observed_mean: computed directly from the records, with no model.",
-    "method", "geometric for a trait on a positive scale; arithmetic for a trait on a signed scale, whose definition allows values below zero (a water potential, a temperature, an isotope ratio), for which a geometric mean does not exist.",
+    "method", "How value or value_mode was found. Numeric traits: geometric for a trait on a positive scale; arithmetic for a trait on a signed scale, whose definition allows values below zero (a water potential, a temperature, an isotope ratio), for which a geometric mean does not exist. Categorical traits: mode, the most frequent value; majority for a trait recording months, the months at least half the records mark.",
     "value", "Numeric traits: the observed mean. With method geometric, a geometric mean: records are averaged on the log scale within each dataset x location, flora minimum and maximum bounds give a geometric midpoint per observation, and the value is exp(mean) over those groups, each group counting once; records with zero or negative values are not used. With method arithmetic, the arithmetic mean over the same groups, using every record.",
     "log_value", "Natural log of value; empty with method arithmetic.",
     "arithmetic_mean", "Arithmetic mean over the same groups and records (each group's arithmetic mean or midpoint, then their mean). With method geometric it is not the observed mean and is given for comparison; with method arithmetic it equals value.",
@@ -395,7 +395,7 @@ trait_means_check_rules <- function(rules, call = rlang::caller_env()) {
 # variety or form that is not a hybrid formula or intergrade ("A x B var. c",
 # "A - B subsp. c"). `rank` is `NULL` when the taxonomy is not known, and the
 # name alone then decides.
-trait_means_roll_up <- function(taxon_name, rank = NULL) {
+trait_means_species <- function(taxon_name, rank = NULL) {
   rank_marker <- "\\s(subsp|var|f|forma|nothosubsp|nothovar)\\.\\s.*$"
   hybrid_formula <- "\\s(x|-)\\s[A-Z]"
 
@@ -652,6 +652,7 @@ trait_means_months <- function(records, by) {
       dataset_id = datasets$keys,
       source_id = sources$keys,
       type = "categorical",
+      method = "majority",
       value_mode = do.call(paste0, as.data.frame(majority)),
       value_count = apply(listed, 1, function(x) {
         x <- x[!is.na(x)]
