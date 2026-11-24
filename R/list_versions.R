@@ -60,7 +60,8 @@ list_versions <- function(doi){
 rank_versions <- function(v){
   out <- rep(NA_real_, length(v))
   ok <- !is.na(v)
-  out[ok] <- rank(v[ok], ties.method = "first")
+  # Equal versions share a rank, so order() keeps their repository order
+  out[ok] <- rank(v[ok], ties.method = "min")
   out
 }
 
