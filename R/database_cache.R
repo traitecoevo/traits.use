@@ -173,13 +173,14 @@ cached_records <- function(path) {
       if(!is.list(record) || !is.data.frame(record$files) || is.null(record$files$key)) {
         return(NULL)
       }
-      # Only the files load_database() downloads (relational and flattened);
-      # NA for a record it refused
+      # Only the files load_database() downloads (relational, flattened and
+      # observed means); NA for a record it refused
       pick <- function(flattened) {
         tryCatch(basename(database_file(record$files, json, flattened = flattened)$key),
                  error = function(e) NA_character_)
       }
-      keys <- c(pick(FALSE), pick(TRUE))
+      means <- tryCatch(basename(means_file(record$files, json)$key), error = function(e) NA_character_)
+      keys <- c(pick(FALSE), pick(TRUE), means)
       keys <- if (all(is.na(keys))) NA_character_ else keys[!is.na(keys)]
       data.frame(json = json, file = keys)
     }, error = function(e) NULL)

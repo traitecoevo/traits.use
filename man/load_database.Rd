@@ -4,7 +4,13 @@
 \alias{load_database}
 \title{Load any traits.build database into R console}
 \usage{
-load_database(doi = NULL, path = NULL, update = TRUE, flattened = FALSE)
+load_database(
+  doi = NULL,
+  path = NULL,
+  update = TRUE,
+  flattened = FALSE,
+  means = FALSE
+)
 }
 \arguments{
 \item{doi}{character string - doi of the database, e.g. "10.5281/zenodo.11188867".
@@ -29,10 +35,19 @@ AusTraits from 7.0.0 include it. Its reference columns follow the
 \code{source_primary_citation}, not \code{dataset_id_citation}).
 It is several times larger than the relational database (AusTraits 7.0.0:
 a 77 MB download, about 1 GB once loaded).}
+
+\item{means}{if \code{TRUE}, load the record's observed means instead: one row
+per taxon and trait, made with \code{\link[=summarise_trait_means]{summarise_trait_means()}} when the release
+was built and published beside it as \verb{<name>-<version>-observed-means.csv.gz}.
+Releases of AusTraits after 7.0.0 include it. The file is much smaller
+than the database (AusTraits: about 15 MB). To have both, load each; the
+second call reuses the record fetched by the first. \code{\link[=trait_means_dictionary]{trait_means_dictionary()}}
+defines the columns.}
 }
 \value{
 a large list containing traits.build data tables, or with
-\code{flattened = TRUE}, a single table (tibble)
+\code{flattened = TRUE}, a single table (tibble), or with \code{means = TRUE}, the
+table of observed means (tibble)
 }
 \description{
 Loads a traits.build formatted database, given its doi. The doi is resolved to its repository, the
@@ -53,6 +68,9 @@ and delete what is there.
 # first time, then loads it from the cache. To try the package without
 # downloading anything, see ?austraits_lite.
 austraits <- load_database(doi = "10.5281/zenodo.11188867")
+
+# The observed means of each taxon and trait, published with the release
+means <- load_database(doi = "10.5281/zenodo.11188867", means = TRUE)
 
 # Keeping a copy in a folder of your choice instead, here a temporary one
 austraits <- load_database(doi = "10.5281/zenodo.11188867",

@@ -445,3 +445,59 @@ test_that("The cache folder follows R_user_dir() unless the option is set", {
   withr::local_options(traits.use.cache_dir = c("a", "b"))
   expect_error(database_cache_dir(), "single folder path")
 })
+
+test_that("means = TRUE loads the observed means published with a release", {
+  skip_if_not_installed("readr")
+  src <- tempfile("meanssrc"); path_means <- tempfile("means")
+  on.exit(unlink(c(src, path_means), recursive = TRUE), add = TRUE)
+  dir.create(src)
+
+  # A release as AusTraits publishes it: the database, and its means as csv.gz
+  # and parquet, with a dictionary
+  database <- extract_dataset(austraits_lite, c("Falster_2003", "Falster_2005_1"))
+  published <- summarise_trait_means(database, by = "life_stage")
+  saveRDS(database, file.path(src, "db-1.0.0.rds"))
+  readr::write_csv(published, file.path(src, "db-1.0.0-observed-means.csv.gz"), na = "")
+  writeLines("not read", file.path(src, "db-1.0.0-observed-means.parquet"))
+  readr::write_csv(trait_means_dictionary(), file.path(src, "db-1.0.0-observed-means-dictionary.csv"))
+  keys <- dir(src)
+  files <- data.frame(key = keys, url = vapply(file.path(src, keys), file_url, ""),
+                      md5 = unname(tools::md5sum(file.path(src, keys))))
+  local_mocked_bindings(
+    resolve_doi_files = function(doi) list(doi = doi, source = "zenodo", version = "1.0.0", files = files)
+  )
+
+  means <- suppressMessages(load_database(doi = "10.5281/zenodo.9", path = path_means, means = TRUE))
+  # the same table, with the same column types, the `by` column as text
+  expect_equal(as.data.frame(means), as.data.frame(published))
+  expect_type(means$n_records, "integer")
+  expect_type(means$value, "double")
+  expect_type(means$life_stage, "character")
+
+  # only the means were downloaded, then the database beside them on request
+  expect_equal(dir(path_means, pattern = "csv|rds|parquet"), "db-1.0.0-observed-means.csv.gz")
+  database_again <- suppressMessages(load_database(doi = "10.5281/zenodo.9", path = path_means, update = FALSE))
+  expect_equal(nrow(database_again$traits), nrow(database$traits))
+  expect_setequal(list_cached_databases(path_means)$file, c("db-1.0.0.rds", "db-1.0.0-observed-means.csv.gz"))
+
+  # the extract_*() functions take the means table, as a flat table
+  acacia <- extract_taxa(means, genus = "Acacia")
+  expect_gt(nrow(acacia), 0)
+  expect_true(all(acacia$genus == "Acacia"))
+  expect_equal(unique(extract_trait(means, "leaf_area")$trait_name), "leaf_area")
+
+  expect_error(load_database(doi = "10.5281/zenodo.9", path = path_means, means = TRUE, flattened = TRUE),
+               "Choose one")
+  expect_error(load_database(doi = "10.5281/zenodo.9", path = path_means, means = NA), "TRUE or FALSE")
+})
+
+test_that("a release without observed means says so", {
+  path_none <- tempfile("none")
+  on.exit(unlink(path_none, recursive = TRUE), add = TRUE)
+  local_mocked_bindings(
+    resolve_doi_files = function(doi) list(doi = doi, source = "zenodo", version = "1",
+      files = data.frame(key = "db-1.rds", url = "file:///nonexistent/db-1.rds", md5 = NA))
+  )
+  expect_error(suppressMessages(load_database(doi = "10.5281/zenodo.9", path = path_none, means = TRUE)),
+               "No observed means")
+})
