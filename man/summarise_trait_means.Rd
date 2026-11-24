@@ -91,8 +91,18 @@ all happen to be positive is treated as the whole database is.
 \strong{Categorical traits.} A record listing several space-separated values
 counts once for each. \code{value_mode} is the most frequent value, with tied
 values joined by a space, and \code{value_count} lists every value with its
-count. Traits recorded as one string per record, such as a \code{flowering_time}
-of twelve letters, one per month, are summarised as whole strings.
+count.
+
+\strong{Months.} A trait that records the months of something, such as
+\code{flowering_time} or \code{fruiting_time}, holds a twelve-letter string of \code{y}
+and \code{n} per record, one letter per month from January. Its records are
+summarised month by month: \code{value_count} lists each month at least one
+record marks, in calendar order, with the number of records marking it
+(\code{"Sep (2); Oct (5); Nov (5)"}), so the months listed are those any record
+gives; \code{value_mode} is a twelve-letter string marking the months at least
+half the records give. A trait is treated so when its definition's type is
+\code{monthly_presence}, or when every one of its records is such a string (as
+in releases whose definitions call these traits categorical).
 
 \strong{Taxa.} With \code{roll_up = TRUE}, records of a subspecies, variety or form
 are counted towards their species: the name up to its rank marker

@@ -48,8 +48,18 @@
 #' **Categorical traits.** A record listing several space-separated values
 #' counts once for each. `value_mode` is the most frequent value, with tied
 #' values joined by a space, and `value_count` lists every value with its
-#' count. Traits recorded as one string per record, such as a `flowering_time`
-#' of twelve letters, one per month, are summarised as whole strings.
+#' count.
+#'
+#' **Months.** A trait that records the months of something, such as
+#' `flowering_time` or `fruiting_time`, holds a twelve-letter string of `y`
+#' and `n` per record, one letter per month from January. Its records are
+#' summarised month by month: `value_count` lists each month at least one
+#' record marks, in calendar order, with the number of records marking it
+#' (`"Sep (2); Oct (5); Nov (5)"`), so the months listed are those any record
+#' gives; `value_mode` is a twelve-letter string marking the months at least
+#' half the records give. A trait is treated so when its definition's type is
+#' `monthly_presence`, or when every one of its records is such a string (as
+#' in releases whose definitions call these traits categorical).
 #'
 #' **Taxa.** With `roll_up = TRUE`, records of a subspecies, variety or form
 #' are counted towards their species: the name up to its rank marker
@@ -169,7 +179,7 @@ summarise_trait_means <- function(database,
   details <- details[!duplicated(details$taxon_name), ]
 
   numeric <- trait_means_numeric(records[!is.na(records$unit), ], by, value_type_rules, input$signed)
-  categorical <- trait_means_categorical(records[is.na(records$unit), ], by)
+  categorical <- trait_means_categorical(records[is.na(records$unit), ], by, input$monthly)
 
   taxon_columns <- setdiff(names(details), "taxon_name")
   columns <- trait_means_dictionary()$column
@@ -226,8 +236,8 @@ trait_means_dictionary <- function() {
     "dataset_id", "Datasets contributing, sorted, joined by '; '. Each dataset's reference is in the database's sources table under the same key.",
     "source_id", "References the contributing records were taken from, sorted, joined by '; ': keys of the database's sources table. The same as dataset_id except for a dataset that compiles other studies, whose records name the study they came from. A record without a source_id, as in databases built before traits.build 2.3, counts its dataset as its source.",
     "type", "numerical or categorical.",
-    "value_mode", "Categorical traits: the most frequent value; tied values are joined by a space.",
-    "value_count", "Categorical traits: each value with the number of records carrying it, as 'value (n)' joined by '; '. A record listing several space-separated values counts once for each.",
+    "value_mode", "Categorical traits: the most frequent value; tied values are joined by a space. For a trait recording months (a twelve-letter y/n string per record, as flowering_time), a twelve-letter string marking the months at least half the records mark.",
+    "value_count", "Categorical traits: each value with the number of records carrying it, as 'value (n)' joined by '; '. A record listing several space-separated values counts once for each. For a trait recording months, each month at least one record marks, in calendar order, with the number of records marking it, as 'Jan (n)'.",
     "taxon_rank", "Taxonomic rank of taxon_name; empty for a name the database's taxonomy does not rank.",
     "genus", "Genus.",
     "family", "Family.",
@@ -330,7 +340,27 @@ trait_means_input <- function(database, by, call = rlang::caller_env()) {
   records$value <- as.character(records$value)
 
   list(records = records, taxa = tibble::as_tibble(as.data.frame(taxa)),
-       signed = trait_means_signed(database, records))
+       signed = trait_means_signed(database, records),
+       monthly = trait_means_monthly(database, records))
+}
+
+# Traits recording months, as a twelve-letter y/n string per record: those
+# whose definition's type is `monthly_presence`, and those whose records are
+# all such strings (older definitions call them categorical, and a flat table
+# carries none)
+trait_means_monthly <- function(database, records) {
+  by_definition <- character()
+  if (!is_flat(database) && length(database$definitions) > 0) {
+    type <- vapply(database$definitions, function(definition) {
+      x <- definition$type
+      if (is.character(x) && length(x) == 1) x else NA_character_
+    }, character(1))
+    by_definition <- names(type)[type %in% "monthly_presence"]
+  }
+  categorical <- records[is.na(records$unit) & !is.na(records$value), ]
+  months <- grepl("^[yn]{12}$", categorical$value)
+  all_months <- tapply(months, categorical$trait_name, all)
+  union(by_definition, names(all_months)[all_months %in% TRUE])
 }
 
 # Traits on a signed scale, which get an arithmetic mean: those whose
@@ -534,10 +564,18 @@ trait_means_numeric <- function(records, by, rules, signed = character()) {
   )
 }
 
-trait_means_categorical <- function(records, by) {
+trait_means_categorical <- function(records, by, monthly = character()) {
 
   if (nrow(records) == 0) {
     return(NULL)
+  }
+
+  month_traits <- records$trait_name %in% monthly
+  if (any(month_traits)) {
+    return(dplyr::bind_rows(
+      trait_means_months(records[month_traits, ], by),
+      trait_means_categorical(records[!month_traits, ], by)
+    ))
   }
 
   taxa <- trait_means_groups(records[c("taxon_name", by, "trait_name")])
@@ -578,3 +616,48 @@ trait_means_categorical <- function(records, by) {
     )
   )
 }
+
+# Month traits: per taxon, the number of records marking each month, and the
+# months at least half of them mark. Records that are not a twelve-letter y/n
+# string are left out.
+trait_means_months <- function(records, by) {
+
+  records <- records[grepl("^[yn]{12}$", records$value), ]
+  if (nrow(records) == 0) {
+    return(NULL)
+  }
+
+  taxa <- trait_means_groups(records[c("taxon_name", by, "trait_name")])
+  n_records <- tabulate(taxa$id, taxa$n)
+
+  # Records marking each month, one column per month
+  counts <- vapply(seq_len(12), function(month) {
+    trait_means_sum(substr(records$value, month, month) == "y", taxa$id, taxa$n)
+  }, numeric(taxa$n))
+  counts <- matrix(counts, nrow = taxa$n)
+
+  majority <- matrix(ifelse(2 * counts >= n_records, "y", "n"), nrow = taxa$n)
+  listed <- matrix(ifelse(counts > 0, paste0(month.abb[col(counts)], " (", counts, ")"), NA_character_),
+                   nrow = taxa$n)
+
+  datasets <- trait_means_keys(records$dataset_id, taxa$id, taxa$n)
+  sources <- trait_means_keys(records$source_id, taxa$id, taxa$n)
+
+  dplyr::bind_cols(
+    taxa$keys,
+    tibble::tibble(
+      n_records = n_records,
+      n_datasets = datasets$n,
+      n_field = as.integer(trait_means_sum(records$basis_of_record %in% "field", taxa$id, taxa$n)),
+      dataset_id = datasets$keys,
+      source_id = sources$keys,
+      type = "categorical",
+      value_mode = do.call(paste0, as.data.frame(majority)),
+      value_count = apply(listed, 1, function(x) {
+        x <- x[!is.na(x)]
+        if (length(x) == 0) NA_character_ else paste(x, collapse = "; ")
+      })
+    )
+  )
+}
+

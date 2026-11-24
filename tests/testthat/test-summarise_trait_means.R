@@ -202,6 +202,48 @@ test_that("a categorical trait gets its modal value, with ties joined in sorted 
   expect_equal(repeated$value_count, "shrub (2); tree (1)")
 })
 
+test_that("a trait recording months is summarised month by month", {
+  records <- record("Banksia a", "flowering_time", unit = NA, value = c(
+    "yynnnnnnnyyy",   # Oct to Feb
+    "yynnnnnnnyyy",
+    "yynnnnnnnyyy",
+    "nnnnnnnnnnyy",   # Nov, Dec
+    "ynnnnnnyyyyy",   # Aug to Jan
+    "yynnnnnnnnny"    # Dec to Feb
+  ))
+  means <- summarise_trait_means(records)
+
+  expect_equal(means$n_records, 6)
+  # every month a record marks, with its count, in calendar order
+  expect_equal(means$value_count,
+               "Jan (5); Feb (4); Aug (1); Sep (1); Oct (4); Nov (5); Dec (6)")
+  # the months at least half the records mark: Jan, Feb, Oct, Nov, Dec
+  expect_equal(means$value_mode, "yynnnnnnnyyy")
+  expect_equal(means$type, "categorical")
+
+  # with two records, a month either marks is at least half
+  two <- summarise_trait_means(records[c(4, 5), ])
+  expect_equal(two$value_mode, "ynnnnnnyyyyy")
+
+  # a record that is not a month string is left out
+  odd <- summarise_trait_means(dplyr::bind_rows(records[1, ], record("Banksia a", "flowering_time", "spring", unit = NA)))
+  expect_equal(odd$value_count, "spring (1); yynnnnnnnyyy (1)")
+})
+
+test_that("months are recognised by definition, or by every record being a month string", {
+  database <- austraits_lite
+  months <- summarise_trait_means(database, traits = "flowering_time")
+  # AusTraits 7.0.0 defines flowering_time as categorical; its records decide
+  expect_equal(database$definitions$flowering_time$type, "categorical")
+  expect_true(all(grepl("^[yn]{12}$", months$value_mode)))
+  expect_true(all(grepl("^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \\(", months$value_count)))
+
+  # a definition of type monthly_presence decides on its own
+  database$definitions$flowering_time$type <- "monthly_presence"
+  expect_true("flowering_time" %in% trait_means_monthly(database, database$traits))
+  expect_false("leaf_phenology" %in% trait_means_monthly(database, database$traits))
+})
+
 test_that("subspecies, varieties and forms are rolled up to their species", {
   records <- dplyr::bind_rows(
     record("Acacia a", "plant_height", 2),
