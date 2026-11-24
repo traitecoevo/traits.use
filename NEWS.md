@@ -1,5 +1,6 @@
 # traits.use (development version)
 
+- `library(traits.use)` no longer prints a message asking to cite the package; `citation("traits.use")` still gives the citation.
 - New function `list_versions()` lists the releases of a traits.build database on Zenodo or Figshare, given any of its dois, with each release's version, doi and publication date, newest first (#52). Pass a release's doi to `load_database()` to load it. Before, only AusTraits' releases could be listed, with `austraits::get_versions()`.
 
 # traits.use 0.1.1
