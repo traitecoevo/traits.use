@@ -22,13 +22,13 @@ Source:
 
 Wenk, E., Kar, F., Falster, D. and Indiarto, D. (2026) traits.use:
 Access and Wrangle Data from 'traits.build' Trait Databases. R package
-version 0.1.1. https://github.com/traitecoevo/traits.use
+version 0.1.1.9000. https://github.com/traitecoevo/traits.use
 
     @Manual{,
       title = {traits.use: Access and Wrangle Data from 'traits.build' Trait Databases},
       author = {Elizabeth Wenk and Fonti Kar and Daniel Falster and Dony Indiarto},
       year = {2026},
-      note = {R package version 0.1.1},
+      note = {R package version 0.1.1.9000},
       url = {https://github.com/traitecoevo/traits.use},
     }
 

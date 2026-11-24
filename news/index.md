@@ -1,5 +1,7 @@
 # Changelog
 
+## traits.use (development version)
+
 ## traits.use 0.1.1
 
 - First release as `traits.use`, a generic package for loading and
