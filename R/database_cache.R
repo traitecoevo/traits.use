@@ -25,12 +25,13 @@
 #' To keep a copy of a database with a project instead, give
 #' [load_database()] a `path`; the functions here take the same `path`. They
 #' only ever touch the files [load_database()] wrote there: the database
-#' `.rds` files (relational or flattened) named in its record files
-#' (`10.*.json`, one per doi).
+#' `.rds` files (relational or flattened) and the observed means
+#' (`*-observed-means.csv.gz`) named in its record files (`10.*.json`, one per
+#' doi).
 #'
 #' @param path folder to list or clear; the cache folder by default.
-#' @param files names of the database `.rds` files to delete, as listed by
-#'   `list_cached_databases()`.
+#' @param files names of the files to delete (database `.rds` files or
+#'   observed means), as listed by `list_cached_databases()`.
 #' @param older_than delete the databases not used (loaded from the cache) for
 #'   this many days. In a folder given as `path`, or where the cache cannot be
 #'   written to, this is days since the file was downloaded.
@@ -157,8 +158,9 @@ clear_database_cache <- function(files = NULL, path = database_cache_dir(),
 #' The record files load_database() wrote in a folder, and the files they name
 #'
 #' @return data frame with columns `json` (record file name) and `file` (the
-#'   database `.rds` load_database() downloads for that record, existing or
-#'   not; `NA` for a record it refused)
+#'   files load_database() downloads for that record, the database `.rds`
+#'   files and the observed means, existing or not; `NA` for a record it
+#'   refused)
 #' @noRd
 #' @keywords internal
 
@@ -173,13 +175,14 @@ cached_records <- function(path) {
       if(!is.list(record) || !is.data.frame(record$files) || is.null(record$files$key)) {
         return(NULL)
       }
-      # Only the files load_database() downloads (relational and flattened);
-      # NA for a record it refused
+      # Only the files load_database() downloads (relational, flattened and
+      # observed means); NA for a record it refused
       pick <- function(flattened) {
         tryCatch(basename(database_file(record$files, json, flattened = flattened)$key),
                  error = function(e) NA_character_)
       }
-      keys <- c(pick(FALSE), pick(TRUE))
+      means <- tryCatch(basename(means_file(record$files, json)$key), error = function(e) NA_character_)
+      keys <- c(pick(FALSE), pick(TRUE), means)
       keys <- if (all(is.na(keys))) NA_character_ else keys[!is.na(keys)]
       data.frame(json = json, file = keys)
     }, error = function(e) NULL)

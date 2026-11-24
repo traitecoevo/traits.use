@@ -22,6 +22,12 @@ reference:
   - starts_with("lookup_")
   - traits_build_sources
 
+- title: Summarise traits by taxon
+  desc: One value per taxon and trait, from the records
+- contents:
+  - summarise_trait_means
+  - trait_means_dictionary
+
 - title: Filter from the database
 - contents:
   - starts_with("extract")
