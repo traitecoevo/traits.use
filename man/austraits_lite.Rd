@@ -12,8 +12,8 @@ database: \code{traits} (87,001 values of 151 traits for 7,259 taxa),
 \code{metadata} and \code{build_info}. Every observation names the reference it
 was taken from in \code{source_id} (3,294 name another study than their
 dataset), and the \code{methods} table has the reference columns
-\code{dataset_id_citation}, \code{secondary_id} and \code{secondary_citation} (see
-\code{\link[=join_sources]{join_sources()}}).
+\code{dataset_id_type}, \code{dataset_id_citation}, \code{secondary_id} and
+\code{secondary_citation} (see \code{\link[=join_sources]{join_sources()}}).
 }
 \source{
 AusTraits, \doi{10.5281/zenodo.3568417}, whose compiled database is
