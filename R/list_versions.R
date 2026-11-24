@@ -42,11 +42,26 @@ list_versions <- function(doi){
                         "'. Only Zenodo and Figshare records have versions to list."))
   }
 
-  # Newest first; arrange() keeps the repository's order for releases
-  # published on the same day (AusTraits 3.0.0 to 3.0.2)
-  versions |>
-    dplyr::mutate(publication_date = as.Date(.data$publication_date)) |>
-    dplyr::arrange(dplyr::desc(.data$publication_date))
+  # Newest first: by publication date, then by version for releases published
+  # on the same day (AusTraits 3.0.0 to 3.0.2). A version that is not a
+  # number (after any "v") goes after those that are; order() then keeps
+  # the repository's order.
+  versions <- dplyr::mutate(versions, publication_date = as.Date(.data$publication_date))
+  version_number <- numeric_version(sub("^[vV]", "", versions$version), strict = FALSE)
+  versions[order(-as.numeric(versions$publication_date), -rank_versions(version_number), na.last = TRUE), , drop = FALSE]
+}
+
+#' Rank versions, NA for those that are not version numbers
+#'
+#' @param v a `numeric_version` vector, with NA elements
+#' @noRd
+#' @keywords internal
+
+rank_versions <- function(v){
+  out <- rep(NA_real_, length(v))
+  ok <- !is.na(v)
+  out[ok] <- rank(v[ok], ties.method = "first")
+  out
 }
 
 #' The releases of a Zenodo record
@@ -57,19 +72,29 @@ list_versions <- function(doi){
 #' @keywords internal
 
 zenodo_versions <- function(id){
-  # The versions endpoint returns 404 for a concept record id, so first find
-  # a release; a concept record id redirects to the latest
-  record <- jsonlite::read_json(paste0("https://zenodo.org/api/records/", id),
-                                simplifyVector = TRUE)
-
-  # The listing comes in pages; Zenodo refuses a page size above 25
+  # The listing comes in pages; Zenodo refuses a page size above 25.
+  # list_versions() sorts the result itself; sort=version only keeps the
+  # order stable from page to page.
   size <- 25
+
+  # A concept record id: one search lists all its releases. Searching for a
+  # release's id finds nothing, so then ask for that release's versions
+  # listing (any release's id gives it; a concept record id 404s there)
+  page_url <- function(page) {
+    paste0("https://zenodo.org/api/records?q=conceptrecid:", id,
+           "&all_versions=true&sort=version&size=", size, "&page=", page)
+  }
+  res <- jsonlite::read_json(page_url(1), simplifyVector = TRUE)
+  if(! isTRUE(res$hits$total > 0)){
+    page_url <- function(page) {
+      paste0("https://zenodo.org/api/records/", id, "/versions?sort=version&size=", size, "&page=", page)
+    }
+    res <- jsonlite::read_json(page_url(1), simplifyVector = TRUE)
+  }
+
   versions <- list()
   page <- 1
   repeat {
-    res <- jsonlite::read_json(paste0("https://zenodo.org/api/records/", record$id,
-                                      "/versions?size=", size, "&page=", page),
-                               simplifyVector = TRUE)
     hits <- res$hits$hits
     if(length(hits) == 0 || NROW(hits) == 0) break
 
@@ -84,6 +109,7 @@ zenodo_versions <- function(id){
     total <- res$hits$total
     if(!is.numeric(total) || sum(vapply(versions, nrow, integer(1))) >= total) break
     page <- page + 1
+    res <- jsonlite::read_json(page_url(page), simplifyVector = TRUE)
   }
 
   if(length(versions) == 0){
@@ -109,9 +135,6 @@ figshare_versions <- function(id){
     rlang::abort(paste0("Figshare lists no published versions of article ", id))
   }
 
-  # Newest first, as Zenodo lists them, so list_versions() keeps versions
-  # published on the same day newest first too
-  index <- index[order(index$version, decreasing = TRUE), , drop = FALSE]
   records <- lapply(index$url, jsonlite::read_json, simplifyVector = TRUE)
 
   tibble::tibble(
