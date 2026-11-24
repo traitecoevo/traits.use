@@ -1,6 +1,6 @@
 # traits.use — agent & contributor guide
 
-`traits.use` is an R package for **loading, exploring and wrangling data** from any `traits.build` relational trait database, such as AusTraits. It began as the `austraits` package and was split out in 2026 (traitecoevo/austraits#188, history carried over). `austraits` (4.0.0) is now a thin AusTraits-specific layer over it. The first CRAN release (0.1.1, maintainer Elizabeth Wenk) is tracked in #13.
+`traits.use` is an R package for **loading, exploring and wrangling data** from any `traits.build` relational trait database, such as AusTraits. It began as the `austraits` package and was split out in 2026 (traitecoevo/austraits#188, history carried over). `austraits` (4.0.0) is now a thin AusTraits-specific layer over it. 0.1.1 (2026-11-23) was a GitHub-only release. The next release, the one for AusTraits 8.0.0 and the first on CRAN, is **1.0.0** (maintainer Elizabeth Wenk); it is tracked in #17 and its CRAN preparation in #13.
 
 ## Repo-local guidance
 
