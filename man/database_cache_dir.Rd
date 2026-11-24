@@ -20,8 +20,8 @@ clear_database_cache(
 \arguments{
 \item{path}{folder to list or clear; the cache folder by default.}
 
-\item{files}{names of the database \code{.rds} files to delete, as listed by
-\code{list_cached_databases()}.}
+\item{files}{names of the files to delete (database \code{.rds} files or
+observed means), as listed by \code{list_cached_databases()}.}
 
 \item{older_than}{delete the databases not used (loaded from the cache) for
 this many days. In a folder given as \code{path}, or where the cache cannot be
@@ -63,8 +63,9 @@ follows each operating system's convention for cache files (and the
 To keep a copy of a database with a project instead, give
 \code{\link[=load_database]{load_database()}} a \code{path}; the functions here take the same \code{path}. They
 only ever touch the files \code{\link[=load_database]{load_database()}} wrote there: the database
-\code{.rds} files (relational or flattened) named in its record files
-(\code{10.*.json}, one per doi).
+\code{.rds} files (relational or flattened) and the observed means
+(\verb{*-observed-means.csv.gz}) named in its record files (\code{10.*.json}, one per
+doi).
 }
 \details{
 With neither \code{files} nor \code{older_than}, \code{clear_database_cache()}
