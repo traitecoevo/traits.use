@@ -88,6 +88,8 @@ table of observed means (tibble)
 
 ## See also
 
+[`list_versions()`](https://traitecoevo.github.io/traits.use/reference/list_versions.md)
+to find the dois of a database's releases;
 [`database_cache_dir()`](https://traitecoevo.github.io/traits.use/reference/database_cache_dir.md);
 `austraits::load_austraits()`, which loads a release of AusTraits by
 version number

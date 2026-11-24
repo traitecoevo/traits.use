@@ -2,6 +2,17 @@
 
 ## traits.use (development version)
 
+- New function
+  [`list_versions()`](https://traitecoevo.github.io/traits.use/reference/list_versions.md)
+  lists the releases of a traits.build database on Zenodo or Figshare,
+  given any of its dois, with each release’s version, doi and
+  publication date, newest first
+  ([\#52](https://github.com/traitecoevo/traits.use/issues/52)). Pass a
+  release’s doi to
+  [`load_database()`](https://traitecoevo.github.io/traits.use/reference/load_database.md)
+  to load it. Before, only AusTraits’ releases could be listed, with
+  `austraits::get_versions()`.
+
 ## traits.use 0.1.1
 
 - First release as `traits.use`, a generic package for loading and

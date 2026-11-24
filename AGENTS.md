@@ -28,10 +28,17 @@ tracked in \#17 and its CRAN preparation in \#13.
   (`R/database_cache.R`) must know every kind of file
   [`load_database()`](https://traitecoevo.github.io/traits.use/reference/load_database.md)
   downloads.
+  [`list_versions()`](https://traitecoevo.github.io/traits.use/reference/list_versions.md)
+  (`R/list_versions.R`) lists a record’s releases; it resolves a doi
+  with the same helpers as
+  [`load_database()`](https://traitecoevo.github.io/traits.use/reference/load_database.md),
+  at the end of `R/load_database.R`.
 - **AusTraits-specific code lives in `austraits`, not here** (decided
   2026-11-14, \#13): `load_austraits()`, `get_versions()` /
   `get_version_latest()`, the AusTraits vignette and the map of
-  Australia.
+  Australia. The generic part of `get_versions()` is
+  [`list_versions()`](https://traitecoevo.github.io/traits.use/reference/list_versions.md)
+  here (#52), which lists the releases of any Zenodo or Figshare record.
   [`plot_locations()`](https://traitecoevo.github.io/traits.use/reference/plot_locations.md)
   draws over a world map cropped to the locations by default
   (`inst/extdata/world_land.rds`, from `data-raw/world_land.R`), and
