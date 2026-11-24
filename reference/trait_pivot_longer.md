@@ -77,22 +77,23 @@ traits_wide <- trait_pivot_wider(data)
 tidyr::pivot_longer(traits_wide, cols = dplyr::all_of(unique(data$trait_name)),
   names_to = "trait_name", values_to = "value", values_drop_na = TRUE)
 #> # A tibble: 114 × 21
-#>    dataset_id   taxon_name observation_id entity_type basis_of_record life_stage
-#>    <chr>        <chr>      <chr>          <chr>       <chr>           <chr>     
-#>  1 Falster_2003 Acacia fl… 01             population  field           adult     
-#>  2 Falster_2003 Acacia fl… 01             population  field           adult     
-#>  3 Falster_2003 Acacia fl… 02             species     field           adult     
-#>  4 Falster_2003 Acacia my… 03             population  field           adult     
-#>  5 Falster_2003 Acacia my… 03             population  field           adult     
-#>  6 Falster_2003 Acacia my… 04             species     field           adult     
-#>  7 Falster_2003 Acacia su… 05             population  field           adult     
-#>  8 Falster_2003 Acacia su… 05             population  field           adult     
-#>  9 Falster_2003 Acacia su… 06             species     field           adult     
-#> 10 Falster_2003 Angophora… 07             population  field           adult     
+#>    dataset_id   source_id  taxon_name observation_id entity_type basis_of_record
+#>    <chr>        <chr>      <chr>      <chr>          <chr>       <chr>          
+#>  1 Falster_2003 Falster_2… Acacia fl… 01             population  field          
+#>  2 Falster_2003 Falster_2… Acacia fl… 01             population  field          
+#>  3 Falster_2003 Falster_2… Acacia fl… 02             species     field          
+#>  4 Falster_2003 Falster_2… Acacia my… 03             population  field          
+#>  5 Falster_2003 Falster_2… Acacia my… 03             population  field          
+#>  6 Falster_2003 Falster_2… Acacia my… 04             species     field          
+#>  7 Falster_2003 Falster_2… Acacia su… 05             population  field          
+#>  8 Falster_2003 Falster_2… Acacia su… 05             population  field          
+#>  9 Falster_2003 Falster_2… Acacia su… 06             species     field          
+#> 10 Falster_2003 Falster_2… Angophora… 07             population  field          
 #> # ℹ 104 more rows
-#> # ℹ 15 more variables: population_id <chr>, individual_id <chr>,
-#> #   repeat_measurements_id <chr>, temporal_context_id <chr>, source_id <chr>,
-#> #   location_id <chr>, entity_context_id <chr>, plot_context_id <chr>,
-#> #   treatment_context_id <chr>, collection_date <chr>, method_id <chr>,
-#> #   method_context_id <chr>, original_name <chr>, trait_name <chr>, value <chr>
+#> # ℹ 15 more variables: life_stage <chr>, population_id <chr>,
+#> #   individual_id <chr>, repeat_measurements_id <chr>,
+#> #   temporal_context_id <chr>, location_id <chr>, entity_context_id <chr>,
+#> #   plot_context_id <chr>, treatment_context_id <chr>, collection_date <chr>,
+#> #   method_id <chr>, method_context_id <chr>, original_name <chr>,
+#> #   trait_name <chr>, value <chr>
 ```

@@ -1,7 +1,14 @@
 # Changelog
 
-## traits.use (development version)
+## traits.use 1.0.0
 
+- `austraits_lite` now has the form of AusTraits 8.0.0 (traits.build
+  data model 1.4.0), with `source_id` on every observation and the new
+  reference columns of the `methods` table. It is compiled from
+  AusTraits’ source rather than taken from a release, so the example
+  data can show the data model a release of traits.use reads before
+  AusTraits is released with it
+  ([\#13](https://github.com/traitecoevo/traits.use/issues/13)).
 - [`library(traits.use)`](https://traitecoevo.github.io/traits.use/) no
   longer prints a message asking to cite the package;
   `citation("traits.use")` still gives the citation.
@@ -15,37 +22,6 @@
   [`load_database()`](https://traitecoevo.github.io/traits.use/reference/load_database.md)
   to load it. Before, only AusTraits’ releases could be listed, with
   `austraits::get_versions()`.
-
-## traits.use 0.1.1
-
-- First release as `traits.use`, a generic package for loading and
-  wrangling any traits.build database. The code and history come from
-  the `austraits` package (version 3.1.1 and earlier, listed below),
-  which becomes a thin AusTraits-specific layer over `traits.use`
-  (austraits#188).
-- What is specific to AusTraits stays in the `austraits` package:
-  `load_austraits()`, `get_versions()` and `get_version_latest()` (load
-  AusTraits with
-  [`load_database()`](https://traitecoevo.github.io/traits.use/reference/load_database.md)
-  and its doi instead), the AusTraits Getting Started vignette, and the
-  map of Australia used by
-  [`plot_locations()`](https://traitecoevo.github.io/traits.use/reference/plot_locations.md).
-- Requires R 4.1.0 or later, as the code uses the native pipe `|>`.
-- A database is recognised by the version of the traits.build data model
-  (<https://w3id.org/traits.build/>) its tables follow, which
-  traits.build 2.3 and later records in `metadata$data_model_version`,
-  rather than by the address of traits.build’s GitHub repository in
-  `metadata$related_identifiers`
-  ([\#40](https://github.com/traitecoevo/traits.use/issues/40)). This
-  version of traits.use reads data model 1.x. A database recording a
-  newer major version is refused with a message to update traits.use,
-  where before it would have been told its data were too old;
-  [`print()`](https://rdrr.io/r/base/print.html) shows the version.
-  [`bind_databases()`](https://traitecoevo.github.io/traits.use/reference/bind_databases.md)
-  refuses such a database too, since its result keeps the first
-  database’s metadata, and warns when the databases it binds record
-  different versions. Databases built before the field existed, such as
-  AusTraits 7.0.0 and earlier, are recognised by the address as before.
 - New function
   [`summarise_trait_means()`](https://traitecoevo.github.io/traits.use/reference/summarise_trait_means.md)
   gives one row per taxon and trait, computed from the records
@@ -85,6 +61,37 @@
   and
   [`clear_database_cache()`](https://traitecoevo.github.io/traits.use/reference/database_cache_dir.md)
   count the means files they find.
+
+## traits.use 0.1.1
+
+- First release as `traits.use`, a generic package for loading and
+  wrangling any traits.build database. The code and history come from
+  the `austraits` package (version 3.1.1 and earlier, listed below),
+  which becomes a thin AusTraits-specific layer over `traits.use`
+  (austraits#188).
+- What is specific to AusTraits stays in the `austraits` package:
+  `load_austraits()`, `get_versions()` and `get_version_latest()` (load
+  AusTraits with
+  [`load_database()`](https://traitecoevo.github.io/traits.use/reference/load_database.md)
+  and its doi instead), the AusTraits Getting Started vignette, and the
+  map of Australia used by
+  [`plot_locations()`](https://traitecoevo.github.io/traits.use/reference/plot_locations.md).
+- Requires R 4.1.0 or later, as the code uses the native pipe `|>`.
+- A database is recognised by the version of the traits.build data model
+  (<https://w3id.org/traits.build/>) its tables follow, which
+  traits.build 2.3 and later records in `metadata$data_model_version`,
+  rather than by the address of traits.build’s GitHub repository in
+  `metadata$related_identifiers`
+  ([\#40](https://github.com/traitecoevo/traits.use/issues/40)). This
+  version of traits.use reads data model 1.x. A database recording a
+  newer major version is refused with a message to update traits.use,
+  where before it would have been told its data were too old;
+  [`print()`](https://rdrr.io/r/base/print.html) shows the version.
+  [`bind_databases()`](https://traitecoevo.github.io/traits.use/reference/bind_databases.md)
+  refuses such a database too, since its result keeps the first
+  database’s metadata, and warns when the databases it binds record
+  different versions. Databases built before the field existed, such as
+  AusTraits 7.0.0 and earlier, are recognised by the address as before.
 - New dataset `austraits_lite`: 24 datasets from AusTraits 7.0.0 (CC BY
   4.0), a small traits.build database to try the package on without
   downloading anything. The examples now use it and run; those of

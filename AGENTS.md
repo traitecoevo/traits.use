@@ -14,10 +14,21 @@ tracked in \#17 and its CRAN preparation in \#13.
 - **Code:** `R/` (functions), `tests/` (testthat), `man/` (generated
   docs), `NAMESPACE`, `data-raw/` and `inst/` hold raw assets (incl. the
   cheatsheet); `data/austraits_lite.rda` is the exported example
-  database (24 datasets of AusTraits 7.0.0, used by the examples);
-  `R/sysdata.rda` holds the tests’ fixtures: `austraits_5.0.0_lite` (23
-  datasets of 5.0.0, the main one) and tiny 3.0.2/4.2.0 ones for version
-  checks. Regenerate both with `data-raw/create_data.R`.
+  database (24 datasets, used by the examples), regenerated with
+  `data-raw/austraits_lite.R`; `R/sysdata.rda` holds the tests’
+  fixtures: `austraits_5.0.0_lite` (23 datasets of 5.0.0, the main one)
+  and tiny 3.0.2/4.2.0 ones for version checks, regenerated with
+  `data-raw/create_data.R`.
+- **`austraits_lite` follows the data model, not the AusTraits
+  releases** (decided 2026-11-24, \#13). It is compiled from
+  austraits.build source at a pinned commit, because traits.use must be
+  released before the AusTraits release whose data model it reads.
+  Rebuild it whenever traits.build changes the data model; `test-data.R`
+  fails where traits.build is installed until you do. Release order:
+  traits.build develop → rebuild `austraits_lite` → traits.use release →
+  traits.build release → AusTraits release. Update
+  [`?austraits_lite`](https://traitecoevo.github.io/traits.use/reference/austraits_lite.md)
+  (`R/data.R`) and `inst/COPYRIGHTS` with the commit.
 - **Access entry point:**
   [`load_database()`](https://traitecoevo.github.io/traits.use/reference/load_database.md)
   (`R/load_database.R`) loads any traits.build database from its doi

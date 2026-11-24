@@ -63,8 +63,9 @@ property, which it packs into text columns.
 extract_data(database = austraits_lite, table = "traits",
   col = "trait_name", col_value = "leaf_area")
 #> 
-#> ── This is 7.0.0 of AusTraits: a curated plant trait database for the Australian
-#> ℹ This database is built using traits.build version 2.1.0
+#> ── This is 7.0.0.9000 of AusTraits: a curated plant trait database for the Austr
+#> ℹ This database is built using traits.build version 3.0.0
+#> ℹ Its tables follow traits.build data model 1.4.0
 #> ℹ This database contains a total of 1231 records, for 438 taxa and 1 traits.
 #> 
 #> ── This object is a 'list' with the following components: ──

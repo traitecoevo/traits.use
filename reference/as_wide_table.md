@@ -27,7 +27,7 @@ tables follow them.
 austraits_lite %>%
   extract_dataset("Falster_2003") %>%
   as_wide_table()
-#> # A tibble: 114 × 59
+#> # A tibble: 114 × 56
 #>    dataset_id   observation_id trait_name     taxon_name value unit  entity_type
 #>    <chr>        <chr>          <chr>          <chr>      <chr> <chr> <chr>      
 #>  1 Falster_2003 01             leaf_area      Acacia fl… 142   mm2   population 
@@ -41,7 +41,7 @@ austraits_lite %>%
 #>  9 Falster_2003 06             leaf_compound… Acacia su… simp… NA    species    
 #> 10 Falster_2003 07             leaf_area      Angophora… 1590  mm2   population 
 #> # ℹ 104 more rows
-#> # ℹ 52 more variables: population_id <chr>, individual_id <chr>,
+#> # ℹ 49 more variables: population_id <chr>, individual_id <chr>,
 #> #   value_type <chr>, basis_of_value <chr>, replicates <chr>,
 #> #   collection_date <chr>, basis_of_record <chr>, life_stage <chr>,
 #> #   sampling_strategy <chr>, treatment_context_id <chr>,

@@ -63,8 +63,9 @@ Daniel Falster - daniel.falster@unsw.edu.au
 ``` r
 extract_dataset(austraits_lite, "Falster_2003")
 #> 
-#> ── This is 7.0.0 of AusTraits: a curated plant trait database for the Australian
-#> ℹ This database is built using traits.build version 2.1.0
+#> ── This is 7.0.0.9000 of AusTraits: a curated plant trait database for the Austr
+#> ℹ This database is built using traits.build version 3.0.0
+#> ℹ Its tables follow traits.build data model 1.4.0
 #> ℹ This database contains a total of 114 records, for 38 taxa and 3 traits.
 #> 
 #> ── This object is a 'list' with the following components: ──

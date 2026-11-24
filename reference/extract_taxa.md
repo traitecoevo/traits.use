@@ -77,9 +77,10 @@ Fonti Kar - f.kar@unsw.edu.au
 ``` r
 extract_taxa(database = austraits_lite, family = "Proteaceae")
 #> 
-#> ── This is 7.0.0 of AusTraits: a curated plant trait database for the Australian
-#> ℹ This database is built using traits.build version 2.1.0
-#> ℹ This database contains a total of 9069 records, for 1487 taxa and 111 traits.
+#> ── This is 7.0.0.9000 of AusTraits: a curated plant trait database for the Austr
+#> ℹ This database is built using traits.build version 3.0.0
+#> ℹ Its tables follow traits.build data model 1.4.0
+#> ℹ This database contains a total of 8995 records, for 1487 taxa and 111 traits.
 #> 
 #> ── This object is a 'list' with the following components: ──
 #> 
@@ -124,9 +125,10 @@ extract_taxa(database = austraits_lite, family = "Proteaceae")
 #> ℹ To access a component, try using the $ e.g. database$traits
 extract_taxa(database = austraits_lite, genus = "Acacia")
 #> 
-#> ── This is 7.0.0 of AusTraits: a curated plant trait database for the Australian
-#> ℹ This database is built using traits.build version 2.1.0
-#> ℹ This database contains a total of 5571 records, for 267 taxa and 102 traits.
+#> ── This is 7.0.0.9000 of AusTraits: a curated plant trait database for the Austr
+#> ℹ This database is built using traits.build version 3.0.0
+#> ℹ Its tables follow traits.build data model 1.4.0
+#> ℹ This database contains a total of 5520 records, for 267 taxa and 102 traits.
 #> 
 #> ── This object is a 'list' with the following components: ──
 #> 
