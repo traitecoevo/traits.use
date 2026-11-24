@@ -4,7 +4,8 @@ under the MIT licence (see LICENSE).
 The package includes subsets of a different work, AusTraits, with different
 copyright holders and licence:
 
-- data/austraits_lite.rda (the dataset `austraits_lite`), from AusTraits 7.0.0;
+- data/austraits_lite.rda (the dataset `austraits_lite`), compiled from
+  AusTraits' source after its 7.0.0 release;
 - R/sysdata.rda (`austraits_5.0.0_lite` and two tiny fixtures), internal
   data for the tests, from AusTraits 5.0.0, 4.2.0 and 3.0.2;
 - tests/testthat/benchmarks/austraits_identifiers.rds, a test fixture from a
@@ -15,11 +16,14 @@ Natural Earth's 1:10m land polygons (https://www.naturalearthdata.com/),
 which are in the public domain, by data-raw/world_land.R in the package's
 GitHub repository.
 
-The release `austraits_lite` comes from:
+`austraits_lite` comes from:
 
   Title:    AusTraits: a curated plant trait database for the Australian flora
-  Version:  7.0.0
-  DOI:      https://doi.org/10.5281/zenodo.15718081
+  Version:  7.0.0.9000, compiled with traits.build 3.0.0 from commit
+            a8ae3d94b9e1765ca65f2c4477ac58e11c8bac28 of
+            https://github.com/traitecoevo/austraits.build, whose compiled
+            database is released under the licence below
+  DOI:      https://doi.org/10.5281/zenodo.3568417 (all versions)
   Holders:  the AusTraits contributors, listed in the release and in the
             `contributors` table of the dataset
   Licence:  Creative Commons Attribution 4.0 International (CC BY 4.0),
@@ -27,8 +31,8 @@ The release `austraits_lite` comes from:
             The `taxa` table, compiled from curated taxon lists such as the
             Australian Plant Census, is released under CC BY 3.0
             (https://creativecommons.org/licenses/by/3.0/).
-  Changes:  cut down to 24 of its datasets with traits.use::extract_dataset(),
-            by data-raw/create_data.R in the package's GitHub repository
+  Changes:  compiled for 24 of its datasets only, by
+            data-raw/austraits_lite.R in the package's GitHub repository
             (https://github.com/traitecoevo/traits.use).
 
 The test data come in the same way from AusTraits 5.0.0

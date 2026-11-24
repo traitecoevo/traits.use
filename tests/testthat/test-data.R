@@ -3,15 +3,36 @@ test_that("austraits_lite is a complete traits.build database", {
   # As load_database() returns, so `$` looks references up by key
   expect_s3_class(austraits_lite$sources, "traits_build_sources")
   expect_identical(length(unique(austraits_lite$traits$dataset_id)), 24L)
-  expect_identical(austraits_lite$metadata$version, "7.0.0")
+  # Built from austraits.build source, not a release (data-raw/austraits_lite.R)
+  expect_identical(austraits_lite$metadata$data_model_version, "1.4.0")
   expect_gt(nrow(austraits_lite$identifiers), 0)
   # The tables in the order of a release
   test_database_structure(austraits_lite)
-  expect_identical(length(austraits_lite$sources), 61L)
+  expect_identical(length(austraits_lite$sources), 88L)
 
-  # Every dataset's reference is kept, bar Westoby_2014, which has none in
-  # the full release either
-  cited <- unique(c(austraits_lite$methods$dataset_id, austraits_lite$methods$source_primary_key))
-  expect_identical(setdiff(cited, names(austraits_lite$sources)), "Westoby_2014")
+  # Every reference cited is kept: each dataset's, each observation's source_id,
+  # and the secondary references, which methods lists separated by "; "
+  secondary <- unlist(strsplit(stats::na.omit(austraits_lite$methods$secondary_id), "; ", fixed = TRUE))
+  cited <- unique(c(austraits_lite$methods$dataset_id, austraits_lite$traits$source_id, secondary))
+  expect_identical(setdiff(cited, names(austraits_lite$sources)), character(0))
   expect_false(is.null(austraits_lite$sources$Falster_2003))
+})
+
+test_that("austraits_lite follows the data model of the traits.build installed", {
+  # austraits_lite must be rebuilt (data-raw/austraits_lite.R) whenever
+  # traits.build changes the data model, before traits.use is released (#13).
+  # traits.use cannot depend on traits.build, so this runs only where it is
+  # installed, as on the machines that build releases
+  skip_if_not_installed("traits.build")
+  # an internal function of traits.build (>= 3.0.0)
+  ns <- asNamespace("traits.build")
+  skip_if_not(exists("data_model_version", envir = ns, inherits = FALSE),
+              "this traits.build has no data_model_version()")
+  installed <- get("data_model_version", envir = ns)()
+  expect_identical(
+    austraits_lite$metadata$data_model_version, installed,
+    label = "austraits_lite's data model version",
+    expected.label = sprintf("traits.build %s's (rebuild it with data-raw/austraits_lite.R)",
+                             utils::packageVersion("traits.build"))
+  )
 })
