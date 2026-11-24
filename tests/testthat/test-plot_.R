@@ -340,6 +340,13 @@ test_that("plot_trait_distribution picks the plot from the trait's type", {
   expect_true("Group" %in% names(p$data))
   expect_equal(p$labels$y, "By family")
 
+  # A type other than numeric, e.g. monthly_presence (traits.build 3.0.0), is
+  # plotted as categorical, not as numbers that are all missing
+  expect_equal(austraits_lite$definitions$flowering_time$type, "monthly_presence")
+  p <- plot_trait_distribution(austraits_lite, "flowering_time")
+  expect_true("counts_per_value" %in% names(p$data))
+  expect_gt(nrow(p$data), 0)
+
   # For a traits table, a trait without units is categorical
   t <- trait_table(c("simple", "compound"), trait_name = "leaf_compoundness", unit = NA_character_)
   expect_true("counts_per_value" %in% names(plot_trait_distribution(t, "leaf_compoundness")$data))

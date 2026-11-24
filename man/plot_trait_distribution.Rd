@@ -26,7 +26,8 @@ input, or a trait not in it), a blank plot saying so.
 \description{
 Plots the values of one trait, choosing the plot from the
 trait's type: \code{\link[=plot_trait_distribution_jitter]{plot_trait_distribution_jitter()}} by family for a numeric
-trait, \code{\link[=plot_categorical_trait_distribution]{plot_categorical_trait_distribution()}} for a categorical one.
+trait, \code{\link[=plot_categorical_trait_distribution]{plot_categorical_trait_distribution()}} for any other (categorical,
+or another type such as \code{monthly_presence}).
 }
 \examples{
 \dontshow{if (rlang::is_installed(c("ggplot2", "forcats", "scales"))) withAutoprint(\{ # examplesIf}

@@ -1,3 +1,7 @@
+# traits.use (development version)
+
+- `plot_trait_distribution()` plots a trait of any type but numeric as categorical. A trait of type `monthly_presence`, such as `flowering_time` in databases built with traits.build 3.0.0, used to get a blank plot saying it had no numeric values.
+
 # traits.use 1.0.0
 
 - `austraits_lite` now has the form of AusTraits 8.0.0 (traits.build data model 1.4.0), with `source_id` on every observation and the new reference columns of the `methods` table. It is compiled from AusTraits' source rather than taken from a release, so the example data can show the data model a release of traits.use reads before AusTraits is released with it (#13).

@@ -1,7 +1,8 @@
 #' @title Plot the distribution of a trait
 #' @description Plots the values of one trait, choosing the plot from the
 #'   trait's type: [plot_trait_distribution_jitter()] by family for a numeric
-#'   trait, [plot_categorical_trait_distribution()] for a categorical one.
+#'   trait, [plot_categorical_trait_distribution()] for any other (categorical,
+#'   or another type such as `monthly_presence`).
 #'
 #' @param database traits.build database (list object), or its traits table
 #'   (which must then have a `family` column, e.g. from [join_taxa()])
@@ -38,12 +39,15 @@ plot_trait_distribution <- function(database, trait_name, ...) {
     type <- if (all(is.na(data$unit))) "categorical" else "numeric"
   }
 
-  if (identical(type, "categorical")) {
-    plot_fn <- plot_categorical_trait_distribution
-    args <- list()
-  } else {
+  # Only numeric traits get the numeric plot: categorical traits, and the other
+  # types traits.build 3.0.0 defines (e.g. monthly_presence, as for
+  # flowering_time), get the categorical one
+  if (identical(type, "numeric")) {
     plot_fn <- plot_trait_distribution_jitter
     args <- list(y_axis_category = "family")
+  } else {
+    plot_fn <- plot_categorical_trait_distribution
+    args <- list()
   }
 
   # Keep the named arguments the chosen plot takes

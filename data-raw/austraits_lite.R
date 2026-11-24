@@ -4,7 +4,8 @@
 ##   Rscript data-raw/austraits_lite.R [path to an austraits.build clone] [git ref]
 ## The defaults are ../austraits.build and origin/develop (fetch it first).
 ##
-## `austraits_lite` is built from austraits.build *source at a pinned commit*,
+## `austraits_lite` is built from austraits.build *source at the commit `ref`
+## names* (recorded in `build_info$git_SHA`; pass a sha to reproduce a build),
 ## with the traits.build installed here, rather than taken from a release of
 ## AusTraits (#13). A traits.use release has to come before the AusTraits
 ## release whose data model it reads, so the example data could never be from
@@ -13,8 +14,10 @@
 ## traits.use reads. Release order: traits.build develop -> rebuild this ->
 ## traits.use release -> traits.build release -> AusTraits release.
 ##
-## Update `?austraits_lite` (R/data.R) with the commit and traits.build version
-## this prints.
+## Then update what records the build, with the figures this prints:
+## `?austraits_lite` (R/data.R), inst/COPYRIGHTS, and the facts tests assert
+## (tests/testthat/test-data.R, and the data model and traits.build versions in
+## test-check_compatibiity.R and test-flat.R).
 
 args <- commandArgs(trailingOnly = TRUE)
 repo <- if (length(args) >= 1) args[[1]] else "../austraits.build"
@@ -34,11 +37,17 @@ dataset_ids <- c(
 devtools::load_all()
 library(traits.build)
 
-sha <- system2("git", c("-C", repo, "rev-parse", paste0(ref, "^{commit}")), stdout = TRUE)
+git <- function(...) {
+  out <- suppressWarnings(system2("git", c("-C", shQuote(repo), ...), stdout = TRUE, stderr = TRUE))
+  if (!is.null(attr(out, "status"))) stop("git ", paste(c(...), collapse = " "), " failed:\n", paste(out, collapse = "\n"))
+  out
+}
+sha <- git("rev-parse", "--verify", "--quiet", shQuote(paste0(ref, "^{commit}")))
 src <- tempfile("austraits.build-")
 dir.create(src)
-status <- system(sprintf("git -C %s archive %s | tar -x -C %s", shQuote(repo), sha, shQuote(src)))
-stopifnot(status == 0)
+archive <- file.path(src, "source.tar")
+git("archive", "--output", shQuote(archive), sha)
+utils::untar(archive, exdir = src)
 
 missing <- dataset_ids[!dir.exists(file.path(src, "data", dataset_ids))]
 if (length(missing) > 0) {
@@ -64,9 +73,14 @@ austraits_lite <- withr::with_dir(src, {
   build_post_process(database)
 })
 
-message(sprintf(
-  "austraits_lite: %d datasets, %d trait rows, data model %s, from austraits.build %s (version %s) with traits.build %s",
-  length(unique(austraits_lite$traits$dataset_id)), nrow(austraits_lite$traits),
+traits <- austraits_lite$traits
+message(sprintf(paste0(
+  "austraits_lite: %d datasets, %s values of %d traits for %s taxa, %d sources, ",
+  "%s values with a source_id other than their dataset; data model %s, ",
+  "from austraits.build %s (version %s) with traits.build %s"),
+  length(unique(traits$dataset_id)), format(nrow(traits), big.mark = ","),
+  length(unique(traits$trait_name)), format(length(unique(traits$taxon_name)), big.mark = ","),
+  length(austraits_lite$sources), format(sum(traits$source_id != traits$dataset_id), big.mark = ","),
   austraits_lite$metadata$data_model_version, sha, austraits_lite$build_info$version,
   packageVersion("traits.build")
 ))

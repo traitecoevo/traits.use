@@ -242,9 +242,15 @@ test_that("months are recognised by definition, or by every record being a month
   expect_true(all(grepl("^[yn]{12}$", months$value_mode)))
   expect_true(all(grepl("^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \\(", months$value_count)))
 
+  # the definition decides even where a record is not a month string
+  mixed <- database$traits
+  mixed$value[which(mixed$trait_name == "flowering_time")[1]] <- "spring"
+  expect_true("flowering_time" %in% trait_means_monthly(database, mixed))
+
   # defined as categorical, as in AusTraits 7.0.0 and earlier, its records decide
   database$definitions$flowering_time$type <- "categorical"
   expect_true("flowering_time" %in% trait_means_monthly(database, database$traits))
+  expect_false("flowering_time" %in% trait_means_monthly(database, mixed))
   expect_identical(summarise_trait_means(database, traits = "flowering_time"), months)
 })
 

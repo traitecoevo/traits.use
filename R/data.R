@@ -15,8 +15,8 @@
 #'   `metadata` and `build_info`. Every observation names the reference it
 #'   was taken from in `source_id` (3,294 name another study than their
 #'   dataset), and the `methods` table has the reference columns
-#'   `dataset_id_citation`, `secondary_id` and `secondary_citation` (see
-#'   [join_sources()]).
+#'   `dataset_id_type`, `dataset_id_citation`, `secondary_id` and
+#'   `secondary_citation` (see [join_sources()]).
 #'
 #' @details `austraits_lite` is compiled from AusTraits' source
 #'   (<https://github.com/traitecoevo/austraits.build>) at a given commit, not

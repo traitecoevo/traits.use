@@ -1,6 +1,6 @@
 Package: traits.use
 Title: Access and Wrangle Data from 'traits.build' Trait Databases
-Version: 1.0.0
+Version: 1.0.0.9000
 Authors@R:
     c(person(given = "Elizabeth",
              family = "Wenk",
@@ -32,8 +32,8 @@ Description: Load, explore and wrangle data from relational trait databases
     visualise the distribution of the data.
 License: MIT + file LICENSE
 Copyright: See file COPYRIGHTS: the bundled dataset austraits_lite and
-    the internal test data are CC BY 4.0 subsets of AusTraits releases,
-    held by their contributors.
+    the internal test data are CC BY 4.0 subsets of AusTraits, held by
+    their contributors.
 Encoding: UTF-8
 LazyData: true
 LazyDataCompression: xz
