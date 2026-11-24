@@ -15,7 +15,11 @@ test_database_structure <- function(database, taxa = NA, dataset_id = NA, n_row 
   
   testthat::expect_contains(database$traits$taxon_name |> unique(), database$taxa$taxon_name |> unique())
   testthat::expect_contains(database$traits$dataset_id |> unique(), database$methods$dataset_id |> unique())
-  testthat::expect_contains(paste(database$traits$dataset_id, database$traits$trait_name) |> unique(), paste(database$methods$dataset_id, database$methods$trait_name) |> unique())
+  # A trait in methods has records, or had them all excluded (traits.build 3.0.0
+  # lists those in methods too, e.g. Westoby_2014's leaf_specific_hydraulic_conductance)
+  testthat::expect_contains(unique(c(paste(database$traits$dataset_id, database$traits$trait_name),
+                                     paste(database$excluded_data$dataset_id, database$excluded_data$trait_name))),
+                            paste(database$methods$dataset_id, database$methods$trait_name) |> unique())
   
   if(!is.na(taxa)) {
     testthat::expect_contains(database$traits$taxon_name |> unique(), taxa |> unique())

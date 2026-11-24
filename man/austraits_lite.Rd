@@ -6,35 +6,47 @@
 \title{A small subset of AusTraits, for examples}
 \format{
 A list of class \code{traits.build}, with the tables of a traits.build
-database: \code{traits} (90,568 values of 151 traits for 7,259 taxa),
+database: \code{traits} (87,001 values of 151 traits for 7,259 taxa),
 \code{locations}, \code{contexts}, \code{methods}, \code{excluded_data}, \code{taxonomic_updates},
 \code{taxa}, \code{identifiers}, \code{contributors}, \code{sources}, \code{definitions}, \code{schema},
-\code{metadata} and \code{build_info}. AusTraits 7.0.0 fills in \code{source_id} for
-only a few datasets, and predates the reference columns of the \code{methods}
-table that traits.build 2.3 introduced (it has \code{source_primary_key} and
-others; see \code{\link[=join_sources]{join_sources()}}).
+\code{metadata} and \code{build_info}. Every observation names the reference it
+was taken from in \code{source_id} (3,294 name another study than their
+dataset), and the \code{methods} table has the reference columns
+\code{dataset_id_citation}, \code{secondary_id} and \code{secondary_citation} (see
+\code{\link[=join_sources]{join_sources()}}).
 }
 \source{
-AusTraits 7.0.0, \doi{10.5281/zenodo.15718081}, licensed under
-CC BY 4.0 (\url{https://creativecommons.org/licenses/by/4.0/}), cut down to
-24 datasets with \code{\link[=extract_dataset]{extract_dataset()}} (the script is \code{data-raw/create_data.R}
-in the package's GitHub repository). Please cite AusTraits as described
-in Falster et al. (2021) \doi{10.1038/s41597-021-01006-6}, and the
-original studies, listed in \code{sources} (as in the full release, a few keys
-in \code{source_id} and the \code{methods} table, such as unpublished data, have no
-entry). The \code{taxa} table, compiled from curated taxon lists such as the
-Australian Plant Census, is released under CC BY 3.0, as its description
-in \code{schema} says. See the file \code{COPYRIGHTS} installed with the package.
+AusTraits, \doi{10.5281/zenodo.3568417}, whose compiled database is
+licensed under CC BY 4.0 (\url{https://creativecommons.org/licenses/by/4.0/}),
+compiled for 24 datasets by \code{data-raw/austraits_lite.R} in the package's
+GitHub repository. Please cite AusTraits as described in Falster et al.
+(2021) \doi{10.1038/s41597-021-01006-6}, and the original studies, listed
+in \code{sources}. The \code{taxa} table, compiled from curated taxon lists such as
+the Australian Plant Census, is released under CC BY 3.0, as its
+description in \code{schema} says. See the file \code{COPYRIGHTS} installed with
+the package.
 }
 \usage{
 austraits_lite
 }
 \description{
-A traits.build database with 24 of the datasets in AusTraits
-7.0.0, the Australian plant trait database. It is in the same form as the
-databases \code{\link[=load_database]{load_database()}} downloads, so every function in the package
-works on it, and the examples use it. For analysis, load a full release
-with \code{\link[=load_database]{load_database()}} instead.
+A traits.build database with 24 of the datasets in AusTraits,
+the Australian plant trait database, compiled from AusTraits' source
+after the 7.0.0 release, in the form of the 8.0.0 release (traits.build
+data model 1.4.0). It is in the same form as the databases
+\code{\link[=load_database]{load_database()}} downloads, so every function in the package works on
+it, and the examples use it. For analysis, load a full release with
+\code{\link[=load_database]{load_database()}} instead.
+}
+\details{
+\code{austraits_lite} is compiled from AusTraits' source
+(\url{https://github.com/traitecoevo/austraits.build}) at a given commit, not
+taken from a release: traits.use is released before the AusTraits release
+whose data model it reads, so its example data follows the data model
+rather than the releases. This one was compiled from commit \code{a8ae3d94}
+with traits.build 3.0.0, so \code{metadata$version} is \code{"7.0.0.9000"} and
+\code{build_info$git_SHA} names the commit. Its values can differ a little
+from those of the same datasets in AusTraits 8.0.0.
 }
 \examples{
 austraits_lite

@@ -8,7 +8,7 @@ message: 'To cite package "traits.use" in publications use:'
 type: software
 license: MIT
 title: "traits.use: Access and Wrangle Data from 'traits.build' Trait Databases"
-version: 0.1.1
+version: 1.0.0
 abstract: Load, explore and wrangle data from relational trait databases built with
   'traits.build', such as 'AusTraits', the Australian plant trait database. Functions
   load a database from its DOI, join data across its tables, filter it to specific

@@ -234,16 +234,18 @@ test_that("a trait recording months is summarised month by month", {
 
 test_that("months are recognised by definition, or by every record being a month string", {
   database <- austraits_lite
+  # a definition of type monthly_presence (traits.build 3.0.0) decides on its own
+  expect_equal(database$definitions$flowering_time$type, "monthly_presence")
+  expect_true("flowering_time" %in% trait_means_monthly(database, database$traits))
+  expect_false("leaf_phenology" %in% trait_means_monthly(database, database$traits))
   months <- summarise_trait_means(database, traits = "flowering_time")
-  # AusTraits 7.0.0 defines flowering_time as categorical; its records decide
-  expect_equal(database$definitions$flowering_time$type, "categorical")
   expect_true(all(grepl("^[yn]{12}$", months$value_mode)))
   expect_true(all(grepl("^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \\(", months$value_count)))
 
-  # a definition of type monthly_presence decides on its own
-  database$definitions$flowering_time$type <- "monthly_presence"
+  # defined as categorical, as in AusTraits 7.0.0 and earlier, its records decide
+  database$definitions$flowering_time$type <- "categorical"
   expect_true("flowering_time" %in% trait_means_monthly(database, database$traits))
-  expect_false("leaf_phenology" %in% trait_means_monthly(database, database$traits))
+  expect_identical(summarise_trait_means(database, traits = "flowering_time"), months)
 })
 
 test_that("subspecies, varieties and forms are rolled up to their species", {

@@ -16,8 +16,9 @@ without_compiled_by <- function(database) {
 test_that("databases built before the data model version are recognised by the traits.build URL", {
   expect_silent(check_compatibility(austraits_5.0.0_lite))
   expect_true(check_compatibility(austraits_5.0.0_lite))
+  expect_identical(get_data_model_version(austraits_5.0.0_lite), NA_character_)
   expect_true(check_compatibility(austraits_lite))
-  expect_identical(get_data_model_version(austraits_lite), NA_character_)
+  expect_identical(get_data_model_version(austraits_lite), "1.4.0")
 
   expect_false(check_compatibility(without_compiled_by(austraits_5.0.0_lite)))
   expect_error(join_taxa(without_compiled_by(austraits_5.0.0_lite)),
@@ -104,7 +105,7 @@ test_that("print() shows the data model version", {
   out <- cli::cli_fmt(print(with_data_model_version(austraits_lite, "1.4.0")))
   expect_true(any(grepl("traits.build data model 1.4.0", out, fixed = TRUE)))
 
-  out <- cli::cli_fmt(print(austraits_lite))
+  out <- cli::cli_fmt(print(austraits_5.0.0_lite))
   expect_false(any(grepl("data model", out, fixed = TRUE)))
 
   out <- cli::cli_fmt(print(with_data_model_version(austraits_lite, "2.0.0")))

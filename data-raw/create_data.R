@@ -36,13 +36,9 @@ lite_ids <- c(dataset_id, datasets)
 austraits_5.0.0_lite <- austraits_5.0.0 %>% extract_dataset(dataset_id = lite_ids)
 class(austraits_5.0.0_lite$sources) <- setdiff(class(austraits_5.0.0_lite$sources), "traits_build_sources")
 
-# 7.0.0: exported as `austraits_lite`, the database used in the examples.
-# The same datasets, plus Schulze_2014 for its identifiers. Regenerate it from
-# each new AusTraits release, keeping the name.
-austraits_7.0.0 <- load_database("10.5281/zenodo.15718081", path = path)
-austraits_lite <- austraits_7.0.0 %>% extract_dataset(dataset_id = c(lite_ids, "Schulze_2014"))
+# `austraits_lite`, the exported database used in the examples, is built by
+# data-raw/austraits_lite.R from austraits.build source, not from a release.
 
 ## The map of Australia (`australia_map_raster`) moved to the austraits package
-usethis::use_data(austraits_lite, compress = "xz", overwrite = TRUE)
 usethis::use_data(austraits_3.0.2_lite, austraits_4.2.0_lite, austraits_5.0.0_lite, internal = TRUE,
                   compress = "xz", overwrite = TRUE)

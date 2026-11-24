@@ -21,7 +21,7 @@ test_that("flatten_database() stamps its output with the database it came from",
     data_model_version = NA_character_,
     traits_build_version = "1.0.1"
   ))
-  expect_equal(attr(flatten_database(austraits_lite), "traits.build_stamp")$traits_build_version, "2.1.0")
+  expect_equal(attr(flatten_database(austraits_lite), "traits.build_stamp")$traits_build_version, "3.0.0")
 
   # The data model version, which traits.build 2.3 and later records (#40)
   with_version <- database
