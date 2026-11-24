@@ -1,6 +1,6 @@
 Package: traits.use
 Title: Access and Wrangle Data from 'traits.build' Trait Databases
-Version: 1.0.0.9000
+Version: 1.0.0
 Authors@R:
     c(person(given = "Elizabeth",
              family = "Wenk",
