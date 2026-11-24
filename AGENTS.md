@@ -20,6 +20,12 @@ is now a thin AusTraits-specific layer over it. The first CRAN release
   [`load_database()`](https://traitecoevo.github.io/traits.use/reference/load_database.md)
   (`R/load_database.R`) loads any traits.build database from its doi
   (Zenodo, Figshare, or a doi resolving directly to an `.rds`).
+  `flattened = TRUE` loads the flattened table and `means = TRUE` the
+  observed means published with the release (`*-observed-means.csv.gz`);
+  `means_file()` picks that file and `cached_records()`
+  (`R/database_cache.R`) must know every kind of file
+  [`load_database()`](https://traitecoevo.github.io/traits.use/reference/load_database.md)
+  downloads.
 - **AusTraits-specific code lives in `austraits`, not here** (decided
   2026-11-14, \#13): `load_austraits()`, `get_versions()` /
   `get_version_latest()`, the AusTraits vignette and the map of
@@ -35,6 +41,20 @@ is now a thin AusTraits-specific layer over it. The first CRAN release
   [`bind_databases()`](https://traitecoevo.github.io/traits.use/reference/bind_databases.md),
   [`flatten_database()`](https://traitecoevo.github.io/traits.use/reference/flatten_database.md),
   [`as_wide_table()`](https://traitecoevo.github.io/traits.use/reference/as_wide_table.md).
+- **Trait means:**
+  [`summarise_trait_means()`](https://traitecoevo.github.io/traits.use/reference/summarise_trait_means.md)
+  (`R/summarise_trait_means.R`, \#50) gives one row per taxon and trait:
+  the observed mean of a numeric trait (a geometric mean) and the most
+  frequent value of a categorical one, optionally split `by` further
+  variables. It takes both input formats. AusTraits publishes its output
+  with each release (austraits.build’s `post_export()`), and the API and
+  portal are to read that file, so a change to the method changes
+  published numbers: say so in NEWS. The method’s terms (“observed
+  mean”, never “average”) follow `terminology.md` in
+  traitecoevo/austraits-means. It is computed with group indices and
+  [`rowsum()`](https://rdrr.io/r/base/rowsum.html), not a grouped
+  `summarise()`, which is about a hundred times slower on a full
+  database (3.5 s against 100 s on AusTraits); keep it that way.
 - **Two input formats, told apart by class** (#41): the relational
   database (list, class `traits.build`) and a flat table (data frame;
   [`flatten_database()`](https://traitecoevo.github.io/traits.use/reference/flatten_database.md)

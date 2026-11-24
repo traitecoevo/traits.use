@@ -23,8 +23,9 @@ R_USER_CACHE_DIR environment variable, if set).
 To keep a copy of a database with a project instead, give
 load_database() a path; the functions here take the same path. They
 only ever touch the files load_database() wrote there: the database
-.rds files (relational or flattened) named in its record files
-(10.*.json, one per doi)."><meta property="og:description" content="By default, load_database() keeps the databases it downloads
+.rds files (relational or flattened) and the observed means
+(*-observed-means.csv.gz) named in its record files (10.*.json, one per
+doi)."><meta property="og:description" content="By default, load_database() keeps the databases it downloads
 in one folder per user, so each release is downloaded once per computer and
 shared by every project and R session that loads it.
 database_cache_dir() gives the folder.
@@ -48,8 +49,9 @@ R_USER_CACHE_DIR environment variable, if set).
 To keep a copy of a database with a project instead, give
 load_database() a path; the functions here take the same path. They
 only ever touch the files load_database() wrote there: the database
-.rds files (relational or flattened) named in its record files
-(10.*.json, one per doi)."></head><body>
+.rds files (relational or flattened) and the observed means
+(*-observed-means.csv.gz) named in its record files (10.*.json, one per
+doi)."></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -103,8 +105,9 @@ follows each operating system's convention for cache files (and the
 </ol><p>To keep a copy of a database with a project instead, give
 <code><a href="load_database.html">load_database()</a></code> a <code>path</code>; the functions here take the same <code>path</code>. They
 only ever touch the files <code><a href="load_database.html">load_database()</a></code> wrote there: the database
-<code>.rds</code> files (relational or flattened) named in its record files
-(<code>10.*.json</code>, one per doi).</p>
+<code>.rds</code> files (relational or flattened) and the observed means
+(<code>*-observed-means.csv.gz</code>) named in its record files (<code>10.*.json</code>, one per
+doi).</p>
     </div>
 
     <div class="section level2">
@@ -130,8 +133,8 @@ only ever touch the files <code><a href="load_database.html">load_database()</a>
 
 
 <dt id="arg-files">files<a class="anchor" aria-label="anchor" href="#arg-files"></a></dt>
-<dd><p>names of the database <code>.rds</code> files to delete, as listed by
-<code>list_cached_databases()</code>.</p></dd>
+<dd><p>names of the files to delete (database <code>.rds</code> files or
+observed means), as listed by <code>list_cached_databases()</code>.</p></dd>
 
 
 <dt id="arg-older-than">older_than<a class="anchor" aria-label="anchor" href="#arg-older-than"></a></dt>

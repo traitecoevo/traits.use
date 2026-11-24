@@ -42,6 +42,16 @@
 
   Look up references in a database's `sources` by key
 
+## Summarise traits by taxon
+
+One value per taxon and trait, from the records
+
+- [`summarise_trait_means()`](https://traitecoevo.github.io/traits.use/reference/summarise_trait_means.md)
+  : Summarise each taxon's trait values: observed means and most
+  frequent values
+- [`trait_means_dictionary()`](https://traitecoevo.github.io/traits.use/reference/trait_means_dictionary.md)
+  : Columns of the table of trait means
+
 ## Filter from the database
 
 - [`extract_data()`](https://traitecoevo.github.io/traits.use/reference/extract_data.md)

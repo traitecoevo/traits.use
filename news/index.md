@@ -16,7 +16,7 @@
   [`plot_locations()`](https://traitecoevo.github.io/traits.use/reference/plot_locations.md).
 - Requires R 4.1.0 or later, as the code uses the native pipe `|>`.
 - A database is recognised by the version of the traits.build data model
-  (<https://w3id.org/traits.build>) its tables follow, which
+  (<https://w3id.org/traits.build/>) its tables follow, which
   traits.build 2.3 and later records in `metadata$data_model_version`,
   rather than by the address of traits.build’s GitHub repository in
   `metadata$related_identifiers`
@@ -30,6 +30,45 @@
   database’s metadata, and warns when the databases it binds record
   different versions. Databases built before the field existed, such as
   AusTraits 7.0.0 and earlier, are recognised by the address as before.
+- New function
+  [`summarise_trait_means()`](https://traitecoevo.github.io/traits.use/reference/summarise_trait_means.md)
+  gives one row per taxon and trait, computed from the records
+  ([\#50](https://github.com/traitecoevo/traits.use/issues/50)): for a
+  numeric trait the observed mean, a geometric mean of dataset x
+  location means and flora range midpoints (an arithmetic mean, labelled
+  `method = "arithmetic"`, for a trait whose definition allows negative
+  values, such as a water potential or an isotope ratio), with the
+  arithmetic mean, the range, counts of the evidence behind it, and the
+  datasets (`dataset_id`) and references (`source_id`) it draws on
+  alongside; for a categorical trait the most frequent value and the
+  count of each value; for a trait recording months, such as
+  `flowering_time`, the months at least half the records give and the
+  number of records giving each month. It summarises every trait unless
+  `traits` names some, takes a database, a subset made with the
+  `extract_*()` functions, or a flat table, and splits each taxon’s
+  records further with `by`, given a column of the traits table or a
+  context property (`by = "life_stage"`, or `"sex"` where a database
+  records it as a context). Subspecies, varieties and forms count
+  towards their species unless `collapse_to_species = FALSE`; hybrid
+  formulae keep their own rows. `value_type_rules` lets a dataset that
+  reports only bounds contribute them as observations.
+  [`trait_means_dictionary()`](https://traitecoevo.github.io/traits.use/reference/trait_means_dictionary.md)
+  defines the columns. The method is the one AusTraits uses for the
+  observed means it publishes with each release, moved here from
+  traitecoevo/austraits-means and austraits.build; all of AusTraits’ 2.3
+  million records take about 4 seconds.
+- `load_database(means = TRUE)` loads the observed means a release
+  publishes beside the database
+  (`<name>-<version>-observed-means.csv.gz`, made with
+  [`summarise_trait_means()`](https://traitecoevo.github.io/traits.use/reference/summarise_trait_means.md)),
+  rather than the database: a much smaller download (AusTraits: about 15
+  MB). It uses the same cache, checksum and version message as the
+  database; load each to have both. A release without the file says so.
+  The `extract_*()` functions take the table like any flat table.
+  [`list_cached_databases()`](https://traitecoevo.github.io/traits.use/reference/database_cache_dir.md)
+  and
+  [`clear_database_cache()`](https://traitecoevo.github.io/traits.use/reference/database_cache_dir.md)
+  count the means files they find.
 - New dataset `austraits_lite`: 24 datasets from AusTraits 7.0.0 (CC BY
   4.0), a small traits.build database to try the package on without
   downloading anything. The examples now use it and run; those of
