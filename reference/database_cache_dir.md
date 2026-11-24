@@ -93,7 +93,7 @@ every database in `path`, with its record file.
 
 ``` r
 database_cache_dir()
-#> [1] "/Users/runner/Library/Caches/org.R-project.R/R/traits.use"
+#> [1] "/home/runner/.cache/R/traits.use"
 list_cached_databases()
 #> # A tibble: 0 × 3
 #> # ℹ 3 variables: file <chr>, size_mb <dbl>, last_used <dttm>
