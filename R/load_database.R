@@ -2,7 +2,7 @@
 #'
 #' @description Loads a traits.build formatted database, given its doi. The doi is resolved to its repository, the
 #' relational database `.rds` file (or with `flattened = TRUE`, the flattened
-#' one) is downloaded (if there is no copy already,
+#' one, or with `means = TRUE`, the observed means published with it) is downloaded (if there is no copy already,
 #' or if the copy does not match the record's md5 checksum) and then loaded.
 #' Zenodo and Figshare records are supported, as are dois that resolve directly
 #' to an `.rds` file.
@@ -27,15 +27,24 @@
 #'   `source_primary_citation`, not `dataset_id_citation`).
 #'   It is several times larger than the relational database (AusTraits 7.0.0:
 #'   a 77 MB download, about 1 GB once loaded).
+#' @param means if `TRUE`, load the record's observed means instead: one row
+#'   per taxon and trait, made with [summarise_trait_means()] when the release
+#'   was built and published beside it as `<name>-<version>-observed-means.csv.gz`.
+#'   Releases of AusTraits after 7.0.0 include it. The file is much smaller
+#'   than the database (AusTraits: about 15 MB). To have both, load each; the
+#'   second call reuses the record fetched by the first. [trait_means_dictionary()]
+#'   defines the columns.
 #' @param update if TRUE, the record's metadata .json will be re-downloaded;
 #'   if that fails (e.g. offline), the saved copy is used. With `FALSE`, a
 #'   concept doi loads the version last fetched into `path`, which for the
 #'   cache folder may have been by another project.
 #'
 #' @return a large list containing traits.build data tables, or with
-#'   `flattened = TRUE`, a single table (tibble)
+#'   `flattened = TRUE`, a single table (tibble), or with `means = TRUE`, the
+#'   table of observed means (tibble)
 #' @export
-#' @seealso [database_cache_dir()]; `austraits::load_austraits()`, which loads
+#' @seealso [list_versions()] to find the dois of a database's releases;
+#'   [database_cache_dir()]; `austraits::load_austraits()`, which loads
 #'   a release of AusTraits by version number
 #'
 #' @examplesIf interactive()
@@ -44,13 +53,22 @@
 #' # downloading anything, see ?austraits_lite.
 #' austraits <- load_database(doi = "10.5281/zenodo.11188867")
 #'
+#' # The observed means of each taxon and trait, published with the release
+#' means <- load_database(doi = "10.5281/zenodo.11188867", means = TRUE)
+#'
 #' # Keeping a copy in a folder of your choice instead, here a temporary one
 #' austraits <- load_database(doi = "10.5281/zenodo.11188867",
 #'   path = file.path(tempdir(), "austraits"))
 
-load_database <- function(doi = NULL, path = NULL, update = TRUE, flattened = FALSE){
+load_database <- function(doi = NULL, path = NULL, update = TRUE, flattened = FALSE, means = FALSE){
   if(!is.logical(flattened) || length(flattened) != 1 || is.na(flattened)){
     rlang::abort("`flattened` must be TRUE or FALSE.")
+  }
+  if(!is.logical(means) || length(means) != 1 || is.na(means)){
+    rlang::abort("`means` must be TRUE or FALSE.")
+  }
+  if(flattened && means){
+    rlang::abort("Choose one of `flattened = TRUE` and `means = TRUE`: they load different files.")
   }
 
   # Is doi supplied?
@@ -68,9 +86,7 @@ load_database <- function(doi = NULL, path = NULL, update = TRUE, flattened = FA
     rlang::abort("`path` must be a single folder path, or NULL for the cache folder.")
   }
 
-  # Remove any url prefix from doi
-  doi <- stringr::str_remove(doi, "^(https?://)?(dx\\.)?doi\\.org/") %>%
-    stringr::str_remove("^doi:")
+  doi <- clean_doi(doi)
 
   # Does the path exist?
   if(! file.exists(path)) {
@@ -85,9 +101,56 @@ load_database <- function(doi = NULL, path = NULL, update = TRUE, flattened = FA
     message("doi '", doi, "' is version ", record$version)
   }
 
-  # The relational (or flattened) database .rds among the record's files
-  files <- database_file(record$files, doi, flattened = flattened)
+  # The relational (or flattened) database .rds, or the observed means, among
+  # the record's files
+  files <- if(means) means_file(record$files, doi) else database_file(record$files, doi, flattened = flattened)
+  file_nm <- fetch_record_file(files, doi, path, use_cache)
 
+  if(means){
+    message("Loading observed means from '", file_nm, "'")
+    return(read_trait_means(file_nm))
+  }
+
+  # Loading the .rds
+  message("Loading data from '", file_nm,"'")
+  data <- readRDS(file_nm)
+
+  if(isTRUE(flattened)){
+    if(! is.data.frame(data) || ! all(c("dataset_id", "taxon_name", "trait_name", "value") %in% names(data))){
+      rlang::abort(paste0("'", file_nm, "' is not a flattened traits.build database!"))
+    }
+    # A file flattened since #41 holds a stamped `traits.build_flat` tibble;
+    # as_tibble() would drop its class, so convert only an older plain table
+    if(! tibble::is_tibble(data)){
+      data <- tibble::as_tibble(data)
+    }
+    return(data)
+  }
+
+  # Check it looks like a traits.build database
+  if(! is.list(data) | ! all(c("traits", "taxa", "methods") %in% names(data))){
+    rlang::abort(paste0("'", file_nm, "' is not a traits.build database!"))
+  }
+
+  # Assign class, and let `$` look up sources by key
+  attr(data, "class") <- "traits.build"
+  data <- classify_sources(data)
+
+  data
+}
+
+#' Download one of a record's files into `path`, unless a copy matching its
+#' md5 is already there
+#'
+#' @param files the one row of the record's files to fetch (`key`, `url`, `md5`)
+#' @param doi the doi, used in messages
+#' @param path the folder to keep it in
+#' @param use_cache whether `path` is the shared cache folder
+#' @return the path of the local copy
+#' @noRd
+#' @keywords internal
+
+fetch_record_file <- function(files, doi, path, use_cache){
   url <- files$url
   file_nm <- file.path(path, basename(files$key))
   md5 <- if(is.null(files$md5)) NA_character_ else files$md5
@@ -123,32 +186,59 @@ load_database <- function(doi = NULL, path = NULL, update = TRUE, flattened = FA
     Sys.setFileTime(file_nm, Sys.time())
   }
 
-  # Loading the .rds
-  message("Loading data from '", file_nm,"'")
-  data <- readRDS(file_nm)
+  file_nm
+}
 
-  if(isTRUE(flattened)){
-    if(! is.data.frame(data) || ! all(c("dataset_id", "taxon_name", "trait_name", "value") %in% names(data))){
-      rlang::abort(paste0("'", file_nm, "' is not a flattened traits.build database!"))
-    }
-    # A file flattened since #41 holds a stamped `traits.build_flat` tibble;
-    # as_tibble() would drop its class, so convert only an older plain table
-    if(! tibble::is_tibble(data)){
-      data <- tibble::as_tibble(data)
-    }
-    return(data)
+#' Pick the observed means from a record's files
+#'
+#' The table [summarise_trait_means()] made when the release was built, as
+#' `<name>-<version>-observed-means.csv.gz` (AusTraits also publishes a
+#' parquet copy, which is not needed). Its column dictionary is not loaded.
+#'
+#' @param files data frame of the record's files (`key`, `url`, `md5`)
+#' @param doi the doi, used in messages
+#' @return the one row of `files` to download
+#' @noRd
+#' @keywords internal
+
+means_file <- function(files, doi){
+  files <- files[grepl("[-_.]observed-means\\.csv\\.gz$", files$key, ignore.case = TRUE), , drop = FALSE]
+
+  if(nrow(files) == 0) {
+    rlang::abort(paste0("No observed means (a file ending in '-observed-means.csv.gz') found for doi '", doi,
+                        "'. Releases published before the means were added do not have them; ",
+                        "summarise_trait_means() computes them from the database."))
   }
-
-  # Check it looks like a traits.build database
-  if(! is.list(data) | ! all(c("traits", "taxa", "methods") %in% names(data))){
-    rlang::abort(paste0("'", file_nm, "' is not a traits.build database!"))
+  if(nrow(files) > 1) {
+    rlang::abort(paste0("More than one observed-means file found for doi '", doi, "': ",
+                        paste(files$key, collapse = ", ")))
   }
+  files
+}
 
-  # Assign class, and let `$` look up sources by key
-  attr(data, "class") <- "traits.build"
-  data <- classify_sources(data)
+#' Read a published table of observed means
+#'
+#' Column types are those [summarise_trait_means()] gives; any other column,
+#' such as a `by` variable, is read as text.
+#'
+#' @param file the `.csv.gz`
+#' @noRd
+#' @keywords internal
 
-  data
+read_trait_means <- function(file){
+  rlang::check_installed("readr", reason = "to read the observed means.")
+  template <- trait_means_template()
+  types <- vapply(template, function(x) if(is.integer(x)) "i" else if(is.numeric(x)) "d" else "c", character(1))
+  col_types <- do.call(readr::cols, c(as.list(types), list(.default = "c")))
+
+  means <- readr::read_csv(file, col_types = col_types, na = "", progress = FALSE)
+
+  if(! all(c("taxon_name", "trait_name", "value") %in% names(means))){
+    rlang::abort(paste0("'", file, "' is not a table of observed means!"))
+  }
+  attr(means, "spec") <- NULL
+  attr(means, "problems") <- NULL
+  tibble::as_tibble(means)
 }
 
 
@@ -277,20 +367,11 @@ record_cache_size <- function(path, file_nm){
 #' @keywords internal
 
 resolve_doi_files <- function(doi){
-  # Zenodo dois contain the record id, so no need to resolve them
-  if(stringr::str_detect(doi, stringr::regex("^10\\.5281/zenodo\\.[0-9]+$", ignore_case = TRUE))){
-    landing_url <- paste0("https://zenodo.org/records/", stringr::str_extract(doi, "[0-9]+$"))
-  } else {
-    landing_url <- resolve_doi(doi)
-  }
+  landing_url <- doi_landing_url(doi)
 
   # Zenodo
-  if(stringr::str_detect(landing_url, "zenodo\\.org/")){
-    id <- stringr::str_match(landing_url, "zenodo\\.org/(?:api/)?records?/([0-9]+)")[, 2]
-
-    if(is.na(id)){
-      rlang::abort(paste0("Could not find Zenodo record id for doi '", doi, "'"))
-    }
+  if(is_zenodo(landing_url)){
+    id <- zenodo_id(doi, landing_url)
 
     # Concept record ids redirect to the latest version
     res <- jsonlite::read_json(paste0("https://zenodo.org/api/records/", id),
@@ -311,18 +392,8 @@ resolve_doi_files <- function(doi){
   }
 
   # Figshare
-  if(stringr::str_detect(landing_url, "figshare\\.com/")){
-    # Take the article id and version from the doi itself
-    # (10.6084/m9.figshare.<id>[.v<version>]); the landing url's slug can
-    # contain numbers too, so it is only a fallback.
-    ids <- stringr::str_match(doi, stringr::regex("figshare\\.([0-9]+)(?:\\.v([0-9]+))?/?$", ignore_case = TRUE))
-    if(is.na(ids[, 2])) {
-      ids <- stringr::str_match(landing_url, "/([0-9]+)(?:/([0-9]+))?/?$")
-    }
-
-    if(is.na(ids[, 2])){
-      rlang::abort(paste0("Could not find Figshare article id for doi '", doi, "'"))
-    }
+  if(is_figshare(landing_url)){
+    ids <- figshare_ids(doi, landing_url)
 
     api_url <- paste0("https://api.figshare.com/v2/articles/", ids[, 2])
     if(!is.na(ids[, 3])) {
@@ -350,6 +421,79 @@ resolve_doi_files <- function(doi){
 
   rlang::abort(paste0("doi '", doi, "' resolves to '", landing_url,
                       "', which is not a supported repository (Zenodo, Figshare or a direct .rds link)"))
+}
+
+#' Remove a url or `doi:` prefix, in any case, and trailing slashes from a doi
+#' @noRd
+#' @keywords internal
+
+clean_doi <- function(doi){
+  stringr::str_remove(doi, stringr::regex("^(https?://)?(dx\\.)?doi\\.org/", ignore_case = TRUE)) %>%
+    stringr::str_remove(stringr::regex("^doi:", ignore_case = TRUE)) %>%
+    stringr::str_remove("/+$")
+}
+
+#' The landing page url of a doi
+#'
+#' Zenodo dois contain the record id, so are not sent to doi.org
+#' @noRd
+#' @keywords internal
+
+doi_landing_url <- function(doi){
+  if(stringr::str_detect(doi, stringr::regex("^10\\.5281/zenodo\\.[0-9]+$", ignore_case = TRUE))){
+    return(paste0("https://zenodo.org/records/", stringr::str_extract(doi, "[0-9]+$")))
+  }
+  resolve_doi(doi)
+}
+
+#' Which repository a landing page url is in
+#' @noRd
+#' @keywords internal
+
+is_zenodo <- function(landing_url){
+  stringr::str_detect(landing_url, "zenodo\\.org/")
+}
+
+#' @rdname is_zenodo
+#' @noRd
+is_figshare <- function(landing_url){
+  stringr::str_detect(landing_url, "figshare\\.com/")
+}
+
+#' The Zenodo record id in a landing page url
+#' @noRd
+#' @keywords internal
+
+zenodo_id <- function(doi, landing_url){
+  id <- stringr::str_match(landing_url, "zenodo\\.org/(?:api/)?records?/([0-9]+)")[, 2]
+
+  if(is.na(id)){
+    rlang::abort(paste0("Could not find Zenodo record id for doi '", doi, "'"))
+  }
+
+  id
+}
+
+#' The Figshare article id and version of a doi
+#'
+#' Taken from the doi itself (`10.6084/m9.figshare.<id>[.v<version>]`); the
+#' landing url's slug can contain numbers too, so it is only a fallback.
+#' @return a one-row character matrix: the match, the article id and the
+#'   version (`NA` if the doi names no version)
+#' @noRd
+#' @keywords internal
+
+figshare_ids <- function(doi, landing_url){
+  ids <- stringr::str_match(doi, stringr::regex("figshare\\.([0-9]+)(?:\\.v([0-9]+))?/?$", ignore_case = TRUE))
+  if(is.na(ids[, 2])) {
+    ids <- stringr::str_match(landing_url, "/([0-9]+)(?:/([0-9]+))?/?$")
+  }
+
+  if(is.na(ids[, 2])){
+    rlang::abort(paste0("Could not find Figshare article id for doi '", doi, "'"))
+  }
+
+  ids
 }
 
 #' Check a file against its md5 checksum

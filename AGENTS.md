@@ -7,14 +7,16 @@
 - **Code:** `R/` (functions), `tests/` (testthat), `man/` (generated docs), `NAMESPACE`,
   `data-raw/` and `inst/` hold raw assets (incl. the cheatsheet); `data/austraits_lite.rda` is the exported example database (24 datasets of AusTraits 7.0.0, used by the examples); `R/sysdata.rda` holds the tests' fixtures: `austraits_5.0.0_lite` (23 datasets of 5.0.0, the main one) and tiny 3.0.2/4.2.0 ones for version checks. Regenerate both with `data-raw/create_data.R`.
 - **Access entry point:** `load_database()` (`R/load_database.R`) loads any traits.build database from its doi
-  (Zenodo, Figshare, or a doi resolving directly to an `.rds`).
+  (Zenodo, Figshare, or a doi resolving directly to an `.rds`). `flattened = TRUE` loads the flattened table and `means = TRUE` the observed means published with the release (`*-observed-means.csv.gz`); `means_file()` picks that file and `cached_records()` (`R/database_cache.R`) must know every kind of file `load_database()` downloads. `list_versions()` (`R/list_versions.R`) lists a record's releases; it resolves a doi with the same helpers as `load_database()`, at the end of `R/load_database.R`.
 - **AusTraits-specific code lives in `austraits`, not here** (decided 2026-11-14, #13): `load_austraits()`,
-  `get_versions()` / `get_version_latest()`, the AusTraits vignette and the map of Australia. `plot_locations()`
+  `get_versions()` / `get_version_latest()`, the AusTraits vignette and the map of Australia. The generic part of
+  `get_versions()` is `list_versions()` here (#52), which lists the releases of any Zenodo or Figshare record. `plot_locations()`
   draws over a world map cropped to the locations by default (`inst/extdata/world_land.rds`, from
   `data-raw/world_land.R`), and takes a `basemap` data frame so `austraits` can pass its map.
 - **Wrangle/extract:** `extract_*()` (data/dataset/taxa/trait), `join_*()` (taxa, methods,
   contributors, locations, context/location properties), `lookup_*()`, `trait_pivot_longer/wider()`,
   `summarise_database()`, `bind_databases()`, `flatten_database()`, `as_wide_table()`.
+- **Trait means:** `summarise_trait_means()` (`R/summarise_trait_means.R`, #50) gives one row per taxon and trait: the observed mean of a numeric trait (a geometric mean) and the most frequent value of a categorical one, optionally split `by` further variables. It takes both input formats. AusTraits publishes its output with each release (austraits.build's `post_export()`), and the API and portal are to read that file, so a change to the method changes published numbers: say so in NEWS. The method's terms ("observed mean", never "average") follow `terminology.md` in traitecoevo/austraits-means. It is computed with group indices and `rowsum()`, not a grouped `summarise()`, which is about a hundred times slower on a full database (3.5 s against 100 s on AusTraits); keep it that way.
 - **Two input formats, told apart by class** (#41): the relational database (list, class `traits.build`) and a flat table (data frame; `flatten_database()` output has class `traits.build_flat` and a `traits.build_stamp` attribute). `database_format()` in `R/check_compatibility.R` is the one place that decides; don't branch on `dim()` or `is_tibble()`. `extract_trait/taxa/dataset()`, `summarise_database()` and the plots take both, so test them with both (`tests/testthat/test-flat.R`); everything else stops on a flat table via `check_compatibility()`.
 - **Build/test (standard R-package workflow):** `devtools::load_all()`, `devtools::test()`,
   `devtools::check()`. The package targets `R >= 4.1.0` (it uses `|>`); tidyverse-style Imports (dplyr, tidyr,
