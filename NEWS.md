@@ -1,3 +1,7 @@
+# traits.use (development version)
+
+- `list_versions()` lists a Zenodo record from its concept doi in one request rather than two, with Zenodo's search (AusTraits: about 4 s rather than 6.5 s from Sydney). It sorts the releases itself, newest publication date first and then highest version, so releases published on the same day are in version order whatever order the repository gives.
+
 # traits.use 1.0.0
 
 - `austraits_lite` now has the form of AusTraits 8.0.0 (traits.build data model 1.4.0), with `source_id` on every observation and the new reference columns of the `methods` table. It is compiled from AusTraits' source rather than taken from a release, so the example data can show the data model a release of traits.use reads before AusTraits is released with it (#13).
