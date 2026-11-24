@@ -423,13 +423,14 @@ resolve_doi_files <- function(doi){
                       "', which is not a supported repository (Zenodo, Figshare or a direct .rds link)"))
 }
 
-#' Remove a url or `doi:` prefix from a doi
+#' Remove a url or `doi:` prefix, in any case, and trailing slashes from a doi
 #' @noRd
 #' @keywords internal
 
 clean_doi <- function(doi){
-  stringr::str_remove(doi, "^(https?://)?(dx\\.)?doi\\.org/") %>%
-    stringr::str_remove("^doi:")
+  stringr::str_remove(doi, stringr::regex("^(https?://)?(dx\\.)?doi\\.org/", ignore_case = TRUE)) %>%
+    stringr::str_remove(stringr::regex("^doi:", ignore_case = TRUE)) %>%
+    stringr::str_remove("/+$")
 }
 
 #' The landing page url of a doi

@@ -26,7 +26,7 @@
 #' austraits <- load_database(doi = versions$doi[1])
 
 list_versions <- function(doi){
-  if(!is.character(doi) || length(doi) != 1 || is.na(doi) || !nzchar(doi)){
+  if(!is.character(doi) || length(doi) != 1 || is.na(doi) || !nzchar(clean_doi(doi))){
     rlang::abort("`doi` must be a single doi.")
   }
 
@@ -73,8 +73,10 @@ zenodo_versions <- function(id){
     hits <- res$hits$hits
     if(length(hits) == 0 || NROW(hits) == 0) break
 
+    # version is optional on Zenodo: a page where no release has one has no
+    # version column at all
     versions[[page]] <- tibble::tibble(
-      version = as.character(hits$metadata$version),
+      version = if(is.null(hits$metadata$version)) NA_character_ else as.character(hits$metadata$version),
       doi = hits$doi,
       publication_date = hits$metadata$publication_date
     )
@@ -82,6 +84,10 @@ zenodo_versions <- function(id){
     total <- res$hits$total
     if(!is.numeric(total) || sum(vapply(versions, nrow, integer(1))) >= total) break
     page <- page + 1
+  }
+
+  if(length(versions) == 0){
+    rlang::abort(paste0("Zenodo lists no versions of record ", id))
   }
 
   dplyr::bind_rows(versions)
@@ -103,6 +109,9 @@ figshare_versions <- function(id){
     rlang::abort(paste0("Figshare lists no published versions of article ", id))
   }
 
+  # Newest first, as Zenodo lists them, so list_versions() keeps versions
+  # published on the same day newest first too
+  index <- index[order(index$version, decreasing = TRUE), , drop = FALSE]
   records <- lapply(index$url, jsonlite::read_json, simplifyVector = TRUE)
 
   tibble::tibble(

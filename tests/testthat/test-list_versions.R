@@ -1,6 +1,6 @@
 # A fake Zenodo record of 30 releases, published one a day, served in pages
 # of `size` like the versions endpoint
-zenodo_fake <- function(n = 30, concept = 100, latest = 200 + n) {
+zenodo_fake <- function(n = 30, concept = 100, latest = 200 + n, version = TRUE) {
   ids <- 200 + seq_len(n)
   requested <- character()
   read_json <- function(url, ...) {
@@ -16,8 +16,8 @@ zenodo_fake <- function(n = 30, concept = 100, latest = 200 + n) {
       i <- i[!is.na(i)]
       hits <- if (length(i) == 0) list() else data.frame(doi = paste0("10.5281/zenodo.", i))
       if (length(i) > 0) {
-        hits$metadata <- data.frame(version = paste0("v", i - 200, ".0.0"),
-                                    publication_date = as.character(as.Date("2020-01-01") + i - 200))
+        hits$metadata <- data.frame(publication_date = as.character(as.Date("2020-01-01") + i - 200))
+        if (version) hits$metadata$version <- paste0("v", i - 200, ".0.0")
       }
       return(list(hits = list(total = n, hits = hits)))
     }
@@ -50,6 +50,42 @@ test_that("list_versions() pages through every Zenodo release, newest first", {
   expect_equal(list_versions("10.5281/zenodo.205"), versions)
 })
 
+test_that("list_versions() stops at a full last page, and lists one release", {
+  # 25 releases fill one page exactly, so no second page is asked for
+  fake <- zenodo_fake(n = 25)
+  local_mocked_bindings(read_json = fake$read_json, .package = "jsonlite")
+  expect_equal(nrow(list_versions("10.5281/zenodo.100")), 25)
+  expect_length(fake$requested(), 2)
+
+  # A record of one release that records no version
+  fake <- zenodo_fake(n = 1, version = FALSE)
+  local_mocked_bindings(read_json = fake$read_json, .package = "jsonlite")
+  versions <- list_versions("10.5281/zenodo.201")
+  expect_equal(nrow(versions), 1)
+  expect_identical(versions$version, NA_character_)
+  expect_equal(versions$doi, "10.5281/zenodo.201")
+
+  # A record that lists no versions gives a clear error
+  local_mocked_bindings(
+    read_json = function(url, ...) if (grepl("/versions", url)) list(hits = list(total = 0, hits = list())) else list(id = 1),
+    .package = "jsonlite"
+  )
+  expect_error(list_versions("10.5281/zenodo.1"), "lists no versions")
+})
+
+test_that("list_versions() accepts a doi in any of its usual forms", {
+  for (doi in c("DOI:10.5281/zenodo.100", "HTTPS://DOI.ORG/10.5281/zenodo.100",
+                "https://dx.doi.org/10.5281/zenodo.100", "10.5281/zenodo.100/")) {
+    fake <- zenodo_fake(n = 2)
+    local_mocked_bindings(read_json = fake$read_json, .package = "jsonlite")
+    expect_equal(nrow(list_versions(doi)), 2)
+    # Read as a Zenodo doi, without asking doi.org
+    expect_equal(fake$requested()[1], "https://zenodo.org/api/records/100")
+  }
+  expect_error(list_versions("doi:"), "single doi")
+  expect_error(list_versions("https://doi.org/"), "single doi")
+})
+
 test_that("list_versions() keeps Zenodo's order for releases of one day", {
   local_mocked_bindings(
     read_json = function(url, ...) {
@@ -73,20 +109,24 @@ test_that("list_versions() lists Figshare versions", {
     read_json = function(url, ...) {
       requested <<- c(requested, url)
       if (grepl("/versions$", url)) {
-        return(data.frame(version = 1:2, url = paste0(url, "/", 1:2)))
+        return(data.frame(version = 1:3, url = paste0(url, "/", 1:3)))
       }
       v <- as.integer(stringr::str_extract(url, "[0-9]+$"))
+      # Versions 2 and 3 published on the same day
       list(version = v, doi = paste0("10.6084/m9.figshare.12345678.v", v),
-           published_date = paste0("2019-0", v, "-01T10:00:00Z"))
+           published_date = c("2019-01-01T10:00:00Z", "2019-02-01T10:00:00Z", "2019-02-01T15:00:00Z")[v])
     },
     .package = "jsonlite"
   )
 
   versions <- list_versions("10.6084/m9.figshare.12345678.v1")
-  expect_equal(versions$version, c("2", "1"))
-  expect_equal(versions$doi, c("10.6084/m9.figshare.12345678.v2", "10.6084/m9.figshare.12345678.v1"))
-  expect_equal(versions$publication_date, as.Date(c("2019-02-01", "2019-01-01")))
+  expect_equal(versions$version, c("3", "2", "1"))
+  expect_equal(versions$doi, paste0("10.6084/m9.figshare.12345678.v", 3:1))
+  expect_equal(versions$publication_date, as.Date(c("2019-02-01", "2019-02-01", "2019-01-01")))
   expect_equal(requested[1], "https://api.figshare.com/v2/articles/12345678/versions")
+
+  # A doi without a version lists the same versions
+  expect_equal(list_versions("10.6084/m9.figshare.12345678"), versions)
 })
 
 test_that("list_versions() gives clear errors", {
