@@ -16,7 +16,7 @@ join_context_properties(
 
 \item{format}{Specifies whether metadata from the contexts is output in a human readable format ("single_column_pretty"; default), with each context property added as a separate column ("many_columns") or using json syntax ("single_column_json").}
 
-\item{vars}{Location properties for which data is to be appended to the traits table, defaulting to all context properties (vars = "all").}
+\item{vars}{Context properties for which data is to be appended to the traits table, defaulting to all context properties (vars = "all").}
 
 \item{include_description}{A logical indicating whether to include (TRUE) or omit (FALSE) the context_property descriptions.}
 }

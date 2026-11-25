@@ -9,7 +9,7 @@ join_methods(database, vars = c("methods"))
 \arguments{
 \item{database}{traits.build database (list object)}
 
-\item{vars}{Columns from the taxa table to be joined to the traits table, defaulting to c("methods").}
+\item{vars}{Columns from the methods table to be joined to the traits table, defaulting to c("methods").}
 }
 \value{
 traits.build list object, but with additional fields (columns) for the specified variables from the methods table appended to the traits table.

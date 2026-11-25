@@ -11,7 +11,7 @@ join_contributors(database, format = "single_column_pretty", vars = "all")
 
 \item{format}{Specifies whether metadata from the contributors table is output in a human readable format ("single_column_pretty"; default) or using json syntax ("single_column_json").}
 
-\item{vars}{Columns from the taxa table to be joined to the traits table, defaulting to all columns (vars = "all").}
+\item{vars}{Columns from the contributors table to be joined to the traits table, defaulting to all columns (vars = "all").}
 }
 \value{
 traits.build list object, but with additional fields (columns) for the specified variables from the data contributors table appended to the traits table.
