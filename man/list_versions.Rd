@@ -34,6 +34,6 @@ austraits <- load_database(doi = versions$doi[1])
 \dontshow{\}) # examplesIf}
 }
 \seealso{
-\code{\link[=load_database]{load_database()}}; \code{austraits::get_versions()}, which lists the
-releases of AusTraits
+\code{\link[=load_database]{load_database()}}; \code{austraits::get_versions()}, which calls this
+for AusTraits and keeps a copy of the list for offline use
 }
