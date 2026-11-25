@@ -279,13 +279,16 @@ load_record_json <- function(doi, path, update){
 #' @param doi the doi, used in messages
 #' @param flattened if `TRUE`, pick the flattened database .rds instead
 #' @return the one row of `files` that load_database() downloads; an error if
-#'   there is not exactly one. clear_database_cache() uses this too, so it
+#'   there is not exactly one. An observed-means .rds is never picked. clear_database_cache() uses this too, so it
 #'   only ever claims the files load_database() wrote.
 #' @noRd
 #' @keywords internal
 
 database_file <- function(files, doi, flattened = FALSE){
-  is_rds <- grepl("\\.rds$", files$key, ignore.case = TRUE)
+  # The observed means are not a database, though a release may publish them
+  # as .rds beside the .csv.gz (AusTraits 8.0.0 does); means = TRUE loads them
+  is_rds <- grepl("\\.rds$", files$key, ignore.case = TRUE) &
+    !grepl("[-_.]observed-means\\.rds$", files$key, ignore.case = TRUE)
 
   if(! any(is_rds)){
     rlang::abort(paste0("No .rds file found for doi '", doi,

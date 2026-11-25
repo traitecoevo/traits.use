@@ -1,3 +1,7 @@
+# traits.use 1.0.1
+
+- `load_database()` (and so `austraits::load_austraits()`) can load AusTraits 8.0.0. It stopped with "More than one .rds file found" because the release publishes its observed means as `.rds` too (`austraits-8.0.0-observed-means.rds`), and only the flattened `.rds` was set aside when picking the database. The observed-means `.rds` is now never taken for the database; `means = TRUE` still loads the means from the `.csv.gz`.
+
 # traits.use 1.0.0
 
 - `austraits_lite` now has the form of AusTraits 8.0.0 (traits.build data model 1.4.0), with `source_id` on every observation and the new reference columns of the `methods` table. It is compiled from AusTraits' source rather than taken from a release, so the example data can show the data model a release of traits.use reads before AusTraits is released with it (#13).
