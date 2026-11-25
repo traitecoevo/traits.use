@@ -1,32 +1,30 @@
 
 # Miscellaneous bugs that have been raised
-# Want this file to come after loading so that dataset is available
 
 test_that("Dataframe is extracted correctly", {
-  # Downloads AusTraits 5.0.0 from Zenodo unless it is already cached
-  skip_on_cran()
-  skip_if_offline()
-  austraits <- suppressMessages(load_database(doi = "10.5281/zenodo.10156222", path = "ignore/data/austraits"))
-  
-  # Extract Veronica first
-  veronica <- extract_taxa(austraits, genus = "Veronica")
-  
-  # Filter to lifespan traits using dplyr
-  veronica_lifespan <- veronica$traits %>%
-    dplyr::filter(trait_name == "lifespan")
-  
+  # Extracting by genus then trait gives the same values as by trait then genus
+  austraits <- austraits_lite
+
+  # Extract Acacia first
+  acacia <- extract_taxa(austraits, genus = "Acacia")
+
+  # Filter to leaf area using dplyr
+  acacia_leaf_area <- acacia$traits %>%
+    dplyr::filter(trait_name == "leaf_area")
+  expect_gt(nrow(acacia_leaf_area), 0)
+
   # Extract trait after
-  veronica %>%  extract_trait("lifespan") -> genus_first
-  
+  acacia %>% extract_trait("leaf_area") -> genus_first
+
   # Extract trait first
-  austraits %>% extract_trait("lifespan") -> lifespan
-  
+  austraits %>% extract_trait("leaf_area") -> leaf_area
+
   # Extract taxa after
-  lifespan %>% extract_taxa(genus = "Veronica") -> trait_first
-  
-  expect_setequal(trait_first$traits$value, veronica_lifespan$value)
+  leaf_area %>% extract_taxa(genus = "Acacia") -> trait_first
+
+  expect_setequal(trait_first$traits$value, acacia_leaf_area$value)
   expect_setequal(trait_first$traits$value, genus_first$traits$value)
-  expect_setequal(veronica_lifespan$value, genus_first$traits$value)
+  expect_setequal(acacia_leaf_area$value, genus_first$traits$value)
 })
 
 test_that("Function executes - convert functions", {
@@ -42,9 +40,10 @@ test_that("Function executes - convert functions", {
 
 
 test_that("Function throws error - function not supported", {
+  expect_error(function_not_supported(austraits_lite$traits))
   expect_error(
-    function_not_supported(austraits_3.0.2_lite)
+    function_not_supported(list(traits = austraits_lite$traits, metadata = list(title = "x"))),
+    "doesn't look like a database built by traits.build"
   )
-  expect_error( function_not_supported(austraits_4.2.0_lite))
 }
 )
