@@ -26,7 +26,7 @@
 #' [load_database()] a `path`; the functions here take the same `path`. They
 #' only ever touch the files [load_database()] wrote there: the database
 #' `.rds` files (relational or flattened) and the observed means
-#' (`*-observed-means.csv.gz`) named in its record files (`10.*.json`, one per
+#' (`*-observed-means.rds` or `.csv.gz`) named in its record files (`10.*.json`, one per
 #' doi).
 #'
 #' @param path folder to list or clear; the cache folder by default.

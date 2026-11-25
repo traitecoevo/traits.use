@@ -176,6 +176,29 @@ test_that("A record whose only .rds is flattened is not downloaded", {
                "Only flattened .rds files found")
 })
 
+test_that("An observed-means .rds beside the database is not taken for it (AusTraits 8.0.0)", {
+  src <- tempfile("releases"); path_means <- tempfile("means")
+  on.exit(unlink(c(src, path_means), recursive = TRUE), add = TRUE)
+  release <- make_release(src, "8", 3)
+  # AusTraits 8.0.0's files, in the order Zenodo lists them
+  keys <- c("austraits-8.0.0-observed-means.rds", "MYtraits.rds", "austraits-8.0.0-flattened.rds",
+            "austraits-8.0.0-observed-means.csv.gz", "austraits-8.0.0-observed-means.parquet")
+  release$files <- data.frame(key = keys, url = c("file:///nowhere", release$files$url, rep("file:///nowhere", 3)),
+                              md5 = c(NA, release$files$md5, rep(NA, 3)))
+  local_mocked_bindings(resolve_doi_files = function(doi) release)
+  database <- suppressMessages(load_database(doi = "10.5281/zenodo.8", path = path_means))
+  expect_equal(nrow(database$traits), 3)
+  expect_identical(database_file(release$files, "x")$key, "MYtraits.rds")
+  expect_identical(database_file(release$files, "x", flattened = TRUE)$key, "austraits-8.0.0-flattened.rds")
+  expect_identical(list_cached_databases(path_means)$file, "MYtraits.rds")
+
+  # With only the means as .rds, the record has no database to load
+  release$files <- release$files[release$files$key != "MYtraits.rds", ]
+  expect_error(database_file(release$files, "x"), "Only flattened .rds files found")
+  release$files <- release$files[!grepl("flattened", release$files$key), ]
+  expect_error(database_file(release$files, "x"), "No .rds file found")
+})
+
 test_that("Without a path, databases are kept in the per-user cache and reused", {
   src <- tempfile("releases")
   cache <- tempfile("cache")
@@ -489,6 +512,37 @@ test_that("means = TRUE loads the observed means published with a release", {
   expect_error(load_database(doi = "10.5281/zenodo.9", path = path_means, means = TRUE, flattened = TRUE),
                "Choose one")
   expect_error(load_database(doi = "10.5281/zenodo.9", path = path_means, means = NA), "TRUE or FALSE")
+})
+
+test_that("means = TRUE reads the observed-means .rds when a release has one (AusTraits 8.0.0)", {
+  skip_if_not_installed("readr")
+  src <- tempfile("meanssrc"); path_means <- tempfile("means")
+  on.exit(unlink(c(src, path_means), recursive = TRUE), add = TRUE)
+  dir.create(src)
+
+  database <- extract_dataset(austraits_lite, "Falster_2003")
+  published <- summarise_trait_means(database)
+  saveRDS(database, file.path(src, "db-8.0.0.rds"))
+  saveRDS(published, file.path(src, "db-8.0.0-observed-means.rds"))
+  # rounded, as a csv round trip does, so a test that read it would not be identical
+  readr::write_csv(dplyr::mutate(published, value = signif(value, 3)), file.path(src, "db-8.0.0-observed-means.csv.gz"), na = "")
+  keys <- dir(src)
+  files <- data.frame(key = keys, url = vapply(file.path(src, keys), file_url, ""),
+                      md5 = unname(tools::md5sum(file.path(src, keys))))
+  local_mocked_bindings(
+    resolve_doi_files = function(doi) list(doi = doi, source = "zenodo", version = "8.0.0", files = files)
+  )
+
+  means <- suppressMessages(load_database(doi = "10.5281/zenodo.9", path = path_means, means = TRUE))
+  expect_identical(means, tibble::as_tibble(published))
+  expect_equal(dir(path_means, pattern = "csv|rds|parquet"), "db-8.0.0-observed-means.rds")
+  expect_setequal(list_cached_databases(path_means)$file, "db-8.0.0-observed-means.rds")
+
+  # a .rds that is not a table of means is refused
+  saveRDS(list(a = 1), file.path(src, "db-8.0.0-observed-means.rds"))
+  files$md5 <- unname(tools::md5sum(file.path(src, keys)))
+  expect_error(suppressMessages(load_database(doi = "10.5281/zenodo.9", path = tempfile("means2"), means = TRUE)),
+               "not a table of observed means")
 })
 
 test_that("a release without observed means says so", {

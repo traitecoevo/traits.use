@@ -64,7 +64,7 @@ To keep a copy of a database with a project instead, give
 \code{\link[=load_database]{load_database()}} a \code{path}; the functions here take the same \code{path}. They
 only ever touch the files \code{\link[=load_database]{load_database()}} wrote there: the database
 \code{.rds} files (relational or flattened) and the observed means
-(\verb{*-observed-means.csv.gz}) named in its record files (\code{10.*.json}, one per
+(\verb{*-observed-means.rds} or \code{.csv.gz}) named in its record files (\code{10.*.json}, one per
 doi).
 }
 \details{
