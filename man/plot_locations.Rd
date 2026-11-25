@@ -57,6 +57,3 @@ data$traits \%>\% plot_locations("trait_name", basemap = NULL)
 # land raster `r`. `austraits::plot_locations()` draws a map of Australia.
 \dontshow{\}) # examplesIf}
 }
-\author{
-Dony Indiarto - d.indiarto@student.unsw.edu.au
-}

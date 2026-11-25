@@ -17,10 +17,6 @@ Authors@R:
              role = "aut",
              email = "daniel.falster@unsw.edu.au",
              comment = c(ORCID = "0000-0002-9814-092X")),
-      person(given = "Dony",
-             family = "Indiarto",
-             role = "aut",
-             comment = c(ORCID = "0000-0001-9546-8201")),
       person("AusTraits contributors", role = "cph",
              comment = "AusTraits data in austraits_lite and the test data, see COPYRIGHTS"))
 Description: Load, explore and wrangle data from relational trait databases

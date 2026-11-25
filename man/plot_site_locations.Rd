@@ -21,6 +21,3 @@ ggplot of sites
 
 Plot location where trait data was collected from
 }
-\author{
-Dony Indiarto - d.indiarto@student.unsw.edu.au
-}
