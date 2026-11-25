@@ -43,7 +43,7 @@ it, and the examples use it. For analysis, load a full release with
 (\url{https://github.com/traitecoevo/austraits.build}) at a given commit, not
 taken from a release: traits.use is released before the AusTraits release
 whose data model it reads, so its example data follows the data model
-rather than the releases. This one was compiled from commit \code{a8ae3d94}
+rather than the releases. This one was compiled from commit \code{a019d137}
 with traits.build 3.0.0, so \code{metadata$version} is \code{"7.0.0.9000"} and
 \code{build_info$git_SHA} names the commit. Its values can differ a little
 from those of the same datasets in AusTraits 8.0.0.
