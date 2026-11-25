@@ -25,7 +25,6 @@ Authors:
   \item Elizabeth Wenk \email{e.wenk@unsw.edu.au} (\href{https://orcid.org/0000-0001-5640-5910}{ORCID}) [copyright holder]
   \item Fonti Kar \email{f.kar@unsw.edu.au} (\href{https://orcid.org/0000-0002-2760-3974}{ORCID}) [copyright holder]
   \item Daniel Falster \email{daniel.falster@unsw.edu.au} (\href{https://orcid.org/0000-0002-9814-092X}{ORCID})
-  \item Dony Indiarto (\href{https://orcid.org/0000-0001-9546-8201}{ORCID})
 }
 
 Other contributors:

@@ -16,7 +16,6 @@
 #'   the map (plus half a degree) are left out, with a message saying how many
 #'   records that affects; if no location lies on the map, it stops with an
 #'   error. The `austraits` package passes its map of Australia here.
-#' @author Dony Indiarto - d.indiarto@student.unsw.edu.au
 #' @return ggplot of sites
 #' @examplesIf rlang::is_installed(c("ggplot2", "ggpointdensity", "viridis"))
 #' # All traits from a given study
@@ -272,7 +271,6 @@ world_map_raster <- function(xlim, ylim, max_cells = 600){
 #' @param trait_data traits table in a traits.build database with site details appended. See join_location_coordinates and examples
 #' @param feature grouping/classification categories e.g trait_name, collection_type for <= v3.0.2
 #' @param ... arguments passed to ggplot()
-#' @author Dony Indiarto - d.indiarto@student.unsw.edu.au
 #' @return ggplot of sites
 #' @export
 
