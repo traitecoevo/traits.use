@@ -514,6 +514,37 @@ test_that("means = TRUE loads the observed means published with a release", {
   expect_error(load_database(doi = "10.5281/zenodo.9", path = path_means, means = NA), "TRUE or FALSE")
 })
 
+test_that("means = TRUE reads the observed-means .rds when a release has one (AusTraits 8.0.0)", {
+  skip_if_not_installed("readr")
+  src <- tempfile("meanssrc"); path_means <- tempfile("means")
+  on.exit(unlink(c(src, path_means), recursive = TRUE), add = TRUE)
+  dir.create(src)
+
+  database <- extract_dataset(austraits_lite, "Falster_2003")
+  published <- summarise_trait_means(database)
+  saveRDS(database, file.path(src, "db-8.0.0.rds"))
+  saveRDS(published, file.path(src, "db-8.0.0-observed-means.rds"))
+  # rounded, as a csv round trip does, so a test that read it would not be identical
+  readr::write_csv(dplyr::mutate(published, value = signif(value, 3)), file.path(src, "db-8.0.0-observed-means.csv.gz"), na = "")
+  keys <- dir(src)
+  files <- data.frame(key = keys, url = vapply(file.path(src, keys), file_url, ""),
+                      md5 = unname(tools::md5sum(file.path(src, keys))))
+  local_mocked_bindings(
+    resolve_doi_files = function(doi) list(doi = doi, source = "zenodo", version = "8.0.0", files = files)
+  )
+
+  means <- suppressMessages(load_database(doi = "10.5281/zenodo.9", path = path_means, means = TRUE))
+  expect_identical(means, tibble::as_tibble(published))
+  expect_equal(dir(path_means, pattern = "csv|rds|parquet"), "db-8.0.0-observed-means.rds")
+  expect_setequal(list_cached_databases(path_means)$file, "db-8.0.0-observed-means.rds")
+
+  # a .rds that is not a table of means is refused
+  saveRDS(list(a = 1), file.path(src, "db-8.0.0-observed-means.rds"))
+  files$md5 <- unname(tools::md5sum(file.path(src, keys)))
+  expect_error(suppressMessages(load_database(doi = "10.5281/zenodo.9", path = tempfile("means2"), means = TRUE)),
+               "not a table of observed means")
+})
+
 test_that("a release without observed means says so", {
   path_none <- tempfile("none")
   on.exit(unlink(path_none, recursive = TRUE), add = TRUE)

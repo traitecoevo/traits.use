@@ -29,8 +29,9 @@
 #'   a 77 MB download, about 1 GB once loaded).
 #' @param means if `TRUE`, load the record's observed means instead: one row
 #'   per taxon and trait, made with [summarise_trait_means()] when the release
-#'   was built and published beside it as `<name>-<version>-observed-means.csv.gz`.
-#'   Releases of AusTraits after 7.0.0 include it. The file is much smaller
+#'   was built and published beside it as `<name>-<version>-observed-means.rds`
+#'   (read when present: values exactly as computed) or `.csv.gz`.
+#'   Releases of AusTraits after 7.0.0 include them. The file is much smaller
 #'   than the database (AusTraits: about 15 MB). To have both, load each; the
 #'   second call reuses the record fetched by the first. [trait_means_dictionary()]
 #'   defines the columns.
@@ -108,7 +109,7 @@ load_database <- function(doi = NULL, path = NULL, update = TRUE, flattened = FA
 
   if(means){
     message("Loading observed means from '", file_nm, "'")
-    return(read_trait_means(file_nm))
+    return(if(grepl("\\.rds$", file_nm, ignore.case = TRUE)) read_trait_means_rds(file_nm) else read_trait_means(file_nm))
   }
 
   # Loading the .rds
@@ -192,8 +193,11 @@ fetch_record_file <- function(files, doi, path, use_cache){
 #' Pick the observed means from a record's files
 #'
 #' The table [summarise_trait_means()] made when the release was built, as
-#' `<name>-<version>-observed-means.csv.gz` (AusTraits also publishes a
-#' parquet copy, which is not needed). Its column dictionary is not loaded.
+#' `<name>-<version>-observed-means.rds` if the release has it (AusTraits from
+#' 8.0.0), else `.csv.gz`: the .rds holds the values exactly as computed (the
+#' .csv.gz rounds the last digit or so of a double) and is the smaller download.
+#' AusTraits also publishes a parquet copy, which is not needed. Its column
+#' dictionary is not loaded.
 #'
 #' @param files data frame of the record's files (`key`, `url`, `md5`)
 #' @param doi the doi, used in messages
@@ -202,10 +206,12 @@ fetch_record_file <- function(files, doi, path, use_cache){
 #' @keywords internal
 
 means_file <- function(files, doi){
-  files <- files[grepl("[-_.]observed-means\\.csv\\.gz$", files$key, ignore.case = TRUE), , drop = FALSE]
+  is_rds <- grepl("[-_.]observed-means\\.rds$", files$key, ignore.case = TRUE)
+  is_csv <- grepl("[-_.]observed-means\\.csv\\.gz$", files$key, ignore.case = TRUE)
+  files <- files[if(any(is_rds)) is_rds else is_csv, , drop = FALSE]
 
   if(nrow(files) == 0) {
-    rlang::abort(paste0("No observed means (a file ending in '-observed-means.csv.gz') found for doi '", doi,
+    rlang::abort(paste0("No observed means (a file ending in '-observed-means.rds' or '.csv.gz') found for doi '", doi,
                         "'. Releases published before the means were added do not have them; ",
                         "summarise_trait_means() computes them from the database."))
   }
@@ -238,6 +244,20 @@ read_trait_means <- function(file){
   }
   attr(means, "spec") <- NULL
   attr(means, "problems") <- NULL
+  tibble::as_tibble(means)
+}
+
+#' Read a published table of observed means saved as .rds
+#'
+#' @param file the `.rds`
+#' @noRd
+#' @keywords internal
+
+read_trait_means_rds <- function(file){
+  means <- readRDS(file)
+  if(! is.data.frame(means) || ! all(c("taxon_name", "trait_name", "value") %in% names(means))){
+    rlang::abort(paste0("'", file, "' is not a table of observed means!"))
+  }
   tibble::as_tibble(means)
 }
 

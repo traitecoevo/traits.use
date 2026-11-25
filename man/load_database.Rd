@@ -38,8 +38,9 @@ a 77 MB download, about 1 GB once loaded).}
 
 \item{means}{if \code{TRUE}, load the record's observed means instead: one row
 per taxon and trait, made with \code{\link[=summarise_trait_means]{summarise_trait_means()}} when the release
-was built and published beside it as \verb{<name>-<version>-observed-means.csv.gz}.
-Releases of AusTraits after 7.0.0 include it. The file is much smaller
+was built and published beside it as \verb{<name>-<version>-observed-means.rds}
+(read when present: values exactly as computed) or \code{.csv.gz}.
+Releases of AusTraits after 7.0.0 include them. The file is much smaller
 than the database (AusTraits: about 15 MB). To have both, load each; the
 second call reuses the record fetched by the first. \code{\link[=trait_means_dictionary]{trait_means_dictionary()}}
 defines the columns.}
