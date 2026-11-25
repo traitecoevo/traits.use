@@ -86,6 +86,10 @@ book](https://traitecoevo.github.io/traits.build-book/) explains how a
 traits.build database is structured: its tables, identifiers and how
 they link.
 
+### Cheat sheet
+
+[![](reference/figures/traits.use-cheatsheet.png)](https://github.com/traitecoevo/traits.use/blob/master/inst/cheatsheet/traits.use-cheatsheet.pdf)
+
 ## For AusTraits users
 
 AusTraits is built with traits.build, so everything in `traits.use`

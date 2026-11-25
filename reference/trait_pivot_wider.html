@@ -3,7 +3,7 @@
 Data in a traits.build databases' traits table are organised in a long format where each trait measurement is on a different row and measurement metadata is recorded in other columns. Multiple traits may be measured as part of a single observation and this function pivots the data wider, such that each trait is its own column. Note that if two trait measurements have the same observation_id but different value types (min, mean, mode, etc.) these will be on separate rows.
 To pivot its output back into long format, use tidyr::pivot_longer() (trait_pivot_longer() is deprecated)."><meta property="og:description" content="Function to &quot;widen&quot; long format data (&quot;tidy data&quot;).
 Data in a traits.build databases' traits table are organised in a long format where each trait measurement is on a different row and measurement metadata is recorded in other columns. Multiple traits may be measured as part of a single observation and this function pivots the data wider, such that each trait is its own column. Note that if two trait measurements have the same observation_id but different value types (min, mean, mode, etc.) these will be on separate rows.
-To pivot its output back into long format, use tidyr::pivot_longer() (trait_pivot_longer() is deprecated)."></head><body>
+To pivot its output back into long format, use tidyr::pivot_longer() (trait_pivot_longer() is deprecated)."><meta property="og:image" content="https://traitecoevo.github.io/traits.use/logo.png"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -32,8 +32,7 @@ To pivot its output back into long format, use tidyr::pivot_longer() (trait_pivo
 </nav><div class="container template-reference-topic">
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-
-      <h1>Pivot long format traits table into wide format</h1>
+      <img src="../logo.png" class="logo" alt=""><h1>Pivot long format traits table into wide format</h1>
       <small class="dont-index">Source: <a href="https://github.com/traitecoevo/traits.use/blob/master/R/trait_pivot_wider.R" class="external-link"><code>R/trait_pivot_wider.R</code></a></small>
       <div class="d-none name"><code>trait_pivot_wider.Rd</code></div>
     </div>

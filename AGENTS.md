@@ -33,6 +33,16 @@ submission is tracked in \#13.
   traits.build release → AusTraits release. Update
   [`?austraits_lite`](https://traitecoevo.github.io/traits.use/reference/austraits_lite.md)
   (`R/data.R`) and `inst/COPYRIGHTS` with the commit.
+- **Hex and cheat sheet** (decided 2026-11-25): the hex,
+  `man/figures/logo.png`, is drawn by `data-raw/hex.R` (traits.build’s
+  look, with the AusTraits sprig, `data-raw/austraits_sprig.svg`,
+  stamped on the database). The cheat sheet’s source is
+  `inst/cheatsheet/traits.use-cheatsheet.pptx`; after editing it, export
+  the PDF beside it and `man/figures/traits.use-cheatsheet.png` (the
+  README’s image, e.g. `pdftoppm -png -r 100 -singlefile`). It is set in
+  Source Sans Pro and Menlo: a LibreOffice export needs both in the
+  profile’s `user/fonts` folder, or it substitutes a serif. Update it
+  when exported functions or their arguments change.
 - **Access entry point:**
   [`load_database()`](https://traitecoevo.github.io/traits.use/reference/load_database.md)
   (`R/load_database.R`) loads any traits.build database from its doi
