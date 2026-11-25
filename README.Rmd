@@ -17,7 +17,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-# traits.use
+# traits.use <img src="man/figures/logo.png" align="right" alt="" width="120" />
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/traitecoevo/traits.use/actions/workflows/R-CMD-check.yml/badge.svg)](https://github.com/traitecoevo/traits.use/actions/workflows/R-CMD-check.yml)
@@ -69,6 +69,10 @@ summarise_database(wood_density, "family")
 ```
 
 The [Getting Started tutorial](https://traitecoevo.github.io/austraits/articles/austraits.html) in the `austraits` package walks through these functions using AusTraits. The [traits.build book](https://traitecoevo.github.io/traits.build-book/) explains how a traits.build database is structured: its tables, identifiers and how they link.
+
+### Cheat sheet
+
+<a href="https://github.com/traitecoevo/traits.use/blob/master/inst/cheatsheet/traits.use-cheatsheet.pdf"><img src="man/figures/traits.use-cheatsheet.png" width="60%"/></a>
 
 ## For AusTraits users
 
