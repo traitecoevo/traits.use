@@ -107,7 +107,7 @@ join_taxa <- function(database,
 #' @description Function to merge metadata from the taxonomic_updates table of a traits.build database into the core traits table.
 #' 
 #' @param database traits.build database (list object)
-#' @param vars Columns from the taxa table to be joined to the traits table, defaulting to c("aligned_name").
+#' @param vars Columns from the taxonomic_updates table to be joined to the traits table, defaulting to c("aligned_name").
 #' 
 #' @return traits.build list object, but with additional fields (columns) for the specified variables from the taxonomic_updates table appended to the traits table.
 #' @details
@@ -153,7 +153,7 @@ join_taxonomic_updates <- function(database, vars =  c("aligned_name")) {
 #' @description Function to merge metadata from the identifiers table of a traits.build database into the core traits table.
 #' 
 #' @param database traits.build database (list object)
-#' @param format Specifies whether metadata from the identifiers is output in a human readable format ("single_column_pretty"; default), with each location property added as a separate column ("many_columns") or using json syntax ("single_column_json").
+#' @param format Specifies whether metadata from the identifiers is output in a human readable format ("single_column_pretty"; default), with each identifier type added as a separate column ("many_columns") or using json syntax ("single_column_json").
 #' @param vars Identifier types for which data is to be appended to the traits table, defaulting to all identifier types (vars = "all").
 #' 
 #' @return traits.build list object, but with identifiers from the identifiers table appended to the traits table.
@@ -269,7 +269,7 @@ join_identifiers <- function(database,
 #' @description Function to merge metadata from the methods table of a traits.build database into the core traits table.
 #' 
 #' @param database traits.build database (list object)
-#' @param vars Columns from the taxa table to be joined to the traits table, defaulting to c("methods").
+#' @param vars Columns from the methods table to be joined to the traits table, defaulting to c("methods").
 #' 
 #' @return traits.build list object, but with additional fields (columns) for the specified variables from the methods table appended to the traits table.
 #' @details
@@ -388,7 +388,7 @@ join_sources <- function(database, vars = "all") {
 #' 
 #' @param database traits.build database (list object)
 #' @param format Specifies whether metadata from the contributors table is output in a human readable format ("single_column_pretty"; default) or using json syntax ("single_column_json").
-#' @param vars Columns from the taxa table to be joined to the traits table, defaulting to all columns (vars = "all").
+#' @param vars Columns from the contributors table to be joined to the traits table, defaulting to all columns (vars = "all").
 #' 
 #' @return traits.build list object, but with additional fields (columns) for the specified variables from the data contributors table appended to the traits table.
 #' @details
@@ -589,7 +589,7 @@ join_location_properties <- function(database,
 #' 
 #' @param database traits.build database (list object)
 #' @param format Specifies whether metadata from the contexts is output in a human readable format ("single_column_pretty"; default), with each context property added as a separate column ("many_columns") or using json syntax ("single_column_json").
-#' @param vars Location properties for which data is to be appended to the traits table, defaulting to all context properties (vars = "all").
+#' @param vars Context properties for which data is to be appended to the traits table, defaulting to all context properties (vars = "all").
 #' @param include_description A logical indicating whether to include (TRUE) or omit (FALSE) the context_property descriptions.
 #' 
 #' @return traits.build list object, but context properties from the contexts table appended to the traits table.

@@ -9,7 +9,7 @@ join_taxonomic_updates(database, vars = c("aligned_name"))
 \arguments{
 \item{database}{traits.build database (list object)}
 
-\item{vars}{Columns from the taxa table to be joined to the traits table, defaulting to c("aligned_name").}
+\item{vars}{Columns from the taxonomic_updates table to be joined to the traits table, defaulting to c("aligned_name").}
 }
 \value{
 traits.build list object, but with additional fields (columns) for the specified variables from the taxonomic_updates table appended to the traits table.

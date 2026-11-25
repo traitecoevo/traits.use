@@ -1,6 +1,6 @@
 # traits.use — agent & contributor guide
 
-`traits.use` is an R package for **loading, exploring and wrangling data** from any `traits.build` relational trait database, such as AusTraits. It began as the `austraits` package and was split out in 2026 (traitecoevo/austraits#188, history carried over). `austraits` (4.0.0) is now a thin AusTraits-specific layer over it. 0.1.1 (2026-11-23) was a GitHub-only release. The next release, the one for AusTraits 8.0.0 and the first on CRAN, is **1.0.0** (maintainer Elizabeth Wenk); it is tracked in #17 and its CRAN preparation in #13.
+`traits.use` is an R package for **loading, exploring and wrangling data** from any `traits.build` relational trait database, such as AusTraits. It began as the `austraits` package and was split out in 2026 (traitecoevo/austraits#188, history carried over). `austraits` (4.0.0) is now a thin AusTraits-specific layer over it. 0.1.1 (2026-11-23) was a GitHub-only release. **1.0.0** (2026-11-24, maintainer Elizabeth Wenk), the release for AusTraits 8.0.0, is released on GitHub (#17); its CRAN submission is tracked in #13.
 
 ## Repo-local guidance
 
@@ -18,7 +18,7 @@
   contributors, locations, context/location properties), `lookup_*()`, `trait_pivot_longer/wider()`,
   `summarise_database()`, `bind_databases()`, `flatten_database()`, `as_wide_table()`.
 - **Trait means:** `summarise_trait_means()` (`R/summarise_trait_means.R`, #50) gives one row per taxon and trait: the observed mean of a numeric trait (a geometric mean) and the most frequent value of a categorical one, optionally split `by` further variables. It takes both input formats. AusTraits publishes its output with each release (austraits.build's `post_export()`), and the API and portal are to read that file, so a change to the method changes published numbers: say so in NEWS. The method's terms ("observed mean", never "average") follow `terminology.md` in traitecoevo/austraits-means. It is computed with group indices and `rowsum()`, not a grouped `summarise()`, which is about a hundred times slower on a full database (3.5 s against 100 s on AusTraits); keep it that way.
-- **Two input formats, told apart by class** (#41): the relational database (list, class `traits.build`) and a flat table (data frame; `flatten_database()` output has class `traits.build_flat` and a `traits.build_stamp` attribute). `database_format()` in `R/check_compatibility.R` is the one place that decides; don't branch on `dim()` or `is_tibble()`. `extract_trait/taxa/dataset()`, `summarise_database()` and the plots take both, so test them with both (`tests/testthat/test-flat.R`); everything else stops on a flat table via `check_compatibility()`.
+- **Two input formats, told apart by class** (#41): the relational database (list, class `traits.build`) and a flat table (data frame; `flatten_database()` output has class `traits.build_flat` and a `traits.build_stamp` attribute). `database_format()` in `R/check_compatibility.R` is the one place that decides; don't branch on `dim()` or `is_tibble()`. `extract_trait/taxa/dataset/data()`, `summarise_database()`, `summarise_trait_means()` and the plots take both, so test them with both (`tests/testthat/test-flat.R`); everything else stops on a flat table, via `check_compatibility()` or `abort_flat_input()`.
 - **Build/test (standard R-package workflow):** `devtools::load_all()`, `devtools::test()`,
   `devtools::check()`. The package targets `R >= 4.1.0` (it uses `|>`); tidyverse-style Imports (dplyr, tidyr,
   purrr, etc.). Lifecycle badge is **experimental** until the first CRAN release.
@@ -26,12 +26,14 @@
 - **CRAN-bound:** `traits.use` must never `Import`/`Depend` on traits.build (not on CRAN, and +57 recursive dependencies). Keep network tests behind `skip_on_cran()` / `skip_if_offline()`.
 
 > Heads-up: `traits.use` (like `austraits` before it) is the *downstream* access/wrangle layer in the data pipeline, but the
-> R-package install graph runs the other way — `traits.build` **Depends on `traits.use` (>= 0.1.1)** and
+> R-package install graph runs the other way — `traits.build` **Depends on `traits.use` (>= 1.0.0)** and
 > imports a few conversion helpers from it (`convert_df_to_list`, `convert_list_to_df1`,
 > `convert_list_to_df2`, `bind_databases`, `flatten_database`) and re-exports the trait plots
 > (`plot_trait_distribution()`, `plot_categorical_trait_distribution()`,
 > `plot_trait_distribution_jitter()`). Changing any of these can break `traits.build`; run its tests
-> after touching them. `austraits` and `austraits.portal` also `Import` traits.use.
+> after touching them. `austraits` and `austraits.portal` also `Import` traits.use, and `austraits`
+> re-exports nearly every traits.use function (wrapping `plot_locations()`), so adding, renaming or
+> removing an export here needs a matching change there.
 
 > Heads-up: from Sept 2024 the code works against any `traits.build` database (not just
 > `austraits.build`). `austraits.build` versions **< 5.0 are unsupported** by the current package —

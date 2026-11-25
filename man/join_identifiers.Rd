@@ -9,7 +9,7 @@ join_identifiers(database, format = "single_column_pretty", vars = "all")
 \arguments{
 \item{database}{traits.build database (list object)}
 
-\item{format}{Specifies whether metadata from the identifiers is output in a human readable format ("single_column_pretty"; default), with each location property added as a separate column ("many_columns") or using json syntax ("single_column_json").}
+\item{format}{Specifies whether metadata from the identifiers is output in a human readable format ("single_column_pretty"; default), with each identifier type added as a separate column ("many_columns") or using json syntax ("single_column_json").}
 
 \item{vars}{Identifier types for which data is to be appended to the traits table, defaulting to all identifier types (vars = "all").}
 }

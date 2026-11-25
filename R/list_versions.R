@@ -14,8 +14,8 @@
 #'   files are restricted is listed too, though [load_database()] cannot
 #'   download it.
 #' @export
-#' @seealso [load_database()]; `austraits::get_versions()`, which lists the
-#'   releases of AusTraits
+#' @seealso [load_database()]; `austraits::get_versions()`, which calls this
+#'   for AusTraits and keeps a copy of the list for offline use
 #'
 #' @examplesIf interactive()
 #' # The releases of AusTraits
