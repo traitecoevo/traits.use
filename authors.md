@@ -16,7 +16,7 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/traitecoevo/traits.use/blob/master/inst/CITATION)
+[`inst/CITATION`](https://github.com/traitecoevo/traits.use/blob/v1.0.0/inst/CITATION)
 
 Wenk, E., Kar, F. and Falster, D. (2026) traits.use: Access and Wrangle
 Data from 'traits.build' Trait Databases. R package version 1.0.0.
