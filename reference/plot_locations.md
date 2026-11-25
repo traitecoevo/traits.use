@@ -50,10 +50,6 @@ plot_locations(database, feature = "trait_name", ..., basemap = "world")
 
 ggplot of sites
 
-## Author
-
-Dony Indiarto - d.indiarto@student.unsw.edu.au
-
 ## Examples
 
 ``` r

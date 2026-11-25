@@ -29,7 +29,3 @@ plot_site_locations(trait_data, feature = "trait_name", ...)
 ## Value
 
 ggplot of sites
-
-## Author
-
-Dony Indiarto - d.indiarto@student.unsw.edu.au

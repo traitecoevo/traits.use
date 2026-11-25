@@ -35,8 +35,6 @@ Authors:
 - Daniel Falster <daniel.falster@unsw.edu.au>
   ([ORCID](https://orcid.org/0000-0002-9814-092X))
 
-- Dony Indiarto ([ORCID](https://orcid.org/0000-0001-9546-8201))
-
 Other contributors:
 
 - AusTraits contributors (AusTraits data in austraits_lite and the test

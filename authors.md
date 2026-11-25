@@ -10,23 +10,21 @@
 
 - **Daniel Falster**. Author. [](https://orcid.org/0000-0002-9814-092X)
 
-- **Dony Indiarto**. Author. [](https://orcid.org/0000-0001-9546-8201)
-
 - **AusTraits contributors**. Copyright holder.  
   AusTraits data in austraits_lite and the test data, see COPYRIGHTS
 
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/traitecoevo/traits.use/blob/v1.0.0/inst/CITATION)
+[`inst/CITATION`](https://github.com/traitecoevo/traits.use/blob/master/inst/CITATION)
 
-Wenk, E., Kar, F., Falster, D. and Indiarto, D. (2026) traits.use:
-Access and Wrangle Data from 'traits.build' Trait Databases. R package
-version 1.0.0. https://github.com/traitecoevo/traits.use
+Wenk, E., Kar, F. and Falster, D. (2026) traits.use: Access and Wrangle
+Data from 'traits.build' Trait Databases. R package version 1.0.0.
+https://github.com/traitecoevo/traits.use
 
     @Manual{,
       title = {traits.use: Access and Wrangle Data from 'traits.build' Trait Databases},
-      author = {Elizabeth Wenk and Fonti Kar and Daniel Falster and Dony Indiarto},
+      author = {Elizabeth Wenk and Fonti Kar and Daniel Falster},
       year = {2026},
       note = {R package version 1.0.0},
       url = {https://github.com/traitecoevo/traits.use},
