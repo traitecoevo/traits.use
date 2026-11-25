@@ -31,7 +31,8 @@ cannot download it.
 ## See also
 
 [`load_database()`](https://traitecoevo.github.io/traits.use/reference/load_database.md);
-`austraits::get_versions()`, which lists the releases of AusTraits
+`austraits::get_versions()`, which calls this for AusTraits and keeps a
+copy of the list for offline use
 
 ## Examples
 

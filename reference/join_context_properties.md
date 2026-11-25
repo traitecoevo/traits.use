@@ -29,7 +29,7 @@ join_context_properties(
 
 - vars:
 
-  Location properties for which data is to be appended to the traits
+  Context properties for which data is to be appended to the traits
   table, defaulting to all context properties (vars = "all").
 
 - include_description:

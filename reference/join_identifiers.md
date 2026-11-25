@@ -18,9 +18,9 @@ join_identifiers(database, format = "single_column_pretty", vars = "all")
 - format:
 
   Specifies whether metadata from the identifiers is output in a human
-  readable format ("single_column_pretty"; default), with each location
-  property added as a separate column ("many_columns") or using json
-  syntax ("single_column_json").
+  readable format ("single_column_pretty"; default), with each
+  identifier type added as a separate column ("many_columns") or using
+  json syntax ("single_column_json").
 
 - vars:
 

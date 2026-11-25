@@ -17,8 +17,8 @@ join_taxonomic_updates(database, vars = c("aligned_name"))
 
 - vars:
 
-  Columns from the taxa table to be joined to the traits table,
-  defaulting to c("aligned_name").
+  Columns from the taxonomic_updates table to be joined to the traits
+  table, defaulting to c("aligned_name").
 
 ## Value
 

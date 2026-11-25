@@ -23,7 +23,7 @@ join_contributors(database, format = "single_column_pretty", vars = "all")
 
 - vars:
 
-  Columns from the taxa table to be joined to the traits table,
+  Columns from the contributors table to be joined to the traits table,
   defaulting to all columns (vars = "all").
 
 ## Value

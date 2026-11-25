@@ -17,7 +17,7 @@ join_methods(database, vars = c("methods"))
 
 - vars:
 
-  Columns from the taxa table to be joined to the traits table,
+  Columns from the methods table to be joined to the traits table,
   defaulting to c("methods").
 
 ## Value

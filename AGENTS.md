@@ -5,9 +5,9 @@ data** from any `traits.build` relational trait database, such as
 AusTraits. It began as the `austraits` package and was split out in 2026
 (traitecoevo/austraits#188, history carried over). `austraits` (4.0.0)
 is now a thin AusTraits-specific layer over it. 0.1.1 (2026-11-23) was a
-GitHub-only release. The next release, the one for AusTraits 8.0.0 and
-the first on CRAN, is **1.0.0** (maintainer Elizabeth Wenk); it is
-tracked in \#17 and its CRAN preparation in \#13.
+GitHub-only release. **1.0.0** (2026-11-24, maintainer Elizabeth Wenk),
+the release for AusTraits 8.0.0, is released on GitHub (#17); its CRAN
+submission is tracked in \#13.
 
 ## Repo-local guidance
 
@@ -86,12 +86,14 @@ tracked in \#17 and its CRAN preparation in \#13.
   attribute). `database_format()` in `R/check_compatibility.R` is the
   one place that decides; don’t branch on
   [`dim()`](https://rdrr.io/r/base/dim.html) or `is_tibble()`.
-  `extract_trait/taxa/dataset()`,
-  [`summarise_database()`](https://traitecoevo.github.io/traits.use/reference/summarise_database.md)
+  `extract_trait/taxa/dataset/data()`,
+  [`summarise_database()`](https://traitecoevo.github.io/traits.use/reference/summarise_database.md),
+  [`summarise_trait_means()`](https://traitecoevo.github.io/traits.use/reference/summarise_trait_means.md)
   and the plots take both, so test them with both
-  (`tests/testthat/test-flat.R`); everything else stops on a flat table
+  (`tests/testthat/test-flat.R`); everything else stops on a flat table,
   via
-  [`check_compatibility()`](https://traitecoevo.github.io/traits.use/reference/check_compatibility.md).
+  [`check_compatibility()`](https://traitecoevo.github.io/traits.use/reference/check_compatibility.md)
+  or `abort_flat_input()`.
 - **Build/test (standard R-package workflow):** `devtools::load_all()`,
   `devtools::test()`, `devtools::check()`. The package targets
   `R >= 4.1.0` (it uses `|>`); tidyverse-style Imports (dplyr, tidyr,
@@ -106,7 +108,7 @@ tracked in \#17 and its CRAN preparation in \#13.
 > Heads-up: `traits.use` (like `austraits` before it) is the
 > *downstream* access/wrangle layer in the data pipeline, but the
 > R-package install graph runs the other way — `traits.build` **Depends
-> on `traits.use` (\>= 0.1.1)** and imports a few conversion helpers
+> on `traits.use` (\>= 1.0.0)** and imports a few conversion helpers
 > from it (`convert_df_to_list`, `convert_list_to_df1`,
 > `convert_list_to_df2`, `bind_databases`, `flatten_database`) and
 > re-exports the trait plots
@@ -115,7 +117,11 @@ tracked in \#17 and its CRAN preparation in \#13.
 > [`plot_trait_distribution_jitter()`](https://traitecoevo.github.io/traits.use/reference/plot_trait_distribution_jitter.md)).
 > Changing any of these can break `traits.build`; run its tests after
 > touching them. `austraits` and `austraits.portal` also `Import`
-> traits.use.
+> traits.use, and `austraits` re-exports nearly every traits.use
+> function (wrapping
+> [`plot_locations()`](https://traitecoevo.github.io/traits.use/reference/plot_locations.md)),
+> so adding, renaming or removing an export here needs a matching change
+> there.
 
 > Heads-up: from Sept 2024 the code works against any `traits.build`
 > database (not just `austraits.build`). `austraits.build` versions **\<
