@@ -27,7 +27,7 @@ test_that("lists every reference the database cites, sorted, with its type", {
   expect_false(anyNA(refs$citation))
   expect_equal(
     as.list(table(refs$type)),
-    list(dataset = 23L, secondary = 7L, source = 30L)
+    list(dataset = 9L, secondary = 7L, source = 15L)
   )
 
   # Westoby_2014's own reference is Gleason_2012 (`source_primary_key`)

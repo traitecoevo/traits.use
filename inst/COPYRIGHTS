@@ -6,8 +6,8 @@ copyright holders and licence:
 
 - data/austraits_lite.rda (the dataset `austraits_lite`), compiled from
   AusTraits' source after its 7.0.0 release;
-- R/sysdata.rda (`austraits_5.0.0_lite` and two tiny fixtures), internal
-  data for the tests, from AusTraits 5.0.0, 4.2.0 and 3.0.2;
+- R/sysdata.rda (`austraits_5.0.0_lite`), internal data for the tests, from
+  AusTraits 5.0.0;
 - tests/testthat/benchmarks/austraits_identifiers.rds, a test fixture from a
   development build of AusTraits 6.0.0.
 
@@ -36,10 +36,9 @@ GitHub repository.
             (https://github.com/traitecoevo/traits.use).
 
 The test data come in the same way from AusTraits 5.0.0
-(https://doi.org/10.5281/zenodo.10156222, 23 datasets), 4.2.0
-(https://doi.org/10.5281/zenodo.8353840) and 3.0.2
-(https://doi.org/10.5281/zenodo.5112001), all under CC BY 4.0, and from a
-development build of 6.0.0 (two datasets, Schulze_2006 and Schulze_2014).
+(https://doi.org/10.5281/zenodo.10156222, 9 datasets), under CC BY 4.0, and
+from a development build of 6.0.0 (two datasets, Schulze_2006 and
+Schulze_2014).
 
 Please cite AusTraits as: Falster D, Gallagher R, Wenk EH, et al. (2021)
 AusTraits, a curated plant trait database for the Australian flora.

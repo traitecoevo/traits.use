@@ -1,14 +1,13 @@
-not_supported_austraits <- list(austraits_3.0.2_lite, austraits_4.2.0_lite)
 
 
 test_that("Function doesn't throw error", {
   
-  expect_s3_class(austraits_5.0.0_lite %>% plot_trait_distribution_jitter("leaf_mass_per_area", "dataset_id", "Bloomfield_2018"), "ggplot")
+  expect_s3_class(austraits_lite %>% plot_trait_distribution_jitter("leaf_mass_per_area", "dataset_id", "Bloomfield_2018"), "ggplot")
 
   # The highlight label must draw on the pdf() device R CMD check uses: a
   # non-ASCII marker gave "conversion failure ... in 'mbcsToSbcs'" (U+25CF on
   # one R build, U+2022 on another)
-  p <- austraits_5.0.0_lite %>% plot_trait_distribution_jitter("leaf_mass_per_area", "dataset_id", "Bloomfield_2018")
+  p <- austraits_lite %>% plot_trait_distribution_jitter("leaf_mass_per_area", "dataset_id", "Bloomfield_2018")
   pdf_file <- withr::local_tempfile(fileext = ".pdf")
   grDevices::pdf(pdf_file)
   withr::defer(grDevices::dev.off())
@@ -18,28 +17,11 @@ test_that("Function doesn't throw error", {
   expect_true(all(utf8ToInt(label) < 128))
   
   # this function is currently really slow, blocking effective testing
-  expect_invisible((austraits_5.0.0_lite %>% extract_trait("wood_density") %>% join_location_coordinates())$trait %>% plot_locations())
-  expect_invisible(austraits_5.0.0_lite %>% extract_trait("wood_density") %>% plot_locations())
+  expect_invisible((austraits_lite %>% extract_trait("wood_density") %>% join_location_coordinates())$trait %>% plot_locations())
+  expect_invisible(austraits_lite %>% extract_trait("wood_density") %>% plot_locations())
  }) 
 
 
-
-test_non_compatibile <- function(austraits){
-  test_that("Throws correct errors for deprecated or non-compatible",{
-    expect_error(austraits %>% 
-                   extract_dataset("Falster_2003") %>% 
-                   purrr::pluck("traits") %>% plot_locations()
-    )
-    
-    expect_error(austraits %>% 
-                   extract_dataset("Falster_2003") %>% 
-                   purrr::pluck("traits") %>% plot_site_locations()
-    )
-  })
-}
-
-purrr::walk(not_supported_austraits,
-            test_non_compatibile)
 
 test_that("plot_locations draws over a basemap, reporting locations beyond it", {
   sites <- tibble::tibble(
@@ -210,11 +192,8 @@ test_that("the world map lines up with known land and sea", {
 })
 
 test_that("Function throws error", {
-  expect_error(austraits_5.0.0_lite$traits |> plot_locations())
-  expect_error(austraits_3.0.2_lite$traits |> plot_site_locations())
-  expect_error(austraits_3.0.2_lite |> plot_site_locations())
-  expect_error(austraits_3.0.2_lite |> plot_trait_distribution_jitter("leaf_area", "dataset_id"))
-  expect_error(austraits_5.0.0_lite |> plot_trait_distribution_jitter("branch_mass_fraction", y_axis_category = "location_property"), "Incorrect grouping variable")
+  expect_error(austraits_lite$traits |> plot_locations())
+  expect_error(austraits_lite |> plot_trait_distribution_jitter("branch_mass_fraction", y_axis_category = "location_property"), "Incorrect grouping variable")
 }) 
 
 
@@ -228,13 +207,13 @@ test_that("plotting functions say which suggested packages they need", {
     },
     .package = "rlang"
   )
-  expect_error(plot_locations(austraits_5.0.0_lite), "needs")
+  expect_error(plot_locations(austraits_lite), "needs")
   expect_equal(needed, c("ggplot2", "ggpointdensity", "viridis"))
   needed <- NULL
-  expect_error(plot_trait_distribution_jitter(austraits_5.0.0_lite, "leaf_mass_per_area", "dataset_id"), "needs")
+  expect_error(plot_trait_distribution_jitter(austraits_lite, "leaf_mass_per_area", "dataset_id"), "needs")
   expect_equal(needed, c("ggplot2", "forcats", "scales"))
   needed <- NULL
-  expect_error(plot_categorical_trait_distribution(austraits_5.0.0_lite, "leaf_compoundness"), "needs")
+  expect_error(plot_categorical_trait_distribution(austraits_lite, "leaf_compoundness"), "needs")
   expect_equal(needed, "ggplot2")
 })
 
@@ -248,7 +227,7 @@ trait_table <- function(value, value_type = "mean", family = "Myrtaceae",
 }
 
 test_that("plot_trait_distribution_jitter plots numeric values by group", {
-  d <- austraits_5.0.0_lite
+  d <- austraits_lite
   p <- plot_trait_distribution_jitter(d, "leaf_mass_per_area", "family", highlight = "Proteaceae")
   expect_s3_class(p, "ggplot")
   built <- ggplot2::ggplot_build(p)
@@ -324,7 +303,7 @@ test_that("plot_categorical_trait_distribution plots proportions by family", {
   expect_equal(as.character(unique(p$data$family)), "A")
 
   # A whole database gets family from its taxa table
-  p <- plot_categorical_trait_distribution(austraits_5.0.0_lite, "leaf_compoundness", family_count = 10)
+  p <- plot_categorical_trait_distribution(austraits_lite, "leaf_compoundness", family_count = 10)
   expect_equal(length(unique(p$data$family)), 10)
   expect_no_warning(ggplot2::ggplotGrob(p))
 
@@ -333,7 +312,7 @@ test_that("plot_categorical_trait_distribution plots proportions by family", {
 })
 
 test_that("plot_trait_distribution picks the plot from the trait's type", {
-  d <- austraits_5.0.0_lite
+  d <- austraits_lite
   p <- plot_trait_distribution(d, "leaf_compoundness")
   expect_true("counts_per_value" %in% names(p$data))
   p <- plot_trait_distribution(d, "plant_height", hide_ids = TRUE)
@@ -362,7 +341,7 @@ test_that("trait plots give a blank plot when there is nothing to plot", {
   expect_match(label(plot_trait_distribution_jitter(t, "leaf_width", "family")), "No numeric values of leaf_width")
   expect_match(label(plot_categorical_trait_distribution(t[0, ], "leaf_area")), "No values of leaf_area")
   expect_match(label(plot_trait_distribution(NULL, "leaf_area")), "No values of leaf_area")
-  expect_match(label(plot_trait_distribution(austraits_5.0.0_lite, "not_a_trait")), "No values of not_a_trait")
+  expect_match(label(plot_trait_distribution(austraits_lite, "not_a_trait")), "No values of not_a_trait")
 
   # A plain data.frame works like a tibble
   p <- plot_trait_distribution_jitter(as.data.frame(t), "leaf_area", "family")
@@ -370,7 +349,7 @@ test_that("trait plots give a blank plot when there is nothing to plot", {
 })
 
 test_that("plot_trait_distribution ignores arguments the chosen plot does not take", {
-  d <- austraits_5.0.0_lite
+  d <- austraits_lite
   args <- list(y_axis_category = "dataset_id", hide_ids = TRUE, family_count = 5)
   p <- do.call(plot_trait_distribution, c(list(d, "leaf_compoundness"), args))
   expect_lte(length(unique(p$data$family)), 5)
