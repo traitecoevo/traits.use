@@ -18,18 +18,11 @@ test_that("Error message is triggered", {
                             table = "taxa",
                             col = "genusss", 
                             col_value = "Acacia"))
-  expect_error(extract_data(at_six$traits, 
-                            col = "basis_of record", 
-                            col_value = "field lab"))
+  expect_error(extract_data(austraits_lite$traits,
+                            col = "basis_of record",
+                            col_value = "field lab"),
+               "basis_of record")
 })
-
-test_that("Function runs", {
-  expect_visible(austraits_lite %>% extract_taxa(family = family))
-  expect_visible(austraits_lite %>% extract_taxa(genus = genus))
-  expect_visible(extract_dataset(austraits_lite, dataset_id = dataset_id))
-  expect_visible(extract_trait(austraits_lite, trait_names = trait_name))
-}
-)
 
 test_that("Function runs", {
   expect_visible(austraits_lite %>% extract_taxa(family = family))

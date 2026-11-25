@@ -1,6 +1,5 @@
 
 # Miscellaneous bugs that have been raised
-# Want this file to come after loading so that dataset is available
 
 test_that("Dataframe is extracted correctly", {
   # Extracting by genus then trait gives the same values as by trait then genus

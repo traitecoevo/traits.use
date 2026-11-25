@@ -201,3 +201,11 @@ test_that("`file` must be one path", {
     expect_error(get_references(db, file = file), "single file path")
   }
 })
+
+test_that("a database built with traits.build 2.3 or later lists every reference, with no warning", {
+  expect_no_warning(refs <- get_references(austraits_lite))
+  expect_identical(refs$key, sort(unname(names(austraits_lite$sources)), method = "radix"))
+  expect_false(anyNA(refs$citation))
+  # Each dataset's own reference is keyed by its `dataset_id`
+  expect_true(all(unique(austraits_lite$methods$dataset_id) %in% refs$key[refs$type == "dataset"]))
+})

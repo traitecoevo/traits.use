@@ -96,10 +96,13 @@ test_that("`join_sources` adds each observation's references without adding rows
 })
 
 test_that("`flatten_database` takes references from `join_sources`, once", {
-  flat <- flatten_database(austraits_lite)
-  expect_true(all(c("dataset_id_citation", "source_id_citation") %in% names(flat)))
-  expect_false(any(c("source_primary_citation", "source_secondary_key") %in% names(flat)))
-  expect_false(any(grepl("\\.(x|y)$", names(flat))))
+  # Both forms of the methods table's reference columns give way
+  for (db in list(austraits_lite, austraits_5.0.0_lite)) {
+    flat <- flatten_database(db)
+    expect_true(all(c("dataset_id_citation", "source_id_citation") %in% names(flat)))
+    expect_false(any(c("source_primary_citation", "source_secondary_key") %in% names(flat)))
+    expect_false(any(grepl("\\.(x|y)$", names(flat))))
+  }
 })
 
 test_that("join_identifiers() works on a database without an identifiers table", {

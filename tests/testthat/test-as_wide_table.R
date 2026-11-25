@@ -22,7 +22,7 @@ test_that("Most-used columns come first and no column is dropped (#25)", {
     "secondary_citation", "taxonomic_status", "taxon_distribution", "taxon_rank", "genus",
     "family"
   )
-  for (db in list(austraits_lite, austraits_lite)) {
+  for (db in list(austraits_5.0.0_lite, austraits_lite)) {
     out <- as_wide_table(db)
     expect_identical(names(out)[seq_along(first)], first)
     expect_true(all(c("source_id", "repeat_measurements_id", "location_id", "taxon_id") %in% names(out)))

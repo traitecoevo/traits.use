@@ -193,6 +193,7 @@ test_that("the world map lines up with known land and sea", {
 
 test_that("Function throws error", {
   expect_error(austraits_lite$traits |> plot_locations())
+  expect_error(austraits_lite |> plot_site_locations(), "deprecated")
   expect_error(austraits_lite |> plot_trait_distribution_jitter("branch_mass_fraction", y_axis_category = "location_property"), "Incorrect grouping variable")
 }) 
 
