@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="index.html">traits.use</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.0.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -29,7 +29,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="logo.png" class="logo" alt=""><h1>traits.use — agent &amp; contributor guide</h1>
-      <small class="dont-index">Source: <a href="https://github.com/traitecoevo/traits.use/blob/v1.0.0/AGENTS.md" class="external-link"><code>AGENTS.md</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/traitecoevo/traits.use/blob/master/AGENTS.md" class="external-link"><code>AGENTS.md</code></a></small>
     </div>
 
 <div id="traitsuse--agent--contributor-guide" class="section level1">
@@ -44,7 +44,7 @@
 <li>
 <strong>Hex and cheat sheet</strong> (decided 2026-11-25): the hex, <code>man/figures/logo.png</code>, is drawn by <code>data-raw/hex.R</code> (traits.build’s look, with the AusTraits sprig, <code>data-raw/austraits_sprig.svg</code>, stamped on the database). The cheat sheet’s source is <code>inst/cheatsheet/traits.use-cheatsheet.pptx</code>; after editing it, export the PDF beside it and <code>man/figures/traits.use-cheatsheet.png</code> (the README’s image, e.g. <code>pdftoppm -png -r 100 -singlefile</code>). It is set in Source Sans Pro and Menlo: a LibreOffice export needs both in the profile’s <code>user/fonts</code> folder, or it substitutes a serif. Update it when exported functions or their arguments change.</li>
 <li>
-<strong>Access entry point:</strong> <code><a href="reference/load_database.html">load_database()</a></code> (<code>R/load_database.R</code>) loads any traits.build database from its doi (Zenodo, Figshare, or a doi resolving directly to an <code>.rds</code>). <code>flattened = TRUE</code> loads the flattened table and <code>means = TRUE</code> the observed means published with the release (<code>*-observed-means.csv.gz</code>); <code>means_file()</code> picks that file and <code>cached_records()</code> (<code>R/database_cache.R</code>) must know every kind of file <code><a href="reference/load_database.html">load_database()</a></code> downloads. <code><a href="reference/list_versions.html">list_versions()</a></code> (<code>R/list_versions.R</code>) lists a record’s releases; it resolves a doi with the same helpers as <code><a href="reference/load_database.html">load_database()</a></code>, at the end of <code>R/load_database.R</code>.</li>
+<strong>Access entry point:</strong> <code><a href="reference/load_database.html">load_database()</a></code> (<code>R/load_database.R</code>) loads any traits.build database from its doi (Zenodo, Figshare, or a doi resolving directly to an <code>.rds</code>). <code>flattened = TRUE</code> loads the flattened table and <code>means = TRUE</code> the observed means published with the release (<code>*-observed-means.rds</code> when present, else <code>.csv.gz</code>); <code>means_file()</code> picks that file and <code>cached_records()</code> (<code>R/database_cache.R</code>) must know every kind of file <code><a href="reference/load_database.html">load_database()</a></code> downloads. <code><a href="reference/list_versions.html">list_versions()</a></code> (<code>R/list_versions.R</code>) lists a record’s releases; it resolves a doi with the same helpers as <code><a href="reference/load_database.html">load_database()</a></code>, at the end of <code>R/load_database.R</code>.</li>
 <li>
 <strong>AusTraits-specific code lives in <code>austraits</code>, not here</strong> (decided 2026-11-14, #13): <code>load_austraits()</code>, <code>get_versions()</code> / <code>get_version_latest()</code>, the AusTraits vignette and the map of Australia. The generic part of <code>get_versions()</code> is <code><a href="reference/list_versions.html">list_versions()</a></code> here (#52), which lists the releases of any Zenodo or Figshare record. <code><a href="reference/plot_locations.html">plot_locations()</a></code> draws over a world map cropped to the locations by default (<code>inst/extdata/world_land.rds</code>, from <code>data-raw/world_land.R</code>), and takes a <code>basemap</code> data frame so <code>austraits</code> can pass its map.</li>
 <li>

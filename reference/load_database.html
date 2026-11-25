@@ -25,7 +25,7 @@ and delete what is there."><meta property="og:image" content="https://traitecoev
 
     <a class="navbar-brand me-2" href="../index.html">traits.use</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.0.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -47,7 +47,7 @@ and delete what is there."><meta property="og:image" content="https://traitecoev
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Load any traits.build database into R console</h1>
-      <small class="dont-index">Source: <a href="https://github.com/traitecoevo/traits.use/blob/v1.0.0/R/load_database.R" class="external-link"><code>R/load_database.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/traitecoevo/traits.use/blob/master/R/load_database.R" class="external-link"><code>R/load_database.R</code></a></small>
       <div class="d-none name"><code>load_database.Rd</code></div>
     </div>
 
@@ -113,8 +113,9 @@ a 77 MB download, about 1 GB once loaded).</p></dd>
 <dt id="arg-means">means<a class="anchor" aria-label="anchor" href="#arg-means"></a></dt>
 <dd><p>if <code>TRUE</code>, load the record's observed means instead: one row
 per taxon and trait, made with <code><a href="summarise_trait_means.html">summarise_trait_means()</a></code> when the release
-was built and published beside it as <code>&lt;name&gt;-&lt;version&gt;-observed-means.csv.gz</code>.
-Releases of AusTraits after 7.0.0 include it. The file is much smaller
+was built and published beside it as <code>&lt;name&gt;-&lt;version&gt;-observed-means.rds</code>
+(read when present: values exactly as computed) or <code>.csv.gz</code>.
+Releases of AusTraits after 7.0.0 include them. The file is much smaller
 than the database (AusTraits: about 15 MB). To have both, load each; the
 second call reuses the record fetched by the first. <code><a href="trait_means_dictionary.html">trait_means_dictionary()</a></code>
 defines the columns.</p></dd>

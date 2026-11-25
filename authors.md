@@ -16,17 +16,17 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/traitecoevo/traits.use/blob/v1.0.0/inst/CITATION)
+[`inst/CITATION`](https://github.com/traitecoevo/traits.use/blob/master/inst/CITATION)
 
 Wenk, E., Kar, F. and Falster, D. (2026) traits.use: Access and Wrangle
-Data from 'traits.build' Trait Databases. R package version 1.0.0.
+Data from 'traits.build' Trait Databases. R package version 1.0.1.
 https://github.com/traitecoevo/traits.use
 
     @Manual{,
       title = {traits.use: Access and Wrangle Data from 'traits.build' Trait Databases},
       author = {Elizabeth Wenk and Fonti Kar and Daniel Falster},
       year = {2026},
-      note = {R package version 1.0.0},
+      note = {R package version 1.0.1},
       url = {https://github.com/traitecoevo/traits.use},
     }
 

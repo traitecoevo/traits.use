@@ -34,8 +34,8 @@ a `path`; the functions here take the same `path`. They only ever touch
 the files
 [`load_database()`](https://traitecoevo.github.io/traits.use/reference/load_database.md)
 wrote there: the database `.rds` files (relational or flattened) and the
-observed means (`*-observed-means.csv.gz`) named in its record files
-(`10.*.json`, one per doi).
+observed means (`*-observed-means.rds` or `.csv.gz`) named in its record
+files (`10.*.json`, one per doi).
 
 ## Usage
 

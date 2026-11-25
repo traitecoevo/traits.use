@@ -48,9 +48,9 @@ submission is tracked in \#13.
   (`R/load_database.R`) loads any traits.build database from its doi
   (Zenodo, Figshare, or a doi resolving directly to an `.rds`).
   `flattened = TRUE` loads the flattened table and `means = TRUE` the
-  observed means published with the release (`*-observed-means.csv.gz`);
-  `means_file()` picks that file and `cached_records()`
-  (`R/database_cache.R`) must know every kind of file
+  observed means published with the release (`*-observed-means.rds` when
+  present, else `.csv.gz`); `means_file()` picks that file and
+  `cached_records()` (`R/database_cache.R`) must know every kind of file
   [`load_database()`](https://traitecoevo.github.io/traits.use/reference/load_database.md)
   downloads.
   [`list_versions()`](https://traitecoevo.github.io/traits.use/reference/list_versions.md)

@@ -73,10 +73,11 @@ load_database(
   and trait, made with
   [`summarise_trait_means()`](https://traitecoevo.github.io/traits.use/reference/summarise_trait_means.md)
   when the release was built and published beside it as
-  `<name>-<version>-observed-means.csv.gz`. Releases of AusTraits after
-  7.0.0 include it. The file is much smaller than the database
-  (AusTraits: about 15 MB). To have both, load each; the second call
-  reuses the record fetched by the first.
+  `<name>-<version>-observed-means.rds` (read when present: values
+  exactly as computed) or `.csv.gz`. Releases of AusTraits after 7.0.0
+  include them. The file is much smaller than the database (AusTraits:
+  about 15 MB). To have both, load each; the second call reuses the
+  record fetched by the first.
   [`trait_means_dictionary()`](https://traitecoevo.github.io/traits.use/reference/trait_means_dictionary.md)
   defines the columns.
 
