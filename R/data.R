@@ -22,7 +22,7 @@
 #'   (<https://github.com/traitecoevo/austraits.build>) at a given commit, not
 #'   taken from a release: traits.use is released before the AusTraits release
 #'   whose data model it reads, so its example data follows the data model
-#'   rather than the releases. This one was compiled from commit `a8ae3d94`
+#'   rather than the releases. This one was compiled from commit `a019d137`
 #'   with traits.build 3.0.0, so `metadata$version` is `"7.0.0.9000"` and
 #'   `build_info$git_SHA` names the commit. Its values can differ a little
 #'   from those of the same datasets in AusTraits 8.0.0.

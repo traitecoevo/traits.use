@@ -18,7 +18,7 @@ GitHub repository.
 
   Title:    AusTraits: a curated plant trait database for the Australian flora
   Version:  7.0.0.9000, compiled with traits.build 3.0.0 from commit
-            a8ae3d94b9e1765ca65f2c4477ac58e11c8bac28 of
+            a019d137ad73731bffd1a62aef2fbdfa2cbb7f48 of
             https://github.com/traitecoevo/austraits.build, whose compiled
             database is released under the licence below
   DOI:      https://doi.org/10.5281/zenodo.3568417 (all versions)
