@@ -1,7 +1,7 @@
-Banksia_1 <- austraits_5.0.0_lite %>% extract_taxa(taxon_name = "Banksia serrata")
-Banksia_2 <- austraits_5.0.0_lite %>% extract_taxa(taxon_name = "Banksia ericifolia")
-fire <- austraits_5.0.0_lite %>% extract_data(table = "contexts", col = "context_property", col_value = "fire")
-season <- austraits_5.0.0_lite %>% extract_data(table = "contexts", col = "context_property", col_value = "season")
+Banksia_1 <- austraits_lite %>% extract_taxa(taxon_name = "Banksia serrata")
+Banksia_2 <- austraits_lite %>% extract_taxa(taxon_name = "Banksia ericifolia")
+fire <- austraits_lite %>% extract_data(table = "contexts", col = "context_property", col_value = "fire")
+season <- austraits_lite %>% extract_data(table = "contexts", col = "context_property", col_value = "season")
 
 test_that("Function runs", {
   expect_no_error(bound_Banksia <- bind_databases(Banksia_1, Banksia_2))
@@ -22,28 +22,23 @@ test_that("Function returned expected number of rows", {
 )
 
 test_that("Order of tables has not changed", {
-  names_minus_identifiers <- function(x) {
-    names(x) %>% purrr::discard(~ .x == "identifiers")
-  }
-  expect_equal(
-    names_minus_identifiers(bind_databases(Banksia_1, Banksia_2)), 
-    names(austraits_5.0.0_lite))
-  expect_equal(names_minus_identifiers(bind_databases(fire, season)), names(austraits_5.0.0_lite))
-  expect_equal(names_minus_identifiers(bind_databases(Banksia_1, fire)), names(austraits_5.0.0_lite))
+  expect_equal(names(bind_databases(Banksia_1, Banksia_2)), names(austraits_lite))
+  expect_equal(names(bind_databases(fire, season)), names(austraits_lite))
+  expect_equal(names(bind_databases(Banksia_1, fire)), names(austraits_lite))
 }
 )
 
 test_that("Number of columns has not changed", {
   more_Banksia <- bind_databases(Banksia_1, Banksia_2)
-  expect_equal(names(more_Banksia$traits), names(austraits_5.0.0_lite$traits))
-  expect_equal(names(more_Banksia$contexts), names(austraits_5.0.0_lite$contexts))
-  expect_equal(sort(names(more_Banksia$definitions)), sort(names(austraits_5.0.0_lite$definitions)))
+  expect_equal(names(more_Banksia$traits), names(austraits_lite$traits))
+  expect_equal(names(more_Banksia$contexts), names(austraits_lite$contexts))
+  expect_equal(sort(names(more_Banksia$definitions)), sort(names(austraits_lite$definitions)))
 }
 )
 
 test_that("Binding names datasets holding exact copies of their own rows (#36)", {
-  a <- austraits_5.0.0_lite %>% extract_dataset("Apgaua_2017")
-  b <- austraits_5.0.0_lite %>% extract_dataset("Choat_2006")
+  a <- austraits_lite %>% extract_dataset("Apgaua_2017")
+  b <- austraits_lite %>% extract_dataset("Choat_2006")
 
   # Overlap between databases is expected, e.g. a union of two extracts,
   # also when they are passed under one name
@@ -78,8 +73,8 @@ test_that("Binding names datasets holding exact copies of their own rows (#36)",
 })
 
 test_that("Binding warns when one key names different references", {
-  a <- austraits_5.0.0_lite %>% extract_dataset("Apgaua_2017")
-  b <- austraits_5.0.0_lite %>% extract_dataset("Choat_2006")
+  a <- austraits_lite %>% extract_dataset("Apgaua_2017")
+  b <- austraits_lite %>% extract_dataset("Choat_2006")
   # The same reference twice is fine
   expect_no_error(bind_databases(a, a))
   # A different reference under the same key is not
@@ -96,7 +91,7 @@ test_that("Binding warns when one key names different references", {
 })
 
 test_that("`extract_data` keeps the references the extracted observations cite", {
-  a <- austraits_5.0.0_lite %>% extract_dataset("Apgaua_2017")
+  a <- austraits_lite %>% extract_dataset("Apgaua_2017")
   expect_true("Apgaua_2017" %in% names(a$sources))
   expect_false("Choat_2006" %in% names(a$sources))
 })
@@ -110,8 +105,8 @@ test_that("bind_databases() orders sources and definitions the same in any local
   skip_if(identical(sort(c("bark_B", "bark_ash")), sort(c("bark_B", "bark_ash"), method = "radix")),
           "this locale collates like C")
 
-  a <- extract_dataset(austraits_5.0.0_lite, c("Falster_2005_1", "Westoby_2014"))
-  b <- extract_dataset(austraits_5.0.0_lite, c("Falster_2003", "Crous_2013", "Kew_2019_2"))
+  a <- extract_dataset(austraits_lite, c("Falster_2005_1", "Westoby_2014"))
+  b <- extract_dataset(austraits_lite, c("Falster_2003", "Crous_2013", "Kew_2019_2"))
   bound <- suppressWarnings(bind_databases(a, b))
 
   expect_identical(names(bound$definitions), sort(names(bound$definitions), method = "radix"))

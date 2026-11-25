@@ -2,12 +2,12 @@
 
 # Falster_2003 has many location properties
 dataset_id <- "Falster_2003"
-database <- extract_dataset(austraits_5.0.0_lite, dataset_id)
+database <- extract_dataset(austraits_lite, dataset_id)
 combined_table <- flatten_database(database)
 
 # Crous_2013 has many context properties, from 4 of 5 possible categories
 dataset_id_2 <- "Crous_2013"
-database_2 <- extract_dataset(austraits_5.0.0_lite, dataset_id_2)
+database_2 <- extract_dataset(austraits_lite, dataset_id_2)
 
 #expected_output <- readr::read_csv("tests/testthat/Falster_2003_combined_format.csv", show_col_types = FALSE)
 expected_output <- readr::read_csv("Falster_2003_combined_format.csv", show_col_types = FALSE)
@@ -15,13 +15,14 @@ expected_output <- readr::read_csv("Falster_2003_combined_format.csv", show_col_
 test_that("`flatten_database` is working with format = single_column_pretty", {
     expect_equal(combined_table$location_properties, expected_output$location_properties)
     expect_equal(combined_table$data_contributors, expected_output$data_contributors)
-    # The six `source_*` columns of the methods table give way to the four from `join_sources()`
-    expect_length(combined_table, 64)
+    # The methods table's reference columns give way to the five from
+    # `join_sources()`, and `join_identifiers()` adds `identifier_types`
+    expect_length(combined_table, 66)
     expect_true(stringr::str_detect(combined_table$location_properties[1], "=="))
     expect_true(stringr::str_detect(combined_table$data_contributors[1], "<"))
 })
 
-database_3 <- extract_dataset(austraits_5.0.0_lite, "Bloomfield_2018")
+database_3 <- extract_dataset(austraits_lite, "Bloomfield_2018")
 combined_table_3a <- flatten_database(database_3, format = "single_column_pretty")
 combined_table_3b <- flatten_database(database_3, format = "many_columns")
 
@@ -31,7 +32,7 @@ test_that("`flatten_database` defaults to `single_column_pretty` for contributor
 
 # test that join_location_coordinates works as intended
 
-database_no_coord <- austraits_5.0.0_lite %>% extract_dataset("Kooyman_2011")
+database_no_coord <- austraits_lite %>% extract_dataset("Kooyman_2011")
 
 test_that("`join_location_coordinate` works as intended", {
   
@@ -53,8 +54,8 @@ locations_single_column_json <- (database %>% join_location_properties(format = 
 locations_default_subset_vars <- (database %>% join_location_properties(format = "many_columns", vars = location_vars[4:6]))$traits
 
 test_that("`join_locations` is working with different formats, vars", {
-  expect_length(many_location_columns_default_vars, 32)
-  expect_equal(ncol(many_location_columns_default_vars %>% dplyr::select(dplyr::contains("location_property"))), 5)
+  expect_length(many_location_columns_default_vars, 33)
+  expect_equal(ncol(many_location_columns_default_vars %>% dplyr::select(dplyr::contains("location_property"))), 6)
   expect_equal(ncol(locations_default_subset_vars %>% dplyr::select(dplyr::contains("location_property"))), 3)
   expect_equal(ncol(many_location_columns_default_vars), ncol(many_location_columns_all_vars))
   expect_equal(names(many_location_columns_default_vars), names(many_location_columns_all_vars))
@@ -148,7 +149,7 @@ test_that("join_ functions all a diversity of vars strings - 1 value, many value
 test_that("join_ functions given expected output", {
   expect_equal(intersect(names((database %>% join_location_properties(vars = location_vars, format = "many_columns"))$traits), "location_property: leaf area index"), "location_property: leaf area index")
   expect_equal(intersect(names((database %>% join_location_properties(vars = location_vars[1], format = "many_columns"))$traits), "location_property: leaf area index"), character(0))
-  expect_equal(ncol((database %>% join_location_properties(format = "many_columns"))$traits), 32)
+  expect_equal(ncol((database %>% join_location_properties(format = "many_columns"))$traits), 33)
   expect_equal(ncol((database %>% join_location_properties(format = "many_columns"))$traits), 
                ncol((database %>% join_location_properties(vars = location_vars, format = "many_columns"))$traits))
   expect_equal(ncol((database %>% join_location_properties(vars = location_vars[1], format = "many_columns"))$traits), 28)

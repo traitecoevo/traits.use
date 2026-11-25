@@ -1,4 +1,4 @@
-database <- austraits_5.0.0_lite
+database <- austraits_lite
 flat <- flatten_database(database)
 
 # The columns every flat table shares with the traits table, to compare rows
@@ -16,21 +16,20 @@ test_that("flatten_database() stamps its output with the database it came from",
   expect_s3_class(flat, c("traits.build_flat", "tbl_df", "tbl", "data.frame"), exact = TRUE)
   expect_equal(attr(flat, "traits.build_stamp"), list(
     title = database$metadata$title,
-    version = "5.0.0",
+    version = "7.0.0.9000",
     doi = database$metadata$doi,
-    data_model_version = NA_character_,
-    traits_build_version = "1.0.1"
+    data_model_version = "1.4.0",
+    traits_build_version = "3.0.0"
   ))
-  expect_equal(attr(flatten_database(austraits_lite), "traits.build_stamp")$traits_build_version, "3.0.0")
 
-  # The data model version, which traits.build 2.3 and later records (#40)
-  with_version <- database
-  with_version$metadata$data_model_version <- "1.4.0"
-  stamped <- flatten_database(with_version)
-  expect_equal(attr(stamped, "traits.build_stamp")$data_model_version, "1.4.0")
-  expect_identical(get_data_model_version(stamped), "1.4.0")
-  expect_identical(get_data_model_version(flat), NA_character_)
+  # The data model version, which traits.build 2.3 and later records (#40);
+  # a release built before then, such as AusTraits 5.0.0, has none
+  expect_identical(get_data_model_version(flat), "1.4.0")
   expect_identical(get_data_model_version(database$traits), NA_character_)
+  old <- flatten_database(austraits_5.0.0_lite)
+  expect_equal(attr(old, "traits.build_stamp")$data_model_version, NA_character_)
+  expect_equal(attr(old, "traits.build_stamp")$traits_build_version, "1.0.1")
+  expect_identical(get_data_model_version(old), NA_character_)
 
   # A database without the metadata gives NA, not an error
   bare <- database
@@ -51,7 +50,7 @@ test_that("the stamp survives saveRDS() and is printed", {
   skip_if_not_installed("pillar")
   header <- pillar::tbl_sum(flat)
   expect_named(header, c("A traits.build_flat table", "From"))
-  expect_match(header[["From"]], "version 5.0.0, doi:10.5281/zenodo.3568417", fixed = TRUE)
+  expect_match(header[["From"]], "version 7.0.0.9000, doi:10.5281/zenodo.3568417", fixed = TRUE)
 })
 
 test_that("extract_*() take a flat table, keep its class and stamp, and find the same rows", {
