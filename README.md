@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# traits.use
+# traits.use <img src="man/figures/logo.png" align="right" alt="" width="120" />
 
 <!-- badges: start -->
 
@@ -80,6 +80,10 @@ AusTraits. The [traits.build
 book](https://traitecoevo.github.io/traits.build-book/) explains how a
 traits.build database is structured: its tables, identifiers and how
 they link.
+
+### Cheat sheet
+
+<a href="https://github.com/traitecoevo/traits.use/blob/master/inst/cheatsheet/traits.use-cheatsheet.pdf"><img src="man/figures/traits.use-cheatsheet.png" width="60%"/></a>
 
 ## For AusTraits users
 
