@@ -15,10 +15,14 @@ tracked in \#17 and its CRAN preparation in \#13.
   docs), `NAMESPACE`, `data-raw/` and `inst/` hold raw assets (incl. the
   cheatsheet); `data/austraits_lite.rda` is the exported example
   database (24 datasets, used by the examples), regenerated with
-  `data-raw/austraits_lite.R`; `R/sysdata.rda` holds the tests’
-  fixtures: `austraits_5.0.0_lite` (23 datasets of 5.0.0, the main one)
-  and tiny 3.0.2/4.2.0 ones for version checks, regenerated with
-  `data-raw/create_data.R`.
+  `data-raw/austraits_lite.R`; `austraits_lite` is also the tests’ main
+  fixture. `R/sysdata.rda` holds `austraits_5.0.0_lite` (9 datasets of
+  AusTraits 5.0.0, regenerated with `data-raw/austraits_5.0.0_lite.R`),
+  for the tests of releases built before traits.build 2.3: no data model
+  version, the old reference columns of `methods`, sources a plain
+  BibEntry. Releases before 5.0.0 are not supported (decided 2026-11-25)
+  and have no fixture. Write new tests against `austraits_lite`; use the
+  5.0.0 fixture only for what is specific to the older form.
 - **`austraits_lite` follows the data model, not the AusTraits
   releases** (decided 2026-11-24, \#13). It is compiled from
   austraits.build source at a pinned commit, because traits.use must be
