@@ -15,14 +15,21 @@
 #' records, so a study that measured many individuals at one site counts once
 #' for that site.
 #'
-#' - Records with `value_type` raw, mean or median are grouped by dataset and
-#'   location. They are used whatever their basis of record or life stage.
-#' - Minimum and maximum records whose `basis_of_record` is
-#'   `preserved_specimen` or `literature` (floras) are grouped by observation;
-#'   a flora's range gives one midpoint. Other minimum and maximum records are
-#'   not used.
+#' - Records with `value_type` raw, mean, median or mode are grouped by
+#'   dataset and location. They are used whatever their basis of record or
+#'   life stage.
+#' - Minimum and maximum records whose `basis_of_record` includes
+#'   `preserved_specimen` or `literature` (floras; "field literature"
+#'   counts) are grouped by observation; a flora's range gives one midpoint.
+#'   Other minimum and maximum records are not used.
 #' - A dataset named in `value_type_rules` contributes the value types given
 #'   there instead, grouped by dataset and location.
+#' - Records with `value_type` bin, such as `"1--5"` or `"10--"`, record a
+#'   class, not a value, and are not averaged. They are counted as a
+#'   categorical trait's values are: `value_mode` is the most frequent bin and
+#'   `value_count` lists every bin with its count, in order of their bounds.
+#'   A taxon whose only records are bins has an empty `value`, and `method`
+#'   `"mode"`.
 #'
 #' Everything is done on the log scale: a group's value is the geometric mean
 #' of its records (for a flora range, the geometric midpoint,
@@ -220,24 +227,24 @@ trait_means_dictionary <- function() {
     "trait_name", "Trait name.",
     "unit", "Unit of the numeric trait values; empty for categorical traits.",
     "estimate_type", "Always observed_mean: computed directly from the records, with no model.",
-    "method", "How value or value_mode was found. Numeric traits: geometric for a trait on a positive scale; arithmetic for a trait on a signed scale, whose definition allows values below zero (a water potential, a temperature, an isotope ratio), for which a geometric mean does not exist. Categorical traits: mode, the most frequent value; majority for a trait recording months, the months at least half the records mark.",
-    "value", "Numeric traits: the observed mean. With method geometric, a geometric mean: records are averaged on the log scale within each dataset x location, flora minimum and maximum bounds give a geometric midpoint per observation, and the value is exp(mean) over those groups, each group counting once; records with zero or negative values are not used. With method arithmetic, the arithmetic mean over the same groups, using every record.",
+    "method", "How value or value_mode was found. Numeric traits: geometric for a trait on a positive scale; arithmetic for a trait on a signed scale, whose definition allows values below zero (a water potential, a temperature, an isotope ratio), for which a geometric mean does not exist. Categorical traits: mode, the most frequent value; majority for a trait recording months, the months at least half the records mark. A numeric trait whose records for the taxon are all bins (value_type bin, such as '1--5') has mode, for its most frequent bin.",
+    "value", "Numeric traits: the observed mean; empty when the taxon's records are all bins. With method geometric, a geometric mean: records are averaged on the log scale within each dataset x location, flora minimum and maximum bounds give a geometric midpoint per observation, and the value is exp(mean) over those groups, each group counting once; records with zero or negative values are not used. With method arithmetic, the arithmetic mean over the same groups, using every record.",
     "log_value", "Natural log of value; empty with method arithmetic.",
     "arithmetic_mean", "Arithmetic mean over the same groups and records (each group's arithmetic mean or midpoint, then their mean). With method geometric it is not the observed mean and is given for comparison; with method arithmetic it equals value.",
     "value_min", "Smallest record value used.",
     "value_max", "Largest record value used.",
-    "n_records", "Number of records used.",
+    "n_records", "Number of records used, bins included.",
     "n_locations", "Numeric traits: number of distinct dataset x location groups.",
     "n_datasets", "Number of datasets contributing records.",
-    "n_flora", "Numeric traits: number of minimum and maximum records from preserved specimens or the literature (floras) used.",
+    "n_flora", "Numeric traits: number of minimum and maximum records from preserved specimens or the literature (floras) used, including those whose basis of record also names another, such as 'field literature'.",
     "n_field", "Number of records used whose basis of record is field.",
     "sd_log", "Numeric traits: standard deviation of the natural log of the record values used; empty with a single record, or with method arithmetic.",
     "reliability", "Provisional class from the evidence behind the value: high (at least 3 datasets and 10 records), medium (at least 2 datasets or 5 records), low (otherwise). Thresholds are provisional.",
     "dataset_id", "Datasets contributing, sorted, joined by '; '. Each dataset's reference is in the database's sources table under the same key.",
     "source_id", "References the contributing records were taken from, sorted, joined by '; ': keys of the database's sources table. The same as dataset_id except for a dataset that compiles other studies, whose records name the study they came from. A record without a source_id, as in databases built before traits.build 2.3, counts its dataset as its source.",
     "type", "numerical or categorical.",
-    "value_mode", "Categorical traits: the most frequent value; tied values are joined by a space. For a trait recording months (a twelve-letter y/n string per record, as flowering_time), a twelve-letter string marking the months at least half the records mark.",
-    "value_count", "Categorical traits: each value with the number of records carrying it, as 'value (n)' joined by '; '. A record listing several space-separated values counts once for each. For a trait recording months, each month at least one record marks, in calendar order, with the number of records marking it, as 'Jan (n)'.",
+    "value_mode", "Categorical traits: the most frequent value; tied values are joined by a space. For a trait recording months (a twelve-letter y/n string per record, as flowering_time), a twelve-letter string marking the months at least half the records mark. Numeric traits: the most frequent bin, for a taxon with records binned into classes (value_type bin, such as '1--5' or '10--'), which are not averaged into value; empty otherwise.",
+    "value_count", "Categorical traits: each value with the number of records carrying it, as 'value (n)' joined by '; '. A record listing several space-separated values counts once for each. For a trait recording months, each month at least one record marks, in calendar order, with the number of records marking it, as 'Jan (n)'. Numeric traits: each bin with its number of records, in order of the bins' bounds, as '1--5 (n)'; empty for a taxon without bins.",
     "taxon_rank", "Taxonomic rank of taxon_name; empty for a name the database's taxonomy does not rank.",
     "genus", "Genus.",
     "family", "Family.",
@@ -481,24 +488,30 @@ trait_means_keys <- function(key, id, n) {
 
 trait_means_numeric <- function(records, by, rules, signed = character()) {
 
+  # Binned records ("1--5", "10--") are classes, not values: they are counted,
+  # not averaged
+  bin <- records$value_type %in% "bin" & !is.na(records$value) & records$value != ""
+  bins <- records[bin, ]
+  records <- records[!bin, ]
+
   # A signed trait keeps every value; the others need positive ones
   records$value <- suppressWarnings(as.numeric(records$value))
   records <- records[!is.na(records$value) & (records$value > 0 | records$trait_name %in% signed), ]
 
-  # Records summarised per dataset x location: raw, mean and median records,
-  # and whatever the rules allow for the datasets they name. Bounds from
-  # floras are summarised per observation.
+  # Records summarised per dataset x location: raw, mean, median and mode
+  # records, and whatever the rules allow for the datasets they name. Bounds
+  # from floras are summarised per observation.
   ruled <- records$dataset_id %in% rules$dataset_id
   location <-
     (ruled & paste(records$dataset_id, records$value_type) %in% paste(rules$dataset_id, rules$value_type)) |
-    (!ruled & records$value_type %in% c("raw", "mean", "median"))
+    (!ruled & records$value_type %in% c("raw", "mean", "median", "mode"))
   flora <- !ruled &
     records$value_type %in% c("minimum", "maximum") &
-    records$basis_of_record %in% c("preserved_specimen", "literature")
+    trait_means_basis_has(records$basis_of_record, c("preserved_specimen", "literature"))
 
   records <- records[location | flora, ]
   flora <- flora[location | flora]
-  if (nrow(records) == 0) {
+  if (nrow(records) + nrow(bins) == 0) {
     return(NULL)
   }
   # Logs of the positive-scale traits; empty for the signed ones
@@ -506,7 +519,15 @@ trait_means_numeric <- function(records, by, rules, signed = character()) {
   positive <- !records$trait_name %in% signed
   log_value[positive] <- log(records$value[positive])
 
-  taxa <- trait_means_groups(records[c("taxon_name", by, "trait_name", "unit")])
+  # The taxa: those with a value or a bin. A taxon with only bins has no
+  # value, and its numeric columns are empty.
+  keys <- c("taxon_name", by, "trait_name", "unit")
+  used <- dplyr::bind_rows(records[c(keys, "dataset_id", "source_id", "basis_of_record")],
+                           bins[c(keys, "dataset_id", "source_id", "basis_of_record")])
+  taxa <- trait_means_groups(used[keys])
+  all_id <- taxa$id
+  taxa$id <- all_id[seq_len(nrow(records))]
+  bin_id <- all_id[nrow(records) + seq_len(nrow(bins))]
 
   # The groups whose values are averaged: a dataset's records at a location,
   # or one flora observation
@@ -523,44 +544,92 @@ trait_means_numeric <- function(records, by, rules, signed = character()) {
 
   taxon <- groups$keys$taxon
   n_groups <- tabulate(taxon, taxa$n)
-  n_records <- tabulate(taxa$id, taxa$n)
+  n_values <- tabulate(taxa$id, taxa$n)
+  has_value <- n_values > 0
 
   # Spread of the records, about each taxon's own mean of logs
-  mean_log <- trait_means_sum(log_value, taxa$id, taxa$n) / n_records
+  mean_log <- trait_means_sum(log_value, taxa$id, taxa$n) / n_values
   sum_squares <- trait_means_sum((log_value - mean_log[taxa$id])^2, taxa$id, taxa$n)
-  sd_log <- ifelse(n_records > 1, sqrt(sum_squares / (n_records - 1)), NA_real_)
+  sd_log <- ifelse(n_values > 1, sqrt(sum_squares / (n_values - 1)), NA_real_)
 
   # Smallest and largest record of each taxon: the first and last in order
   by_value <- order(taxa$id, records$value)
   ordered_id <- taxa$id[by_value]
-  value_min <- records$value[by_value][!duplicated(ordered_id)]
-  value_max <- records$value[by_value][!duplicated(ordered_id, fromLast = TRUE)]
+  value_min <- value_max <- rep(NA_real_, taxa$n)
+  value_min[ordered_id[!duplicated(ordered_id)]] <- records$value[by_value][!duplicated(ordered_id)]
+  value_max[ordered_id[!duplicated(ordered_id, fromLast = TRUE)]] <- records$value[by_value][!duplicated(ordered_id, fromLast = TRUE)]
 
-  datasets <- trait_means_keys(records$dataset_id, taxa$id, taxa$n)
-  sources <- trait_means_keys(records$source_id, taxa$id, taxa$n)
-  log_mean <- trait_means_sum(group_log_mean, taxon, taxa$n) / n_groups
-  arithmetic_mean <- trait_means_sum(group_mean, taxon, taxa$n) / n_groups
+  # Counts over every record used, values and bins
+  datasets <- trait_means_keys(used$dataset_id, all_id, taxa$n)
+  sources <- trait_means_keys(used$source_id, all_id, taxa$n)
+  binned <- trait_means_bins(bins$value, bin_id, taxa$n)
+
+  log_mean <- ifelse(has_value, trait_means_sum(group_log_mean, taxon, taxa$n) / n_groups, NA_real_)
+  arithmetic_mean <- ifelse(has_value, trait_means_sum(group_mean, taxon, taxa$n) / n_groups, NA_real_)
   arithmetic <- taxa$keys$trait_name %in% signed
 
   dplyr::bind_cols(
     taxa$keys,
     tibble::tibble(
-      method = ifelse(arithmetic, "arithmetic", "geometric"),
+      method = ifelse(!has_value, "mode", ifelse(arithmetic, "arithmetic", "geometric")),
       value = ifelse(arithmetic, arithmetic_mean, exp(log_mean)),
       log_value = ifelse(arithmetic, NA_real_, log_mean),
       arithmetic_mean = arithmetic_mean,
       value_min = value_min,
       value_max = value_max,
-      n_records = n_records,
+      n_records = tabulate(all_id, taxa$n),
       n_locations = as.integer(trait_means_sum(!groups$keys$flora, taxon, taxa$n)),
       n_datasets = datasets$n,
       n_flora = as.integer(trait_means_sum(flora, taxa$id, taxa$n)),
-      n_field = as.integer(trait_means_sum(records$basis_of_record %in% "field", taxa$id, taxa$n)),
+      n_field = as.integer(trait_means_sum(used$basis_of_record %in% "field", all_id, taxa$n)),
       sd_log = ifelse(arithmetic, NA_real_, sd_log),
       dataset_id = datasets$keys,
       source_id = sources$keys,
-      type = "numerical"
+      type = "numerical",
+      value_mode = binned$mode,
+      value_count = binned$count
     )
+  )
+}
+
+# Does a record's basis of record name one of `bases`? A record can list
+# several, space-separated ("field literature").
+trait_means_basis_has <- function(basis_of_record, bases) {
+  grepl(paste0("(^| )(", paste(bases, collapse = "|"), ")( |$)"), basis_of_record)
+}
+
+# Binned records of each of `n` taxa: the most frequent bin (ties joined by a
+# space) and every bin with its number of records, in order of their bounds
+# ("0--1 (2); 1--5 (3); 10-- (1)"). Empty for a taxon without bins.
+trait_means_bins <- function(value, id, n) {
+  if (length(value) == 0) {
+    return(list(mode = rep(NA_character_, n), count = rep(NA_character_, n)))
+  }
+  counted <- trait_means_groups(tibble::tibble(taxon = id, value = value))
+  records <- tabulate(counted$id, counted$n)
+  taxon <- counted$keys$taxon
+  bin <- counted$keys$value
+
+  # An open bin has no lower ("--2") or no upper ("10--") bound
+  lower <- suppressWarnings(as.numeric(sub("--.*$", "", bin)))
+  upper <- suppressWarnings(as.numeric(sub("^.*--", "", bin)))
+  lower[is.na(lower)] <- -Inf
+  upper[is.na(upper)] <- Inf
+  in_order <- order(taxon, lower, upper, bin)
+  taxon <- taxon[in_order]
+  bin <- bin[in_order]
+  records <- records[in_order]
+
+  # The largest count of each taxon: the first in decreasing order
+  by_count <- order(taxon, -records)
+  first <- !duplicated(taxon[by_count])
+  largest <- integer(n)
+  largest[taxon[by_count][first]] <- records[by_count][first]
+  modal <- records == largest[taxon]
+
+  list(
+    mode = trait_means_collapse(bin[modal], taxon[modal], n, " "),
+    count = trait_means_collapse(paste0(bin, " (", records, ")"), taxon, n, "; ")
   )
 }
 
