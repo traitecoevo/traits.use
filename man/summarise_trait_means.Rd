@@ -29,8 +29,9 @@ varieties and forms towards their species? Default \code{TRUE}.}
 
 \item{value_type_rules}{a data frame with columns \code{dataset_id} and
 \code{value_type}, one row per value type to use from a dataset in place of the
-default raw, mean and median, for a dataset that reports numeric values
-another way. For example, a dataset of specimen labels that gives one
+default raw, mean, median and mode, for a dataset that reports numeric
+values another way. Its bins are counted only if \code{bin} is listed for it,
+and are never averaged. For example, a dataset of specimen labels that gives one
 bound per specimen and no raw values would have a row for \code{minimum} and
 one for \code{maximum}, each bound then counting as an observation. The
 default, \code{NULL}, is no such datasets.}

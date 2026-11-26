@@ -103,8 +103,9 @@
 #'   varieties and forms towards their species? Default `TRUE`.
 #' @param value_type_rules a data frame with columns `dataset_id` and
 #'   `value_type`, one row per value type to use from a dataset in place of the
-#'   default raw, mean and median, for a dataset that reports numeric values
-#'   another way. For example, a dataset of specimen labels that gives one
+#'   default raw, mean, median and mode, for a dataset that reports numeric
+#'   values another way. Its bins are counted only if `bin` is listed for it,
+#'   and are never averaged. For example, a dataset of specimen labels that gives one
 #'   bound per specimen and no raw values would have a row for `minimum` and
 #'   one for `maximum`, each bound then counting as an observation. The
 #'   default, `NULL`, is no such datasets.
@@ -229,16 +230,16 @@ trait_means_dictionary <- function() {
     "estimate_type", "Always observed_mean: computed directly from the records, with no model.",
     "method", "How value or value_mode was found. Numeric traits: geometric for a trait on a positive scale; arithmetic for a trait on a signed scale, whose definition allows values below zero (a water potential, a temperature, an isotope ratio), for which a geometric mean does not exist. Categorical traits: mode, the most frequent value; majority for a trait recording months, the months at least half the records mark. A numeric trait whose records for the taxon are all bins (value_type bin, such as '1--5') has mode, for its most frequent bin.",
     "value", "Numeric traits: the observed mean; empty when the taxon's records are all bins. With method geometric, a geometric mean: records are averaged on the log scale within each dataset x location, flora minimum and maximum bounds give a geometric midpoint per observation, and the value is exp(mean) over those groups, each group counting once; records with zero or negative values are not used. With method arithmetic, the arithmetic mean over the same groups, using every record.",
-    "log_value", "Natural log of value; empty with method arithmetic.",
-    "arithmetic_mean", "Arithmetic mean over the same groups and records (each group's arithmetic mean or midpoint, then their mean). With method geometric it is not the observed mean and is given for comparison; with method arithmetic it equals value.",
-    "value_min", "Smallest record value used.",
-    "value_max", "Largest record value used.",
+    "log_value", "Natural log of value; empty with method arithmetic, or when value is empty.",
+    "arithmetic_mean", "Arithmetic mean over the same groups and records (each group's arithmetic mean or midpoint, then their mean). With method geometric it is not the observed mean and is given for comparison; with method arithmetic it equals value. Empty when value is.",
+    "value_min", "Smallest record value used. Bins are not values: empty when the taxon's records are all bins.",
+    "value_max", "Largest record value used. Bins are not values: empty when the taxon's records are all bins.",
     "n_records", "Number of records used, bins included.",
-    "n_locations", "Numeric traits: number of distinct dataset x location groups.",
+    "n_locations", "Numeric traits: number of distinct dataset x location groups of the values averaged (bins not included).",
     "n_datasets", "Number of datasets contributing records.",
     "n_flora", "Numeric traits: number of minimum and maximum records from preserved specimens or the literature (floras) used, including those whose basis of record also names another, such as 'field literature'.",
     "n_field", "Number of records used whose basis of record is field.",
-    "sd_log", "Numeric traits: standard deviation of the natural log of the record values used; empty with a single record, or with method arithmetic.",
+    "sd_log", "Numeric traits: standard deviation of the natural log of the record values used (bins not included); empty with fewer than two values, or with method arithmetic.",
     "reliability", "Provisional class from the evidence behind the value: high (at least 3 datasets and 10 records), medium (at least 2 datasets or 5 records), low (otherwise). Thresholds are provisional.",
     "dataset_id", "Datasets contributing, sorted, joined by '; '. Each dataset's reference is in the database's sources table under the same key.",
     "source_id", "References the contributing records were taken from, sorted, joined by '; ': keys of the database's sources table. The same as dataset_id except for a dataset that compiles other studies, whose records name the study they came from. A record without a source_id, as in databases built before traits.build 2.3, counts its dataset as its source.",
@@ -489,9 +490,12 @@ trait_means_keys <- function(key, id, n) {
 trait_means_numeric <- function(records, by, rules, signed = character()) {
 
   # Binned records ("1--5", "10--") are classes, not values: they are counted,
-  # not averaged
+  # not averaged. A dataset named in the rules contributes them only if the
+  # rules list bin for it.
   bin <- records$value_type %in% "bin" & !is.na(records$value) & records$value != ""
-  bins <- records[bin, ]
+  ruled_out <- records$dataset_id %in% rules$dataset_id &
+    !paste(records$dataset_id, records$value_type) %in% paste(rules$dataset_id, rules$value_type)
+  bins <- records[bin & !ruled_out, ]
   records <- records[!bin, ]
 
   # A signed trait keeps every value; the others need positive ones
@@ -610,9 +614,13 @@ trait_means_bins <- function(value, id, n) {
   taxon <- counted$keys$taxon
   bin <- counted$keys$value
 
-  # An open bin has no lower ("--2") or no upper ("10--") bound
-  lower <- suppressWarnings(as.numeric(sub("--.*$", "", bin)))
-  upper <- suppressWarnings(as.numeric(sub("^.*--", "", bin)))
+  # An open bin has no lower ("--2") or no upper ("10--", "48--NA") bound; a
+  # bare number is its own bounds. A bound can be negative ("-10---5").
+  open_lower <- startsWith(bin, "--")
+  lower <- ifelse(open_lower, NA_character_, sub("^(-?[^-]*)--.*$", "\\1", bin))
+  upper <- ifelse(open_lower, substring(bin, 3), sub("^-?[^-]*--", "", bin))
+  lower <- suppressWarnings(as.numeric(lower))
+  upper <- suppressWarnings(as.numeric(upper))
   lower[is.na(lower)] <- -Inf
   upper[is.na(upper)] <- Inf
   in_order <- order(taxon, lower, upper, bin)
