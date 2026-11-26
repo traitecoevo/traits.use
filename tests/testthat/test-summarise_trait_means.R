@@ -139,6 +139,134 @@ test_that("a lone flora bound stands in for the midpoint", {
   expect_equal(means$reliability, "low")
 })
 
+test_that("mode records are values, and a flora bound may name other bases too", {
+  records <- dplyr::bind_rows(
+    record("Acacia a", "bark_thickness", 2, value_type = "mode", unit = "mm"),
+    record("Acacia a", "bark_thickness", c(4, 16), value_type = c("minimum", "maximum"), unit = "mm",
+           dataset_id = "D2", location_id = NA, basis_of_record = "field literature"),
+    # a bound whose bases name neither a specimen nor the literature
+    record("Acacia a", "bark_thickness", 100, value_type = "maximum", unit = "mm",
+           dataset_id = "D3", basis_of_record = "field field_experiment"),
+    # "literature" only as part of another word is not the literature
+    record("Acacia a", "bark_thickness", 200, value_type = "maximum", unit = "mm",
+           dataset_id = "D4", basis_of_record = "field not_literature")
+  )
+  means <- summarise_trait_means(records)
+  # the mode, 2, and the flora midpoint, 8
+  expect_equal(means$value, 4)
+  expect_equal(means$n_records, 3)
+  expect_equal(means$n_flora, 2)
+  expect_equal(means$n_locations, 1)
+  expect_equal(means$dataset_id, "D1; D2")
+})
+
+test_that("bins are counted, not averaged", {
+  records <- dplyr::bind_rows(
+    # only bins: no value; the most frequent bin, ties joined
+    record("Acacia a", "lifespan", c("10--50", "1--5", "10--50", "50--100", "--2", "100--"),
+           value_type = "bin", unit = "a", dataset_id = c("D1", "D1", "D2", "D2", "D2", "D2"),
+           location_id = NA, basis_of_record = "literature"),
+    # values and bins: the value from the values, the bins counted beside it
+    record("Acacia b", "lifespan", c(4, 16), unit = "a", location_id = c("01", "02")),
+    record("Acacia b", "lifespan", c("1--5", "5--20", "5--20"), value_type = "bin", unit = "a",
+           dataset_id = "D2", location_id = NA),
+    # a tie
+    record("Acacia c", "lifespan", c("5--20", "1--5"), value_type = "bin", unit = "a")
+  )
+  means <- summarise_trait_means(records)
+  a <- means[means$taxon_name == "Acacia a", ]
+  b <- means[means$taxon_name == "Acacia b", ]
+  c <- means[means$taxon_name == "Acacia c", ]
+
+  expect_equal(nrow(means), 3)
+  expect_true(is.na(a$value))
+  expect_true(is.na(a$log_value))
+  expect_true(is.na(a$arithmetic_mean))
+  expect_true(is.na(a$value_min))
+  expect_equal(a$method, "mode")
+  expect_equal(a$type, "numerical")
+  expect_equal(a$value_mode, "10--50")
+  # in order of their bounds, open bins at either end
+  expect_equal(a$value_count, "--2 (1); 1--5 (1); 10--50 (2); 50--100 (1); 100-- (1)")
+  expect_equal(a$n_records, 6)
+  expect_equal(a$n_datasets, 2)
+  expect_equal(a$n_locations, 0)
+  expect_equal(a$reliability, "medium")
+
+  expect_equal(b$value, 8)
+  expect_equal(b$method, "geometric")
+  expect_equal(c(b$value_min, b$value_max), c(4, 16))
+  expect_equal(b$value_mode, "5--20")
+  expect_equal(b$value_count, "1--5 (1); 5--20 (2)")
+  expect_equal(b$n_records, 5)
+  expect_equal(b$n_locations, 2)
+  expect_equal(b$n_field, 5)
+  expect_equal(b$dataset_id, "D1; D2")
+  expect_equal(b$sd_log, sd(log(c(4, 16))))
+
+  expect_equal(c$value_mode, "1--5 5--20")
+
+  expect_equal(a$n_flora, 0)
+  expect_true(is.na(a$value_max))
+  expect_true(is.na(a$sd_log))
+
+  # a taxon with values and no bins has no bin columns
+  plain <- summarise_trait_means(record("Acacia d", "lifespan", 3, unit = "a"))
+  expect_true(is.na(plain$value_mode))
+  expect_true(is.na(plain$value_count))
+})
+
+test_that("bins are ordered by their bounds, lower then upper", {
+  # only bins, so no value is averaged at all; bins sharing a lower bound,
+  # open and bare-number bins, and an upper bound written as NA
+  means <- summarise_trait_means(record(
+    "Acacia a", "lifespan",
+    c("10--", "10--50", "10--20", "--10", "--2", "20", "48--NA", "2--5"),
+    value_type = "bin", unit = "a"
+  ))
+  expect_equal(means$value_count,
+               "--2 (1); --10 (1); 2--5 (1); 10--20 (1); 10--50 (1); 10-- (1); 20 (1); 48--NA (1)")
+  expect_true(is.na(means$value))
+  expect_equal(means$method, "mode")
+
+  # tied bins in order of their bounds, not as text
+  tie <- summarise_trait_means(record("Acacia b", "lifespan", c("10--20", "2--5"), value_type = "bin", unit = "a"))
+  expect_equal(tie$value_mode, "2--5 10--20")
+
+  # negative bounds keep their sign
+  signed <- summarise_trait_means(record(
+    "Acacia c", "water_potential_midday", c("-10---2", "-10---5", "---2", "---5"),
+    value_type = "bin", unit = "MPa"
+  ))
+  expect_equal(signed$value_count, "---5 (1); ---2 (1); -10---5 (1); -10---2 (1)")
+})
+
+test_that("bins follow value-type rules and `by`", {
+  records <- dplyr::bind_rows(
+    record("Acacia a", "lifespan", c(1, 4), value_type = c("minimum", "maximum"), unit = "a",
+           dataset_id = "Labels", observation_id = c("01", "02")),
+    record("Acacia a", "lifespan", "1--5", value_type = "bin", unit = "a", dataset_id = "Labels")
+  )
+  # a ruled dataset's bins are left out unless the rules list bin
+  minmax <- data.frame(dataset_id = "Labels", value_type = c("minimum", "maximum"))
+  ruled <- summarise_trait_means(records, value_type_rules = minmax)
+  expect_equal(ruled$n_records, 2)
+  expect_true(is.na(ruled$value_mode))
+  with_bins <- summarise_trait_means(records, value_type_rules = rbind(minmax, data.frame(dataset_id = "Labels", value_type = "bin")))
+  expect_equal(with_bins$n_records, 3)
+  expect_equal(with_bins$value_mode, "1--5")
+  expect_equal(with_bins$value, 2)
+
+  # bins split by a `by` variable
+  staged <- summarise_trait_means(
+    record("Acacia b", "lifespan", c("1--5", "5--20"), value_type = "bin", unit = "a",
+           life_stage = c("adult", "juvenile")),
+    by = "life_stage"
+  )
+  expect_equal(staged$life_stage, c("adult", "juvenile"))
+  expect_equal(staged$value_mode, c("1--5", "5--20"))
+})
+
 test_that("a dataset with a value-type rule enters by the value types listed", {
   records <- dplyr::bind_rows(
     record("Acacia c", "plant_height", c(1, 4), value_type = c("minimum", "maximum"),
@@ -425,12 +553,12 @@ test_that("the summary agrees with a group-by-group calculation", {
     dplyr::mutate(value = as.numeric(value)) |>
     dplyr::filter(value > 0)
   locations <- records |>
-    dplyr::filter(value_type %in% c("raw", "mean", "median")) |>
+    dplyr::filter(value_type %in% c("raw", "mean", "median", "mode")) |>
     dplyr::group_by(taxon_name, unit, dataset_id, location_id) |>
     dplyr::summarise(log_mean = mean(log(value)), n = dplyr::n(), .groups = "drop")
   floras <- records |>
     dplyr::filter(value_type %in% c("minimum", "maximum"),
-                  basis_of_record %in% c("preserved_specimen", "literature")) |>
+                  grepl("(^| )(preserved_specimen|literature)( |$)", basis_of_record)) |>
     dplyr::group_by(taxon_name, unit, dataset_id, observation_id, original_name) |>
     dplyr::summarise(log_mean = mean(log(value)), n = dplyr::n(), .groups = "drop")
   expected <- dplyr::bind_rows(locations, floras) |>

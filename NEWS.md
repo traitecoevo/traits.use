@@ -1,3 +1,11 @@
+# traits.use (development version)
+
+- `summarise_trait_means()` uses records it used to drop (#68). This changes AusTraits' published observed means.
+  - Binned records (`value_type` bin, such as `"1--5"` or `"10--"`) are counted, not averaged. On a numeric trait's row, `value_mode` is the most frequent bin and `value_count` lists each bin with its count, in order of their bounds. A taxon whose only records are bins gets a row with an empty `value` and `method = "mode"`; before, it got no row. On AusTraits 8.0.0, reproductive_maturity goes from 541 rows to 7,609, lifespan from 14 to 6,015 and seedbank_longevity from 13 to 7,012.
+  - Records with `value_type` mode are used, as median records are (19,379 in AusTraits 8.0.0, mostly bark thickness and flower part counts).
+  - A minimum or maximum record whose `basis_of_record` lists several values, such as `"field literature"`, counts as a flora bound when one of them is `literature` or `preserved_specimen`.
+  - On AusTraits 8.0.0, 360 existing means change value, and categorical rows are unchanged.
+
 # traits.use 1.0.1
 
 - `load_database()` (and so `austraits::load_austraits()`) can load AusTraits 8.0.0. It stopped with "More than one .rds file found" because the release publishes its observed means as `.rds` too (`austraits-8.0.0-observed-means.rds`), and only the flattened `.rds` was set aside when picking the database. The observed-means `.rds` is now never taken for the database.

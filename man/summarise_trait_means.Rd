@@ -29,8 +29,9 @@ varieties and forms towards their species? Default \code{TRUE}.}
 
 \item{value_type_rules}{a data frame with columns \code{dataset_id} and
 \code{value_type}, one row per value type to use from a dataset in place of the
-default raw, mean and median, for a dataset that reports numeric values
-another way. For example, a dataset of specimen labels that gives one
+default raw, mean, median and mode, for a dataset that reports numeric
+values another way. Its bins are counted only if \code{bin} is listed for it,
+and are never averaged. For example, a dataset of specimen labels that gives one
 bound per specimen and no raw values would have a row for \code{minimum} and
 one for \code{maximum}, each bound then counting as an observation. The
 default, \code{NULL}, is no such datasets.}
@@ -57,14 +58,21 @@ value is the mean of the groups, each counting once whatever its number of
 records, so a study that measured many individuals at one site counts once
 for that site.
 \itemize{
-\item Records with \code{value_type} raw, mean or median are grouped by dataset and
-location. They are used whatever their basis of record or life stage.
-\item Minimum and maximum records whose \code{basis_of_record} is
-\code{preserved_specimen} or \code{literature} (floras) are grouped by observation;
-a flora's range gives one midpoint. Other minimum and maximum records are
-not used.
+\item Records with \code{value_type} raw, mean, median or mode are grouped by
+dataset and location. They are used whatever their basis of record or
+life stage.
+\item Minimum and maximum records whose \code{basis_of_record} includes
+\code{preserved_specimen} or \code{literature} (floras; "field literature"
+counts) are grouped by observation; a flora's range gives one midpoint.
+Other minimum and maximum records are not used.
 \item A dataset named in \code{value_type_rules} contributes the value types given
 there instead, grouped by dataset and location.
+\item Records with \code{value_type} bin, such as \code{"1--5"} or \code{"10--"}, record a
+class, not a value, and are not averaged. They are counted as a
+categorical trait's values are: \code{value_mode} is the most frequent bin and
+\code{value_count} lists every bin with its count, in order of their bounds.
+A taxon whose only records are bins has an empty \code{value}, and \code{method}
+\code{"mode"}.
 }
 
 Everything is done on the log scale: a group's value is the geometric mean
