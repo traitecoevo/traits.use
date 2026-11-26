@@ -6,13 +6,15 @@ This is a new submission. traits.use loads and wrangles trait databases built wi
 
 - local macOS (aarch64), R 4.6.1
 - GitHub Actions: macOS-latest and windows-latest, R release
-- win-builder: R-devel (to do)
+- win-builder: R-devel (2026-11-17 r90926 ucrt), Windows Server 2022 x64
 
 ## R CMD check results
 
 0 errors | 0 warnings | 1 note
 
 - New submission.
+- Possibly misspelled words in DESCRIPTION (AusTraits, Falster, et, al): "AusTraits" is the name of the database and "Falster et al." is the citation for it; all are spelled correctly.
+- Possibly invalid URLs in README.md (https://www.dcceew.gov.au, https://www.education.gov.au/ncris): both are valid and open in a browser. These Australian Government servers drop automated requests (HTTP/2 INTERNAL_ERROR, or a timeout over HTTP/1.1).
 
 ## Notes for reviewers
 
