@@ -7,7 +7,7 @@
 load_database(
   doi = NULL,
   path = NULL,
-  update = TRUE,
+  update = NULL,
   flattened = FALSE,
   means = FALSE
 )
@@ -16,15 +16,21 @@ load_database(
 \item{doi}{character string - doi of the database, e.g. "10.5281/zenodo.11188867".
 A Zenodo concept doi will load the latest version of that record.}
 
-\item{path}{folder the database is downloaded to and cached in. If \code{NULL}
-(the default), the folder shared by all your projects, given by
-\code{\link[=database_cache_dir]{database_cache_dir()}}. Give a folder such as \code{"data/austraits"} to keep a
-copy with a project instead, or \code{tempdir()} for one session.}
+\item{path}{a folder, such as \code{"data/austraits"}, to keep a copy of the
+database in (with its record, so the folder loads offline on its own),
+besides the cache folder. If the folder already holds the release (e.g.
+saved there by traits.use 1.0 or austraits 4.0) and it matches the
+repository's checksum, it is copied into the cache rather than downloaded
+again; if the repository cannot be reached, the folder is used on its
+own. \code{NULL} (the default) keeps only the cache copy. To keep nothing beyond one session, set the cache folder to
+a temporary one with \code{options(traits.use.cache_dir = tempfile())}.}
 
-\item{update}{if TRUE, the record's metadata .json will be re-downloaded;
-if that fails (e.g. offline), the saved copy is used. With \code{FALSE}, a
-concept doi loads the version last fetched into \code{path}, which for the
-cache folder may have been by another project.}
+\item{update}{whether to fetch the record's metadata afresh: \code{NULL} (the
+default) when the saved copy is more than 60 days old (see
+\code{\link[=database_cache_dir]{database_cache_dir()}} for the option that sets this), \code{TRUE} always, and
+\code{FALSE} never if there is a saved copy, e.g. to work offline. If fetching
+fails (e.g. offline), the saved copy is used. Until it is fetched afresh,
+a concept doi loads the release last fetched, perhaps by another project.}
 
 \item{flattened}{if \code{TRUE}, load the flattened version of the database
 instead: one table with the other tables joined to the traits table,
@@ -58,10 +64,16 @@ or if the copy does not match the record's md5 checksum) and then loaded.
 Zenodo and Figshare records are supported, as are dois that resolve directly
 to an \code{.rds} file.
 
-By default the download is kept in a folder shared by all your projects
+The download is always kept in a folder shared by all your projects
 (see \code{\link[=database_cache_dir]{database_cache_dir()}}), so each release is downloaded once per
 computer. Use \code{\link[=list_cached_databases]{list_cached_databases()}} and \code{\link[=clear_database_cache]{clear_database_cache()}} to see
-and delete what is there.
+and delete what is there. Give a \code{path} to also keep a copy with a project.
+
+The record's metadata (its list of files and, for a concept doi, which
+release is the latest) is saved with the database and fetched afresh once
+it is more than 60 days old, so a concept doi finds a new release within
+that time; set \code{update = TRUE} to check now. Change the 60 days with
+\code{options(traits.use.update_after_days = )}.
 }
 \examples{
 \dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
@@ -73,7 +85,7 @@ austraits <- load_database(doi = "10.5281/zenodo.11188867")
 # The observed means of each taxon and trait, published with the release
 means <- load_database(doi = "10.5281/zenodo.11188867", means = TRUE)
 
-# Keeping a copy in a folder of your choice instead, here a temporary one
+# Also keeping a copy in a folder of your choice, here a temporary one
 austraits <- load_database(doi = "10.5281/zenodo.11188867",
   path = file.path(tempdir(), "austraits"))
 \dontshow{\}) # examplesIf}

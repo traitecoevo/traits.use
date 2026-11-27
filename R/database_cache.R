@@ -1,7 +1,7 @@
 #' Manage the folder where downloaded databases are kept
 #'
-#' @description By default, [load_database()] keeps the databases it downloads
-#' in one folder per user, so each release is downloaded once per computer and
+#' @description [load_database()] keeps the databases it downloads in one
+#' folder per user, so each release is downloaded once per computer and
 #' shared by every project and R session that loads it.
 #'
 #' - `database_cache_dir()` gives the folder.
@@ -22,8 +22,17 @@
 #'    follows each operating system's convention for cache files (and the
 #'    `R_USER_CACHE_DIR` environment variable, if set).
 #'
-#' To keep a copy of a database with a project instead, give
-#' [load_database()] a `path`; the functions here take the same `path`. They
+#' Setting the option to a temporary folder, e.g. with
+#' `options(traits.use.cache_dir = tempfile())`, keeps nothing beyond the
+#' session.
+#'
+#' Each database's record (its list of files) is saved beside it and fetched
+#' afresh by [load_database()] once it is more than 60 days old; the
+#' `traits.use.update_after_days` option changes the number of days.
+#'
+#' [load_database()] always keeps databases in this folder. Given a `path`, it
+#' also keeps a copy there, which the functions here can list and delete
+#' with the same `path`. They
 #' only ever touch the files [load_database()] wrote there: the database
 #' `.rds` files (relational or flattened) and the observed means
 #' (`*-observed-means.rds` or `.csv.gz`) named in its record files (`10.*.json`, one per
@@ -34,7 +43,7 @@
 #'   observed means), as listed by `list_cached_databases()`.
 #' @param older_than delete the databases not used (loaded from the cache) for
 #'   this many days. In a folder given as `path`, or where the cache cannot be
-#'   written to, this is days since the file was downloaded.
+#'   written to, this is days since the file was saved there, roughly.
 #' @param ask if `TRUE`, asks for confirmation before deleting anything.
 #'
 #' @details With neither `files` nor `older_than`, `clear_database_cache()`
