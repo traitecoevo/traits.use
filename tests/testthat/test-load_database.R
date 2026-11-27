@@ -675,6 +675,14 @@ test_that("Offline, a saved record and database still load", {
   local_mocked_bindings(resolve_doi_files = function(doi) stop("no internet"))
   expect_message(v1_offline <- load_database(doi = "10.5281/zenodo.1", update = TRUE), "Could not update the record.*no internet")
   expect_equal(v1_offline, v1)
+  # By default, a saved record that is not old is used without asking; one
+  # that is old loads all the same, saying the repository was not reached
+  expect_false(any(grepl("Could not update", testthat::capture_messages(load_database(doi = "10.5281/zenodo.1")))))
+  Sys.setFileTime(file.path(cache, c("10.5281_zenodo.1.json", "MYtraits.rds")), Sys.time() - 365 * 86400)
+  expect_message(v1_old <- load_database(doi = "10.5281/zenodo.1"), "Could not update the record.*no internet")
+  expect_equal(v1_old, v1)
+  expect_false(any(grepl("Could not update", testthat::capture_messages(load_database(doi = "10.5281/zenodo.1", update = FALSE)))))
+
   # With nothing saved, the error is not hidden
   expect_error(suppressMessages(load_database(doi = "10.5281/zenodo.2")), "no internet")
 
