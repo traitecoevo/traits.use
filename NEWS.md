@@ -1,3 +1,8 @@
+# traits.use 1.1.0
+
+- `load_database()` always keeps the database in the cache folder shared by all your projects (`database_cache_dir()`). Given a `path`, it also keeps a copy there, with the record, so the folder loads offline on its own; before, a `path` replaced the cache. A release already in `path` (e.g. saved there by traits.use 1.0) is copied into the cache rather than downloaded again, and a damaged cached file is restored from it. If the cache folder cannot be written to, a `path` is used on its own, as before.
+- `load_database()` no longer contacts the repository on every call. The record of a release (its files, and for a concept doi which release is the latest) is fetched afresh once the saved copy is more than 60 days old, so a concept doi finds a new release within that time; `update = TRUE` checks now, and `options(traits.use.update_after_days = )` changes the number of days. `update = NULL` is the new default; `TRUE` and `FALSE` mean what they did.
+
 # traits.use 1.0.1
 
 - `load_database()` (and so `austraits::load_austraits()`) can load AusTraits 8.0.0. It stopped with "More than one .rds file found" because the release publishes its observed means as `.rds` too (`austraits-8.0.0-observed-means.rds`), and only the flattened `.rds` was set aside when picking the database. The observed-means `.rds` is now never taken for the database.

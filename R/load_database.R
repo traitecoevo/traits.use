@@ -7,17 +7,26 @@
 #' Zenodo and Figshare records are supported, as are dois that resolve directly
 #' to an `.rds` file.
 #'
-#' By default the download is kept in a folder shared by all your projects
+#' The download is always kept in a folder shared by all your projects
 #' (see [database_cache_dir()]), so each release is downloaded once per
 #' computer. Use [list_cached_databases()] and [clear_database_cache()] to see
-#' and delete what is there.
+#' and delete what is there. Give a `path` to also keep a copy with a project.
+#'
+#' The record's metadata (its list of files and, for a concept doi, which
+#' release is the latest) is saved with the database and fetched afresh once
+#' it is more than 60 days old, so a concept doi finds a new release within
+#' that time; set `update = TRUE` to check now. Change the 60 days with
+#' `options(traits.use.update_after_days = )`.
 #'
 #' @param doi character string - doi of the database, e.g. "10.5281/zenodo.11188867".
 #' A Zenodo concept doi will load the latest version of that record.
-#' @param path folder the database is downloaded to and cached in. If `NULL`
-#'   (the default), the folder shared by all your projects, given by
-#'   [database_cache_dir()]. Give a folder such as `"data/austraits"` to keep a
-#'   copy with a project instead, or `tempdir()` for one session.
+#' @param path a folder, such as `"data/austraits"`, to keep a copy of the
+#'   database in (with its record, so the folder loads offline on its own),
+#'   besides the cache folder. If the folder already holds the release (e.g.
+#'   saved there by traits.use 1.0 or austraits 4.0), it is copied into the
+#'   cache rather than downloaded again. `NULL` (the default) keeps only the
+#'   cache copy. To keep nothing beyond one session, set the cache folder to
+#'   a temporary one with `options(traits.use.cache_dir = tempfile())`.
 #' @param flattened if `TRUE`, load the flattened version of the database
 #'   instead: one table with the other tables joined to the traits table,
 #'   made with [flatten_database()] when the release was built. Releases of
@@ -35,10 +44,12 @@
 #'   than the database (AusTraits: about 15 MB). To have both, load each; the
 #'   second call reuses the record fetched by the first. [trait_means_dictionary()]
 #'   defines the columns.
-#' @param update if TRUE, the record's metadata .json will be re-downloaded;
-#'   if that fails (e.g. offline), the saved copy is used. With `FALSE`, a
-#'   concept doi loads the version last fetched into `path`, which for the
-#'   cache folder may have been by another project.
+#' @param update whether to fetch the record's metadata afresh: `NULL` (the
+#'   default) when the saved copy is more than 60 days old (see
+#'   [database_cache_dir()] for the option that sets this), `TRUE` always, and
+#'   `FALSE` never if there is a saved copy, e.g. to work offline. If fetching
+#'   fails (e.g. offline), the saved copy is used. Until it is fetched afresh,
+#'   a concept doi loads the release last fetched, perhaps by another project.
 #'
 #' @return a large list containing traits.build data tables, or with
 #'   `flattened = TRUE`, a single table (tibble), or with `means = TRUE`, the
@@ -57,11 +68,11 @@
 #' # The observed means of each taxon and trait, published with the release
 #' means <- load_database(doi = "10.5281/zenodo.11188867", means = TRUE)
 #'
-#' # Keeping a copy in a folder of your choice instead, here a temporary one
+#' # Also keeping a copy in a folder of your choice, here a temporary one
 #' austraits <- load_database(doi = "10.5281/zenodo.11188867",
 #'   path = file.path(tempdir(), "austraits"))
 
-load_database <- function(doi = NULL, path = NULL, update = TRUE, flattened = FALSE, means = FALSE){
+load_database <- function(doi = NULL, path = NULL, update = NULL, flattened = FALSE, means = FALSE){
   if(!is.logical(flattened) || length(flattened) != 1 || is.na(flattened)){
     rlang::abort("`flattened` must be TRUE or FALSE.")
   }
@@ -77,25 +88,41 @@ load_database <- function(doi = NULL, path = NULL, update = TRUE, flattened = FA
     stop("Please supply a doi!")
   }
 
-  # No path means the cache folder shared by all projects
-  use_cache <- is.null(path)
-  if(use_cache){
-    path <- database_cache_dir()
+  if(!is.null(path) && (!is.character(path) || length(path) != 1 || is.na(path) || !nzchar(path))){
+    rlang::abort("`path` must be a single folder path, or NULL for the cache folder only.")
   }
-
-  if(!is.character(path) || length(path) != 1 || is.na(path) || !nzchar(path)){
-    rlang::abort("`path` must be a single folder path, or NULL for the cache folder.")
-  }
+  check_update(update)
 
   doi <- clean_doi(doi)
 
-  # Does the path exist?
-  if(! file.exists(path)) {
-    dir.create(path, recursive=TRUE, showWarnings=FALSE) #Create folder
+  # The database is kept in the cache folder shared by all projects; `path`,
+  # if given, gets a copy. A cache that cannot be written to (e.g. a read-only
+  # home folder) leaves only `path`.
+  cache <- database_cache_dir()
+  use_cache <- writable_folder(cache)
+  if(!use_cache){
+    if(is.null(path)){
+      rlang::abort(c(paste0("Cannot write to the cache folder '", cache, "'."),
+                     i = "Choose another with `options(traits.use.cache_dir = )`, or give a `path`."))
+    }
+    message("Cannot write to the cache folder '", cache, "'; keeping the database in '", path, "' only")
+    cache <- path
+    path <- NULL
+    writable_folder(cache)
+  }
+  if(!is.null(path)){
+    writable_folder(path)
+    if(same_folder(path, cache)) path <- NULL
+  }
+
+  # A record saved in `path` before (e.g. by traits.use 1.0) stands in for a
+  # missing one in the cache, keeping its age
+  if(!is.null(path)){
+    seed_file(record_json_path(doi, path), record_json_path(doi, cache))
   }
 
   # Load the record metadata
-  record <- load_record_json(doi = doi, path = path, update = update)
+  record <- load_record_json(doi = doi, path = cache, update = update)
 
   # Say which release the doi resolved to (a concept doi resolves to the latest)
   if(length(record$version) == 1 && !is.na(record$version) && nzchar(record$version)) {
@@ -105,7 +132,23 @@ load_database <- function(doi = NULL, path = NULL, update = TRUE, flattened = FA
   # The relational (or flattened) database .rds, or the observed means, among
   # the record's files
   files <- if(means) means_file(record$files, doi) else database_file(record$files, doi, flattened = flattened)
-  file_nm <- fetch_record_file(files, doi, path, use_cache)
+
+  # A copy of the release in `path` saves downloading it again
+  md5 <- if(is.null(files$md5)) NA_character_ else files$md5
+  key <- basename(files$key)
+  if(!is.null(path) && file.exists(file.path(path, key)) && file_matches_md5(file.path(path, key), md5) &&
+     !(file.exists(file.path(cache, key)) && file_matches_md5(file.path(cache, key), md5))){
+    if(file.exists(file.path(cache, key))) remove_file(file.path(cache, key))
+    seed_file(file.path(path, key), file.path(cache, key))
+  }
+
+  file_nm <- fetch_record_file(files, doi, cache, use_cache)
+
+  # The copy in `path`, with the record so the folder loads offline on its own
+  if(!is.null(path)){
+    copy_to_path(file_nm, md5, path, doi)
+    file.copy(record_json_path(doi, cache), record_json_path(doi, path), overwrite = TRUE, copy.date = TRUE)
+  }
 
   if(means){
     message("Loading observed means from '", file_nm, "'")
@@ -271,11 +314,10 @@ read_trait_means_rds <- function(file){
 #' @keywords internal
 
 load_record_json <- function(doi, path, update){
-  # Set the directory path to json
-  file_json <- file.path(path, paste0(stringr::str_replace_all(doi, "[^A-Za-z0-9.]+", "_"), ".json"))
+  file_json <- record_json_path(doi, path)
 
-  # Does the .json exist?
-  if(! file.exists(file_json) | update == TRUE){
+  # Fetch it if there is no saved copy, or (update = NULL) the saved copy is old
+  if(! file.exists(file_json) || needs_update(file_json, update)){
     # Retrieve the record, falling back to the saved one when the repository
     # cannot be reached. Other errors (e.g. a record since restricted) stop.
     res <- tryCatch(resolve_doi_files(doi), error = function(e) {
@@ -358,6 +400,102 @@ database_file <- function(files, doi, flattened = FALSE){
 
 remove_file <- function(file){
   file.remove(file)
+}
+
+#' Where load_database() saves a doi's record in a folder
+#'
+#' The name is part of the folder's format: [clear_database_cache()] finds
+#' records by it, and austraits writes one for caches made by austraits 3.x.
+#' @noRd
+#' @keywords internal
+
+record_json_path <- function(doi, path){
+  file.path(path, paste0(stringr::str_replace_all(doi, "[^A-Za-z0-9.]+", "_"), ".json"))
+}
+
+#' Check the `update` argument: TRUE, FALSE or NULL
+#' @noRd
+#' @keywords internal
+
+check_update <- function(update){
+  if(!is.null(update) && (!is.logical(update) || length(update) != 1 || is.na(update))){
+    rlang::abort("`update` must be TRUE, FALSE or NULL (fetch the record when the saved copy is old).")
+  }
+  invisible(update)
+}
+
+#' Days after which a saved record (or list of releases) is fetched afresh
+#'
+#' The `traits.use.update_after_days` option, 60 by default. austraits reads
+#' the same option for its saved list of releases.
+#' @noRd
+#' @keywords internal
+
+update_after_days <- function(){
+  days <- getOption("traits.use.update_after_days", 60)
+  if(!is.numeric(days) || length(days) != 1 || is.na(days) || days < 0){
+    rlang::abort("The `traits.use.update_after_days` option must be a number of days.")
+  }
+  days
+}
+
+#' Should a saved file be fetched afresh, given `update`?
+#'
+#' @param file the saved file; its modification time is when it was fetched
+#' @noRd
+#' @keywords internal
+
+needs_update <- function(file, update){
+  if(!is.null(update)) return(isTRUE(update))
+  age <- difftime(Sys.time(), file.mtime(file), units = "days")
+  is.na(age) || as.numeric(age) > update_after_days()
+}
+
+#' Create a folder if needed, and say whether it can be written to
+#' @noRd
+#' @keywords internal
+
+writable_folder <- function(path){
+  if(!dir.exists(path)) dir.create(path, recursive = TRUE, showWarnings = FALSE)
+  dir.exists(path) && file.access(path, 2) == 0
+}
+
+#' Copy a file to where it is missing, keeping its modification time
+#'
+#' @return TRUE if copied
+#' @noRd
+#' @keywords internal
+
+seed_file <- function(from, to){
+  if(!file.exists(from) || file.exists(to)) return(FALSE)
+  file.copy(from, to, copy.date = TRUE)
+}
+
+#' Put a copy of a downloaded file in `path`, unless one matching its md5 is
+#' there already
+#'
+#' @param file_nm the file, in the cache folder
+#' @param md5 its md5 checksum (NA if the record gives none)
+#' @param path the folder to copy it to
+#' @param doi the doi, used in messages
+#' @noRd
+#' @keywords internal
+
+copy_to_path <- function(file_nm, md5, path, doi){
+  copy <- file.path(path, basename(file_nm))
+  if(file.exists(copy) && file_matches_md5(copy, md5)){
+    return(invisible(copy))
+  }
+  # e.g. an earlier release saved under the same name (every MYtraits release
+  # is MYtraits.rds)
+  if(file.exists(copy) && !remove_file(copy)){
+    rlang::abort(paste0("Could not replace '", copy, "' with doi '", doi, "'. Is it open in another R session?"))
+  }
+  if(!file.copy(file_nm, copy, copy.date = TRUE)){
+    rlang::abort(paste0("Could not copy '", file_nm, "' to '", path, "'."))
+  }
+  message("Saved a copy in '", copy, "'")
+  invisible(copy)
 }
 
 #' Say what the cache holds after a download into it

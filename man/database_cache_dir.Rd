@@ -25,7 +25,7 @@ observed means), as listed by \code{list_cached_databases()}.}
 
 \item{older_than}{delete the databases not used (loaded from the cache) for
 this many days. In a folder given as \code{path}, or where the cache cannot be
-written to, this is days since the file was downloaded.}
+written to, this is days since the file was downloaded to the cache.}
 
 \item{ask}{if \code{TRUE}, asks for confirmation before deleting anything.}
 }
@@ -60,8 +60,17 @@ follows each operating system's convention for cache files (and the
 \code{R_USER_CACHE_DIR} environment variable, if set).
 }
 
-To keep a copy of a database with a project instead, give
-\code{\link[=load_database]{load_database()}} a \code{path}; the functions here take the same \code{path}. They
+Setting the option to a temporary folder, e.g. with
+\code{options(traits.use.cache_dir = tempfile())}, keeps nothing beyond the
+session.
+
+Each database's record (its list of files) is saved beside it and fetched
+afresh by \code{\link[=load_database]{load_database()}} once it is more than 60 days old; the
+\code{traits.use.update_after_days} option changes the number of days.
+
+\code{\link[=load_database]{load_database()}} always keeps databases in this folder. Given a \code{path}, it
+also keeps a copy there, which the functions here can list and delete
+with the same \code{path}. They
 only ever touch the files \code{\link[=load_database]{load_database()}} wrote there: the database
 \code{.rds} files (relational or flattened) and the observed means
 (\verb{*-observed-means.rds} or \code{.csv.gz}) named in its record files (\code{10.*.json}, one per
