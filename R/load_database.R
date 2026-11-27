@@ -23,9 +23,10 @@
 #' @param path a folder, such as `"data/austraits"`, to keep a copy of the
 #'   database in (with its record, so the folder loads offline on its own),
 #'   besides the cache folder. If the folder already holds the release (e.g.
-#'   saved there by traits.use 1.0 or austraits 4.0), it is copied into the
-#'   cache rather than downloaded again. `NULL` (the default) keeps only the
-#'   cache copy. To keep nothing beyond one session, set the cache folder to
+#'   saved there by traits.use 1.0 or austraits 4.0) and it matches the
+#'   repository's checksum, it is copied into the cache rather than downloaded
+#'   again; if the repository cannot be reached, the folder is used on its
+#'   own. `NULL` (the default) keeps only the cache copy. To keep nothing beyond one session, set the cache folder to
 #'   a temporary one with `options(traits.use.cache_dir = tempfile())`.
 #' @param flattened if `TRUE`, load the flattened version of the database
 #'   instead: one table with the other tables joined to the traits table,
@@ -101,28 +102,37 @@ load_database <- function(doi = NULL, path = NULL, update = NULL, flattened = FA
   cache <- database_cache_dir()
   use_cache <- writable_folder(cache)
   if(!use_cache){
-    if(is.null(path)){
+    if(has_cached_copy(doi, cache, flattened = flattened, means = means)){
+      # A cache that holds the release but cannot be written to (e.g. one
+      # shared by a research group) is read as it is
+      update <- FALSE
+    } else if(is.null(path)){
       rlang::abort(c(paste0("Cannot write to the cache folder '", cache, "'."),
                      i = "Choose another with `options(traits.use.cache_dir = )`, or give a `path`."))
+    } else {
+      message("Cannot write to the cache folder '", cache, "'; keeping the database in '", path, "' only")
+      cache <- path
+      path <- NULL
+      writable_folder(cache)
     }
-    message("Cannot write to the cache folder '", cache, "'; keeping the database in '", path, "' only")
-    cache <- path
-    path <- NULL
-    writable_folder(cache)
   }
   if(!is.null(path)){
     writable_folder(path)
     if(same_folder(path, cache)) path <- NULL
   }
 
-  # A record saved in `path` before (e.g. by traits.use 1.0) stands in for a
-  # missing one in the cache, keeping its age
-  if(!is.null(path)){
-    seed_file(record_json_path(doi, path), record_json_path(doi, cache))
+  # Load the record metadata. The cache only ever holds what was checked
+  # against a record fetched from the repository, so that one project's folder
+  # cannot change what another project loads. A record saved in `path` (e.g.
+  # by traits.use 1.0) is used only when the repository cannot be reached or
+  # is not to be asked (`update = FALSE`), and then `path` is used on its own.
+  record <- load_record_json(doi = doi, path = cache, update = update,
+                             fallback = if(!is.null(path)) record_json_path(doi, path))
+  if(isTRUE(attr(record, "from_fallback"))){
+    cache <- path
+    path <- NULL
+    use_cache <- FALSE
   }
-
-  # Load the record metadata
-  record <- load_record_json(doi = doi, path = cache, update = update)
 
   # Say which release the doi resolved to (a concept doi resolves to the latest)
   if(length(record$version) == 1 && !is.na(record$version) && nzchar(record$version)) {
@@ -133,10 +143,13 @@ load_database <- function(doi = NULL, path = NULL, update = NULL, flattened = FA
   # the record's files
   files <- if(means) means_file(record$files, doi) else database_file(record$files, doi, flattened = flattened)
 
-  # A copy of the release in `path` saves downloading it again
+  # A copy of the release in `path` saves downloading it again, if it matches
+  # the record's checksum (without a checksum it cannot be told from any other
+  # file of that name)
   md5 <- if(is.null(files$md5)) NA_character_ else files$md5
   key <- basename(files$key)
-  if(!is.null(path) && file.exists(file.path(path, key)) && file_matches_md5(file.path(path, key), md5) &&
+  if(!is.null(path) && !is.na(md5) &&
+     file.exists(file.path(path, key)) && file_matches_md5(file.path(path, key), md5) &&
      !(file.exists(file.path(cache, key)) && file_matches_md5(file.path(cache, key), md5))){
     if(file.exists(file.path(cache, key))) remove_file(file.path(cache, key))
     seed_file(file.path(path, key), file.path(cache, key))
@@ -147,7 +160,7 @@ load_database <- function(doi = NULL, path = NULL, update = NULL, flattened = FA
   # The copy in `path`, with the record so the folder loads offline on its own
   if(!is.null(path)){
     copy_to_path(file_nm, md5, path, doi)
-    file.copy(record_json_path(doi, cache), record_json_path(doi, path), overwrite = TRUE, copy.date = TRUE)
+    copy_record_to_path(record_json_path(doi, cache), record_json_path(doi, path))
   }
 
   if(means){
@@ -313,26 +326,41 @@ read_trait_means_rds <- function(file){
 #' @noRd
 #' @keywords internal
 
-load_record_json <- function(doi, path, update){
+load_record_json <- function(doi, path, update, fallback = NULL){
   file_json <- record_json_path(doi, path)
 
-  # Fetch it if there is no saved copy, or (update = NULL) the saved copy is old
-  if(! file.exists(file_json) || needs_update(file_json, update)){
+  # The saved copy: the one in `path`, else `fallback` (a record file in
+  # another folder, never copied into `path`)
+  saved <- if(file.exists(file_json)) file_json else if(!is.null(fallback) && file.exists(fallback)) fallback
+
+  # Fetch it if there is no saved copy in `path`, or (update = NULL) that copy
+  # is old, or names another release than `fallback` does (two computers
+  # sharing a project folder, with a concept doi fetched at different times:
+  # the repository says which is the latest); with update = FALSE, never if
+  # there is any saved copy
+  fetch <- if(isFALSE(update)) is.null(saved) else
+    ! file.exists(file_json) || needs_update(file_json, update) || records_differ(file_json, fallback)
+  if(fetch){
     # Retrieve the record, falling back to the saved one when the repository
     # cannot be reached. Other errors (e.g. a record since restricted) stop.
     res <- tryCatch(resolve_doi_files(doi), error = function(e) {
       unreachable <- ! inherits(e, "rlang_error") || inherits(e, "traits_use_unreachable")
-      if(! unreachable || ! file.exists(file_json)) stop(e)
+      if(! unreachable || is.null(saved)) stop(e)
       message("Could not update the record for doi '", doi, "' (", conditionMessage(e),
-              "); using the copy saved in '", path, "'")
+              "); using the copy saved in '", dirname(saved), "'")
       NULL
     })
     # Save it
-    if(! is.null(res)) jsonlite::write_json(res, file_json)
+    if(! is.null(res)){
+      jsonlite::write_json(res, file_json)
+      saved <- file_json
+    }
   }
 
-  # Load the json
-  jsonlite::fromJSON(file_json)
+  # Load the json, saying if it is not the one in `path`
+  record <- jsonlite::fromJSON(saved)
+  if(! identical(saved, file_json)) attr(record, "from_fallback") <- TRUE
+  record
 }
 
 #' Pick the relational database .rds from a record's files
@@ -451,6 +479,37 @@ needs_update <- function(file, update){
   is.na(age) || as.numeric(age) > update_after_days()
 }
 
+#' Do two saved records name different releases?
+#'
+#' @param a,b record files; `b` may be NULL or missing
+#' @return TRUE only if both can be read and differ in version or checksums
+#' @noRd
+#' @keywords internal
+
+records_differ <- function(a, b){
+  if(is.null(b) || !file.exists(a) || !file.exists(b)) return(FALSE)
+  tryCatch({
+    a <- jsonlite::fromJSON(a)
+    b <- jsonlite::fromJSON(b)
+    !identical(a$version, b$version) || !setequal(a$files$md5, b$files$md5)
+  }, error = function(e) FALSE)
+}
+
+#' Does a folder hold a doi's record and the file it names, matching its md5?
+#' @noRd
+#' @keywords internal
+
+has_cached_copy <- function(doi, path, flattened = FALSE, means = FALSE){
+  json <- record_json_path(doi, path)
+  if(!file.exists(json)) return(FALSE)
+  tryCatch({
+    record <- jsonlite::fromJSON(json)
+    files <- if(means) means_file(record$files, doi) else database_file(record$files, doi, flattened = flattened)
+    file <- file.path(path, basename(files$key))
+    file.exists(file) && file_matches_md5(file, if(is.null(files$md5)) NA_character_ else files$md5)
+  }, error = function(e) FALSE)
+}
+
 #' Create a folder if needed, and say whether it can be written to
 #' @noRd
 #' @keywords internal
@@ -483,19 +542,39 @@ seed_file <- function(from, to){
 
 copy_to_path <- function(file_nm, md5, path, doi){
   copy <- file.path(path, basename(file_nm))
+  # Without a checksum from the record, compare with the file itself
+  if(is.na(md5)) md5 <- unname(tools::md5sum(file_nm))
   if(file.exists(copy) && file_matches_md5(copy, md5)){
     return(invisible(copy))
   }
   # e.g. an earlier release saved under the same name (every MYtraits release
-  # is MYtraits.rds)
+  # is MYtraits.rds). A copy that cannot be made is not a reason to stop: the
+  # database loads from the cache.
   if(file.exists(copy) && !remove_file(copy)){
-    rlang::abort(paste0("Could not replace '", copy, "' with doi '", doi, "'. Is it open in another R session?"))
+    rlang::warn(paste0("Could not replace '", copy, "' with doi '", doi, "': it still holds another release. ",
+                       "Is it open in another R session?"))
+    return(invisible(NULL))
   }
-  if(!file.copy(file_nm, copy, copy.date = TRUE)){
-    rlang::abort(paste0("Could not copy '", file_nm, "' to '", path, "'."))
+  if(!suppressWarnings(file.copy(file_nm, copy, copy.date = TRUE))){
+    rlang::warn(paste0("Could not save a copy of doi '", doi, "' in '", path, "'. Can the folder be written to?"))
+    return(invisible(NULL))
   }
   message("Saved a copy in '", copy, "'")
   invisible(copy)
+}
+
+#' Put a copy of a record in `path`, unless the copy there is the same
+#'
+#' Not rewritten on every load: an unchanged file is left alone, so a synced
+#' or read-only project folder sees no writes.
+#' @noRd
+#' @keywords internal
+
+copy_record_to_path <- function(from, to){
+  if(file.exists(to) && identical(unname(tools::md5sum(from)), unname(tools::md5sum(to)))){
+    return(invisible(FALSE))
+  }
+  invisible(suppressWarnings(file.copy(from, to, overwrite = TRUE, copy.date = TRUE)))
 }
 
 #' Say what the cache holds after a download into it

@@ -1,7 +1,7 @@
 #' Manage the folder where downloaded databases are kept
 #'
-#' @description By default, [load_database()] keeps the databases it downloads
-#' in one folder per user, so each release is downloaded once per computer and
+#' @description [load_database()] keeps the databases it downloads in one
+#' folder per user, so each release is downloaded once per computer and
 #' shared by every project and R session that loads it.
 #'
 #' - `database_cache_dir()` gives the folder.
@@ -43,7 +43,7 @@
 #'   observed means), as listed by `list_cached_databases()`.
 #' @param older_than delete the databases not used (loaded from the cache) for
 #'   this many days. In a folder given as `path`, or where the cache cannot be
-#'   written to, this is days since the file was downloaded to the cache.
+#'   written to, this is days since the file was saved there, roughly.
 #' @param ask if `TRUE`, asks for confirmation before deleting anything.
 #'
 #' @details With neither `files` nor `older_than`, `clear_database_cache()`

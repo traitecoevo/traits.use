@@ -25,7 +25,7 @@ observed means), as listed by \code{list_cached_databases()}.}
 
 \item{older_than}{delete the databases not used (loaded from the cache) for
 this many days. In a folder given as \code{path}, or where the cache cannot be
-written to, this is days since the file was downloaded to the cache.}
+written to, this is days since the file was saved there, roughly.}
 
 \item{ask}{if \code{TRUE}, asks for confirmation before deleting anything.}
 }
@@ -36,8 +36,8 @@ database: \code{file}, \code{size_mb} and \code{last_used}. \code{clear_database
 invisibly returns the paths of the files it deleted.
 }
 \description{
-By default, \code{\link[=load_database]{load_database()}} keeps the databases it downloads
-in one folder per user, so each release is downloaded once per computer and
+\code{\link[=load_database]{load_database()}} keeps the databases it downloads in one
+folder per user, so each release is downloaded once per computer and
 shared by every project and R session that loads it.
 \itemize{
 \item \code{database_cache_dir()} gives the folder.

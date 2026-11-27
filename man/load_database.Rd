@@ -19,9 +19,10 @@ A Zenodo concept doi will load the latest version of that record.}
 \item{path}{a folder, such as \code{"data/austraits"}, to keep a copy of the
 database in (with its record, so the folder loads offline on its own),
 besides the cache folder. If the folder already holds the release (e.g.
-saved there by traits.use 1.0 or austraits 4.0), it is copied into the
-cache rather than downloaded again. \code{NULL} (the default) keeps only the
-cache copy. To keep nothing beyond one session, set the cache folder to
+saved there by traits.use 1.0 or austraits 4.0) and it matches the
+repository's checksum, it is copied into the cache rather than downloaded
+again; if the repository cannot be reached, the folder is used on its
+own. \code{NULL} (the default) keeps only the cache copy. To keep nothing beyond one session, set the cache folder to
 a temporary one with \code{options(traits.use.cache_dir = tempfile())}.}
 
 \item{update}{whether to fetch the record's metadata afresh: \code{NULL} (the

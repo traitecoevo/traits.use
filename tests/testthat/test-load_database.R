@@ -417,7 +417,7 @@ test_that("A path keeps a copy with a project, and clearing it leaves other file
   expect_true(dir.exists(project))
 })
 
-test_that("A project folder seeds the cache, so it is not downloaded again, even offline", {
+test_that("A project folder loads on its own offline, and seeds the cache once the repository confirms it", {
   src <- tempfile("releases")
   project <- tempfile("project")
   on.exit(unlink(c(src, project), recursive = TRUE), add = TRUE)
@@ -438,19 +438,31 @@ test_that("A project folder seeds the cache, so it is not downloaded again, even
   expect_identical(n_downloads, 1)
 
   # A project folder as traits.use 1.0 left it: the database and its record
-  # there, nothing in the cache. Offline, it loads, and fills the cache.
+  # there, nothing in the cache. Offline, it loads from the folder alone: the
+  # cache takes nothing the repository has not confirmed.
   suppressMessages(clear_database_cache(ask = FALSE))
   expect_false(file.exists(file.path(cache, "MYtraits.rds")))
   local_mocked_bindings(resolve_doi_files = function(doi) stop("no internet"))
-  msgs <- testthat::capture_messages(v1_again <- load_database(doi = "10.5281/zenodo.1", path = project))
+  expect_message(v1_again <- load_database(doi = "10.5281/zenodo.1", path = project),
+                 "Could not update the record.*using the copy saved in .*project")
   expect_equal(v1_again, v1)
-  expect_identical(n_downloads, 1)
+  expect_length(list.files(cache), 0)
+  # update = FALSE does not ask the repository at all
+  local_mocked_bindings(resolve_doi_files = function(doi) stop("the repository was asked"))
+  msgs <- testthat::capture_messages(v1_again <- load_database(doi = "10.5281/zenodo.1", path = project, update = FALSE))
+  expect_equal(v1_again, v1)
   expect_false(any(grepl("Could not update", msgs)))
+  expect_length(list.files(cache), 0)
+
+  # Online, the repository's record confirms the folder's copy, which then
+  # fills the cache without a download
+  local_mocked_bindings(resolve_doi_files = function(doi) releases[[doi]])
+  expect_equal(suppressMessages(load_database(doi = "10.5281/zenodo.1", path = project)), v1)
+  expect_identical(n_downloads, 1)
   expect_true(file.exists(file.path(cache, "MYtraits.rds")))
   expect_true(file.exists(file.path(cache, "10.5281_zenodo.1.json")))
 
   # The project's copy of another release under the same name is replaced
-  local_mocked_bindings(resolve_doi_files = function(doi) releases[[doi]])
   suppressMessages(load_database(doi = "10.5281/zenodo.2", path = project))
   expect_identical(tools::md5sum(file.path(project, "MYtraits.rds"))[[1]], releases[["10.5281/zenodo.2"]]$files$md5)
   expect_message(load_database(doi = "10.5281/zenodo.1", path = project), "Saved a copy")
@@ -460,6 +472,52 @@ test_that("A project folder seeds the cache, so it is not downloaded again, even
 
   # The cache folder given as `path` is just the cache
   expect_false(any(grepl("Saved a copy", testthat::capture_messages(load_database(doi = "10.5281/zenodo.1", path = cache)))))
+})
+
+test_that("A project folder's own record and file never reach the cache or another project", {
+  src <- tempfile("releases")
+  project <- tempfile("project")
+  on.exit(unlink(c(src, project), recursive = TRUE), add = TRUE)
+  cache <- local_test_cache()
+  release <- make_release(src, "1", 3)
+  n_fetches <- 0
+  local_mocked_bindings(resolve_doi_files = function(doi) {
+    n_fetches <<- n_fetches + 1
+    release
+  })
+
+  # A folder holding a file that is not the published one, under the
+  # release's name, with a record giving that file's checksum. The record is
+  # new (as after a clone or unzip), so its age says nothing.
+  dir.create(project)
+  altered <- file.path(project, "MYtraits.rds")
+  saveRDS(list(traits = data.frame(value = 1:99), taxa = data.frame(), methods = data.frame()), altered)
+  own_record <- release
+  own_record$files$md5 <- unname(tools::md5sum(altered))
+  jsonlite::write_json(own_record, file.path(project, "10.5281_zenodo.1.json"))
+
+  # Asked not to contact the repository, the folder is used as it is, alone
+  db <- suppressMessages(load_database(doi = "10.5281/zenodo.1", path = project, update = FALSE))
+  expect_equal(nrow(db$traits), 99)
+  expect_identical(n_fetches, 0)
+  expect_length(list.files(cache), 0)
+
+  # Otherwise the repository is asked, and its release is what loads, here
+  # and in any other project
+  db <- suppressMessages(load_database(doi = "10.5281/zenodo.1", path = project))
+  expect_identical(n_fetches, 1)
+  expect_equal(nrow(db$traits), 3)
+  expect_identical(tools::md5sum(file.path(cache, "MYtraits.rds"))[[1]], release$files$md5)
+  expect_equal(nrow(suppressMessages(load_database(doi = "10.5281/zenodo.1"))$traits), 3)
+
+  # Without a checksum, a file in the folder cannot be confirmed, so the
+  # cache gets the repository's
+  suppressMessages(clear_database_cache(ask = FALSE))
+  saveRDS(list(traits = data.frame(value = 1:99), taxa = data.frame(), methods = data.frame()), altered)
+  release$files$md5 <- NA
+  db <- suppressMessages(load_database(doi = "10.5281/zenodo.1", update = TRUE, path = project))
+  expect_equal(nrow(readRDS(file.path(cache, "MYtraits.rds"))$traits), 3)
+  expect_equal(nrow(readRDS(altered)$traits), 3)
 })
 
 test_that("The saved record is fetched afresh once it is old, so a concept doi finds a new release", {
@@ -529,6 +587,53 @@ test_that("A cache that cannot be written to leaves only the path", {
   expect_true(file.exists(file.path(project, "MYtraits.rds")))
   expect_false(file.exists(file.path(cache, "MYtraits.rds")))
   expect_error(load_database(doi = "10.5281/zenodo.1"), "Cannot write to the cache folder")
+
+  # A cache that already holds the release (e.g. one a group shares, read
+  # only) is read as it is, without asking the repository, and can fill a `path`
+  dir.create(cache)
+  file.copy(file.path(project, c("MYtraits.rds", "10.5281_zenodo.1.json")), cache)
+  local_mocked_bindings(resolve_doi_files = function(doi) stop("the repository was asked"))
+  msgs <- testthat::capture_messages(db <- load_database(doi = "10.5281/zenodo.1"))
+  expect_equal(nrow(db$traits), 3)
+  expect_false(any(grepl("Cannot write|Could not update", msgs)))
+  other <- tempfile("other")
+  on.exit(unlink(other, recursive = TRUE), add = TRUE)
+  expect_message(load_database(doi = "10.5281/zenodo.1", path = other), "Saved a copy")
+  # but not a release it does not hold
+  expect_error(load_database(doi = "10.5281/zenodo.2"), "Cannot write to the cache folder")
+})
+
+test_that("A project folder and a cache that name different releases ask the repository", {
+  src <- tempfile("releases")
+  shared <- tempfile("shared")
+  on.exit(unlink(c(src, shared), recursive = TRUE), add = TRUE)
+  concept <- "10.5281/zenodo.100"
+  latest <- make_release(src, "1", 3)
+  n_fetches <- 0
+  local_mocked_bindings(resolve_doi_files = function(doi) {
+    n_fetches <<- n_fetches + 1
+    latest
+  })
+
+  # This computer fetched the concept doi when release 1 was the latest
+  cache_b <- local_test_cache()
+  suppressMessages(load_database(doi = concept))
+  # A colleague's computer, later, saved release 2 in the shared folder
+  latest <- make_release(src, "2", 5)
+  withr::with_options(list(traits.use.cache_dir = tempfile("cache_a")),
+                      suppressMessages(load_database(doi = concept, path = shared)))
+  expect_equal(nrow(readRDS(file.path(shared, "MYtraits.rds"))$traits), 5)
+
+  # Here the saved record is new, but disagrees with the folder's: the
+  # repository is asked, and the folder keeps release 2
+  n_fetches <- 0
+  db <- suppressMessages(load_database(doi = concept, path = shared))
+  expect_identical(n_fetches, 1)
+  expect_equal(nrow(db$traits), 5)
+  expect_equal(nrow(readRDS(file.path(shared, "MYtraits.rds"))$traits), 5)
+  # and once they agree, it is not asked again
+  suppressMessages(load_database(doi = concept, path = shared))
+  expect_identical(n_fetches, 1)
 })
 
 test_that("Loading from the cache marks a database used, and older_than clears unused ones", {
@@ -593,11 +698,18 @@ test_that("A stale cached file that cannot be removed stops the load", {
   dir.create(database_cache_dir())
   writeLines("an older release", file.path(database_cache_dir(), "MYtraits.rds"))
   expect_error(suppressMessages(load_database(doi = "10.5281/zenodo.1")), "Could not remove")
-  # in the folder given as `path`
+  # in the folder given as `path`, it only warns: the database loads from the cache
   unlink(file.path(database_cache_dir(), "MYtraits.rds"))
   dir.create(path)
   writeLines("an older release", file.path(path, "MYtraits.rds"))
-  expect_error(suppressMessages(load_database(doi = "10.5281/zenodo.1", path = path)), "Could not replace")
+  expect_warning(db <- suppressMessages(load_database(doi = "10.5281/zenodo.1", path = path)), "Could not replace")
+  expect_equal(nrow(db$traits), 3)
+
+  # as does a folder that cannot be written to
+  local_mocked_bindings(remove_file = function(file) file.remove(file))
+  blocked <- file.path(path, "MYtraits.rds", "not-a-folder")
+  expect_warning(db <- suppressMessages(load_database(doi = "10.5281/zenodo.1", path = blocked)), "Could not save a copy")
+  expect_equal(nrow(db$traits), 3)
 })
 
 test_that("The cache folder follows R_user_dir() unless the option is set", {
